@@ -738,10 +738,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     // need for operations with Player class
     Player* plr = victim->ToPlayer();
-	
-	//Battle Fatigue
-	if (HasAura(134732) && !IsFriendlyTo(victim) && victim->GetTypeId() == TYPEID_PLAYER)
-         victim->CastSpell(victim, 134735, true);
 
     // Healing Elixirs - if player has less than 35% hp after this hit
     if (plr && plr->getClass() == CLASS_MONK && plr->getLevel() >= 75)
@@ -3034,9 +3030,9 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellInfo const* spell)
     if (spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
         attType = RANGED_ATTACK;
 
-    int32 roll = urand (0, 10000);
+    uint32 roll = urand (0, 10000);
 
-    int32 missChance = int32(MeleeSpellMissChance(victim, attType, spell->Id) * 100.0f);
+    uint32 missChance = uint32(MeleeSpellMissChance(victim, attType, spell->Id) * 100.0f);
     // Roll miss
     if (roll < missChance)
         return SPELL_MISS_MISS;
@@ -9327,16 +9323,21 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                     if (victim->IsFriendlyTo(this))
                         return false;
 
+                    if (!roll_chance_i(50))
+                        return false;
+
                     if (GetTypeId() == TYPEID_PLAYER)
                     {
                         int32 bp = std::max<int32>(int32(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), 20)),
                                                             CalculatePct(SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ALL), 30));
-                        bp = CalculatePct(bp, 40);
+
                         if (!procSpell || (procFlag & PROC_FLAG_DONE_MAINHAND_ATTACK) || (procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK))
                         {
+                            bp = CalculatePct(bp, 40);
+
                             Item* mainItem = ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                             if (mainItem)
-                                bp = CalculatePct(bp, (mainItem->GetTemplate()->Delay / 2.6));
+                                bp = CalculatePct(bp, (mainItem->GetTemplate()->Delay / 2600));
 
                             if (procFlag & PROC_FLAG_DONE_OFFHAND_ATTACK)
                                 bp = CalculatePct(bp, 50);
@@ -9346,7 +9347,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                             if (procFlag & PROC_FLAG_DONE_PERIODIC)
                             {
                                 // Mind Flay, Malefic Grasp and Drain Soul
-                                if (procSpell->Id != 15407 && procSpell->Id != 129197 && procSpell->Id != 103103 && procSpell->Id != 1120)
+                                if (procSpell->Id != 15407 && procSpell->Id != 103103 && procSpell->Id != 1120)
                                     return false;
                             }
 
@@ -9355,10 +9356,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                                 return false;
 
                             float baseCastTime = procSpell->CastTimeEntry->CastTime;
-                            if (baseCastTime > 1500)
+                            if (baseCastTime < 1500)
                                 baseCastTime = 1500;
 
                             bp = int32(bp * (baseCastTime / 1500));
+
+                            // From 5.4 it should damage 40% from damage
+                            bp = CalculatePct(bp, 40);
 
                             if (procSpell->GetCustomCoefficientForStormlash())
                                 bp = CalculatePct(bp, procSpell->GetCustomCoefficientForStormlash());
@@ -9399,7 +9403,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, uint32 absorb, AuraE
                             else if (procSpell)
                             {
                                 float baseCastTime = procSpell->CastTimeEntry->CastTime;
-                                if (baseCastTime > 1500)
+                                if (baseCastTime < 1500)
                                     baseCastTime = 1500;
 
                                 bp = int32(bp * (baseCastTime / 1500));
@@ -12626,8 +12630,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (GetTypeId() == TYPEID_PLAYER && IsMounted())
         return false;
 
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && !(ToCreature() && ToCreature()->GetScriptName() == "npc_training_dummy"))
-        return false;
+    //if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    //    return false;
 
     // nobody can attack GM in GM-mode
     if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -16352,8 +16356,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, bool isControlled)
     if (!isAlive())
         return;
 
-    if (PvP || (enemy && enemy->ToCreature() && enemy->ToCreature()->GetScriptName() == "npc_training_dummy"))
-        m_CombatTimer = 5500;
+    if (PvP)
+        m_CombatTimer = 5000;
 
     if (isInCombat())
         return;
@@ -16395,7 +16399,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy, bool isControlled)
                 creature->GetFormation()->MemberAttackStart(creature, enemy);
         }
 
-        if (creature->HasUnitTypeMask(UNIT_MASK_MINION))
+        if (isPet())
         {
             UpdateSpeed(MOVE_RUN, true);
             UpdateSpeed(MOVE_SWIM, true);
@@ -16933,26 +16937,58 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
     if (main_speed_mod)
         AddPct(speed, main_speed_mod);
 
-		switch (mtype)
-		{
-			case MOVE_RUN:
-			case MOVE_SWIM:
-			case MOVE_FLIGHT:
-			{
-				// Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
-				// TODO: possible affect only on MOVE_RUN
-				if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
-				{
-					// Use speed from aura
-					float max_speed = normalization / (IsControlledByPlayer() ? playerBaseMoveSpeed[mtype] : baseMoveSpeed[mtype]);
-					if (speed > max_speed)
-						speed = max_speed;
-				}
-				break;
-			}
-			default:
-				break;
-		}
+    switch (mtype)
+    {
+        case MOVE_RUN:
+        case MOVE_SWIM:
+        case MOVE_FLIGHT:
+        {
+            // Set creature speed rate
+            if (GetTypeId() == TYPEID_UNIT)
+            {
+                Unit* pOwner = GetCharmerOrOwner();
+                if ((isPet() || isGuardian()) && !isInCombat() && pOwner) // Must check for owner or crash on "Tame Beast"
+                {
+                    // For every yard over 5, increase speed by 0.01
+                    //  to help prevent pet from lagging behind and despawning
+                    float dist = GetDistance(pOwner);
+                    float base_rate = 1.00f; // base speed is 100% of owner speed
+
+                    if (dist < 5)
+                        dist = 5;
+
+                    float mult = base_rate + ((dist - 5) * 0.01f);
+
+                    float petSpeed = 0.0f;
+                    switch (mtype)
+                    {
+                    case MOVE_RUN:
+                    case MOVE_SWIM:
+                        petSpeed = ToCreature()->GetCreatureTemplate()->speed_run;
+                        break;
+                    case MOVE_FLIGHT:
+                        petSpeed = ToCreature()->GetCreatureTemplate()->speed_fly;
+                        break;
+                    }
+                    speed *= petSpeed * mult;
+                }
+                else
+                    speed *= ToCreature()->GetCreatureTemplate()->speed_run;    // at this point, MOVE_WALK is never reached
+            }
+            // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
+            // TODO: possible affect only on MOVE_RUN
+            if (int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
+            {
+                // Use speed from aura
+                float max_speed = normalization / (IsControlledByPlayer() ? playerBaseMoveSpeed[mtype] : baseMoveSpeed[mtype]);
+                if (speed > max_speed)
+                    speed = max_speed;
+            }
+            break;
+        }
+        default:
+            break;
+    }
 
     // for creature case, we check explicit if mob searched for assistance
     if (GetTypeId() == TYPEID_UNIT)
@@ -16990,28 +17026,6 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                 speed = min_speed;
         }
     }
-	
-	if (GetTypeId() == TYPEID_UNIT)
-     {
-         if (mtype == MOVE_RUN)
-             speed *= ToCreature()->GetCreatureTemplate()->speed_run;
- 
-         if (Unit* owner = GetCharmerOrOwner())
-         {
-             if (ToCreature()->HasUnitTypeMask(UNIT_MASK_MINION) &&
-                 ToCreature()->HasUnitState(UNIT_STATE_FOLLOW) && !ToCreature()->isInCombat())
-             {
-                 // Sync speed with owner when near or slower
-                 float owner_speed = owner->GetSpeedRate(mtype);
-                 if (ToCreature()->IsWithinMeleeRange(owner) || speed < owner_speed)
-                     speed = owner_speed + std::max(non_stack_bonus, stack_bonus);
- 
-                 // Decrease speed when near to help prevent stop-and-go movement
-                 // and increase speed when away to help prevent falling behind
-                 speed *= std::min(0.6f + (GetDistance(owner) / 10.0f), 1.1f);
-             }
-         }
-     }
 
     SetSpeed(mtype, speed, forced);
 }
@@ -17172,10 +17186,6 @@ bool Unit::CanHaveThreatList() const
     // totems can not have threat list
     if (ToCreature()->isTotem())
         return false;
-	
-	// Dummys don't have threat lists
-	if (ToCreature()->GetScriptName() == "npc_training_dummy")
-        return false;
 
     // vehicles can not have threat list
     //if (ToCreature()->IsVehicle())
@@ -17208,7 +17218,7 @@ void Unit::AddThreat(Unit* victim, float fThreat, SpellSchoolMask schoolMask, Sp
         this->ToCreature()->AI()->OnAddThreat(victim, fThreat, schoolMask, threatSpell);
 
     // Only mobs can manage threat lists
-    if (CanHaveThreatList() && !HasUnitState(UNIT_STATE_EVADE))
+    if (CanHaveThreatList())
         m_ThreatManager.addThreat(victim, fThreat, schoolMask, threatSpell);
 }
 

@@ -33,8 +33,6 @@
 #include "DynamicTree.h"
 #include "GameObjectModel.h"
 #include "ObjectDefines.h"
-#include "MMapFactory.h"
-#include "MMapManager.h"
 
 #include <unordered_set>
 #include <bitset>
@@ -305,7 +303,6 @@ class Map : public GridRefManager<NGridType>
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
         static bool ExistVMap(uint32 mapid, int gx, int gy);
-        void LoadMMap(int gx, int gy);
 
         static void InitStateMachine();
         static void DeleteStateMachine();

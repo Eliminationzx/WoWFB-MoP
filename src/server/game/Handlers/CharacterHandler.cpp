@@ -917,12 +917,12 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recvData)
         m_playerLoading = false;
         return;
     }
-	
 
     _charLoginCallback = CharacterDatabase.DelayQueryHolder((SQLQueryHolder*)holder);
     PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_SEL_CHARACTER_SPELL);
     stmt->setUInt32(0, GetAccountId());
     _accountSpellCallback = LoginDatabase.AsyncQuery(stmt);
+
 }
 
 void WorldSession::HandleLoadScreenOpcode(WorldPacket& recvPacket)
@@ -1299,13 +1299,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder, PreparedQueryResu
         SendNotification(LANG_RESET_TALENTS);
     }
 
-	bool firstlogin = false;
-	
     if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
-	{
         pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
-		firstlogin = true;
-	}
 
     // show time before shutdown if shutdown planned.
     if (sWorld->IsShuttingDown())
@@ -1355,11 +1350,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder, PreparedQueryResu
     pCurrChar->RemoveAurasByType(SPELL_AURA_BIND_SIGHT);
 
     sScriptMgr->OnPlayerLogin(pCurrChar);
-	
-	
-	if (firstlogin)
-		if (pCurrChar->getClass() == CLASS_HUNTER)
-			pCurrChar->CastSpell(GetPlayer(), 883, true);	
 
     uint32 time9 = getMSTime() - time8;
 

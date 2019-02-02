@@ -23,7 +23,6 @@
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
 #include "Player.h"
-#include "PathGenerator.h"
 
 #ifdef MAP_BASED_RAND_GEN
 #define rand_norm() unit.rand_norm()
@@ -145,17 +144,9 @@ bool ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
             float x = i_waypoints[i_nextMove][0];
             float y = i_waypoints[i_nextMove][1];
             float z = i_waypoints[i_nextMove][2];
-            PathGenerator path(&unit);
-            path.SetPathLengthLimit(30.0f);
-            bool result = path.CalculatePath(x, y, z);
-            if (!result || (path.GetPathType() & PATHFIND_NOPATH))
-            {
-                i_nextMoveTime.Reset(100);
-                return true;
-            }
 
             Movement::MoveSplineInit init(unit);
-            init.MovebyPath(path.GetPath());
+            init.MoveTo(x, y, z);
             init.SetWalk(true);
             init.Launch();
         }

@@ -26,8 +26,8 @@ template<class T>
 class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementGenerator<T> >
 {
     public:
-        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool generatePath, float _speed = 0.0f, std::shared_ptr<TriggerAfterMovement const> _afterMovement = nullptr) : id(_id),
-            i_x(_x), i_y(_y), i_z(_z), speed(_speed), m_generatePath(generatePath), afterMovement(_afterMovement) {}
+        PointMovementGenerator(uint32 _id, float _x, float _y, float _z, float _speed = 0.0f, std::shared_ptr<TriggerAfterMovement const> _afterMovement = nullptr) : id(_id),
+            i_x(_x), i_y(_y), i_z(_z), speed(_speed), afterMovement(_afterMovement) {}
 
         void Initialize(T &);
         void Finalize(T &);
@@ -45,7 +45,6 @@ class PointMovementGenerator : public MovementGeneratorMedium< T, PointMovementG
         uint32 id;
         float i_x, i_y, i_z;
         float speed;
-        bool m_generatePath;
         bool i_recalculateSpeed;
         std::shared_ptr<TriggerAfterMovement const> afterMovement;
 };
@@ -54,7 +53,7 @@ class AssistanceMovementGenerator : public PointMovementGenerator<Creature>
 {
     public:
         AssistanceMovementGenerator(float _x, float _y, float _z) :
-            PointMovementGenerator<Creature>(0, _x, _y, _z, true) {}
+            PointMovementGenerator<Creature>(0, _x, _y, _z) {}
 
         MovementGeneratorType GetMovementGeneratorType() { return ASSISTANCE_MOTION_TYPE; }
         void Finalize(Unit &);

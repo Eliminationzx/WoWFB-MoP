@@ -23,7 +23,6 @@
 #include "SharedDefines.h"
 #include "ObjectMgr.h"
 #include "SpellInfo.h"
-#include "PathGenerator.h"
 #include <type_traits>
 
 class Unit;
@@ -833,7 +832,6 @@ class Spell
 
         bool m_skipCheck;
         uint32 m_auraScaleMask;
-        PathGenerator m_preGeneratedPath;
 
         bool m_HavocConsumed;
 

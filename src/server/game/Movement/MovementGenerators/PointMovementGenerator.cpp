@@ -25,7 +25,6 @@
 #include "MoveSpline.h"
 #include "Player.h"
 #include "ObjectMgr.h"
-#include "CreatureGroups.h"
 
 //----- Point Movement Generator
 template<class T>
@@ -35,21 +34,12 @@ void PointMovementGenerator<T>::Initialize(T &unit)
         unit.StopMoving();
 
     unit.AddUnitState(UNIT_STATE_ROAMING|UNIT_STATE_ROAMING_MOVE);
-    if (id == EVENT_CHARGE_PREPATH)
-        return;
-
     i_recalculateSpeed = false;
-
     Movement::MoveSplineInit init(unit);
-    init.MoveTo(i_x, i_y, i_z, m_generatePath);
+    init.MoveTo(i_x, i_y, i_z);
     if (speed > 0.0f)
         init.SetVelocity(speed);
     init.Launch();
-
-    // Call for creature group update
-    if (Creature* creature = unit.ToCreature())
-        if (creature->GetFormation() && creature->GetFormation()->getLeader()->GetGUID() == creature->GetGUID())
-            creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
 }
 
 template<class T>
@@ -66,19 +56,14 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 & /*diff*/)
 
     unit.AddUnitState(UNIT_STATE_ROAMING_MOVE);
 
-    if (id != EVENT_CHARGE_PREPATH && i_recalculateSpeed && !unit.movespline->Finalized())
+    if (i_recalculateSpeed && !unit.movespline->Finalized())
     {
         i_recalculateSpeed = false;
         Movement::MoveSplineInit init(unit);
-        init.MoveTo(i_x, i_y, i_z, m_generatePath);
+        init.MoveTo(i_x, i_y, i_z);
         if (speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
             init.SetVelocity(speed);
         init.Launch();
-
-        // Call for creature group update
-        if (Creature* creature = unit.ToCreature())
-            if (creature->GetFormation() && creature->GetFormation()->getLeader()->GetGUID() == creature->GetGUID())
-                creature->GetFormation()->LeaderMoveTo(i_x, i_y, i_z);
     }
 
     return !unit.movespline->Finalized();

@@ -57,8 +57,6 @@ class SplineBase
             // client's value is 20, blizzs use 2-3 steps to compute length
             STEPS_PER_SEGMENT = 3,
         };
-        
-        static_assert(STEPS_PER_SEGMENT > 0, "shouldn't be lesser than 1");
 
     protected:
         void EvaluateLinear(index_type, float, Vector3&) const;
@@ -94,15 +92,13 @@ class SplineBase
             @param t - percent of segment length, assumes that t in range [0, 1]
             @param Idx - spline segment index, should be in range [first, last)
          */
-        void evaluate_percent(index_type Idx, float u, Vector3& c) const { (this->*evaluators[m_mode])(Idx, u, c); }
-        //void evaluate_percent(index_type Idx, float u, Vector3& c) const {ASSERT(u >= 0.f && u <= 1.f); (this->*evaluators[m_mode])(Idx, u, c);}
+        void evaluate_percent(index_type Idx, float u, Vector3& c) const { (this->*evaluators[m_mode])(Idx,u,c); }
 
         /** Caclulates derivation in index Idx, and percent of segment length t
             @param Idx - spline segment index, should be in range [first, last)
             @param t  - percent of spline segment length, assumes that t in range [0, 1]
          */
-        void evaluate_derivative(index_type Idx, float u, Vector3& hermite) const { (this->*derivative_evaluators[m_mode])(Idx, u, hermite); }
-        //void evaluate_derivative(index_type Idx, float u, Vector3& hermite) const {ASSERT(u >= 0.f && u <= 1.f); (this->*derivative_evaluators[m_mode])(Idx, u, hermite);}
+        void evaluate_derivative(index_type Idx, float u, Vector3& hermite) const { (this->*derivative_evaluators[m_mode])(Idx,u,hermite); }
 
         /**  Bounds for spline indexes. All indexes should be in range [first, last). */
         index_type first() const { return index_lo; }

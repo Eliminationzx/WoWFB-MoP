@@ -101,7 +101,7 @@ WorldPacket& SpectatorAddonMsg::CachedMessage()
                 {
                     case SPECTATOR_PREFIX_PLAYER:
                         char buffer[64];
-                        sprintf(buffer, "%I64i;", player);
+                        sprintf(buffer, "%i;", player);
                         msg += buffer;
                         break;
                     case SPECTATOR_PREFIX_NAME:
@@ -110,7 +110,7 @@ WorldPacket& SpectatorAddonMsg::CachedMessage()
                     case SPECTATOR_PREFIX_TARGET:
                     {
                         char buffer[20];
-                        sprintf(buffer, "TRG=%I64i;", target);
+                        sprintf(buffer, "TRG=%i;", target);
                         msg += buffer;
                         break;
                     }

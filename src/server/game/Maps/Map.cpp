@@ -68,7 +68,6 @@ Map::~Map()
 
     if (!m_scriptSchedule.empty())
         sScriptMgr->DecreaseScheduledScriptCount(m_scriptSchedule.size());
-    MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(GetId(), i_InstanceId);
 }
 
 bool Map::ExistMap(uint32 mapid, int gx, int gy)
@@ -96,60 +95,6 @@ bool Map::ExistMap(uint32 mapid, int gx, int gy)
     }
     delete [] tmp;
     return ret;
-}
-
-
-void Map::LoadMap(int gx, int gy, bool reload)
-{
-    if (i_InstanceId != 0)
-    {
-        if (GridMaps[gx][gy])
-            return;
-
-        // load grid map for base map
-        if (!m_parentMap->GridMaps[gx][gy])
-            m_parentMap->EnsureGridCreated(GridCoord(63 - gx, 63 - gy));
-
-        ((MapInstanced*)(m_parentMap))->AddGridMapReference(GridCoord(gx, gy));
-        GridMaps[gx][gy] = m_parentMap->GridMaps[gx][gy];
-        return;
-    }
-
-    if (GridMaps[gx][gy] && !reload)
-        return;
-
-    //map already load, delete it before reloading (Is it necessary? Do we really need the ability the reload maps during runtime?)
-    if (GridMaps[gx][gy])
-    {
-        sLog->outInfo(LOG_FILTER_MAPS, "Unloading previously loaded map %u before reloading.", GetId());
-
-        delete (GridMaps[gx][gy]);
-        GridMaps[gx][gy] = NULL;
-    }
-
-    // map file name
-    char *tmp = NULL;
-    int len = sWorld->GetDataPath().length()+strlen("maps/%04u_%02u_%02u.map")+1;
-    tmp = new char[len];
-    snprintf(tmp, len, (char *)(sWorld->GetDataPath()+"maps/%04u_%02u_%02u.map").c_str(), GetId(), gx, gy);
-    sLog->outInfo(LOG_FILTER_MAPS, "Loading map %s", tmp);
-    // loading data
-    GridMaps[gx][gy] = new GridMap();
-    if (!GridMaps[gx][gy]->loadData(tmp))
-    {
-        sLog->outError(LOG_FILTER_MAPS, "Error loading map file: \n %s\n", tmp);
-    }
-    delete[] tmp;
-}
-
-void Map::LoadMMap(int gx, int gy)
-{
-    bool mmapLoadResult = MMAP::MMapFactory::createOrGetMMapManager()->loadMap((sWorld->GetDataPath() + "mmaps").c_str(), GetId(), gx, gy);
-
-    if (mmapLoadResult)
-        sLog->outInfo(LOG_FILTER_WORLDSERVER, "MMAP loaded name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
-    else
-        sLog->outInfo(LOG_FILTER_WORLDSERVER, "Could not load MMAP name:%s, id:%d, x:%d, y:%d (mmap rep.: x:%d, y:%d)", GetMapName(), GetId(), gx, gy, gx, gy);
 }
 
 bool Map::ExistVMap(uint32 mapid, int gx, int gy)
@@ -189,14 +134,54 @@ void Map::LoadVMap(int gx, int gy)
     }
 }
 
+void Map::LoadMap(int gx, int gy, bool reload)
+{
+    if (i_InstanceId != 0)
+    {
+        if (GridMaps[gx][gy])
+            return;
+
+        // load grid map for base map
+        if (!m_parentMap->GridMaps[gx][gy])
+            m_parentMap->EnsureGridCreated(GridCoord(63-gx, 63-gy));
+
+        ((MapInstanced*)(m_parentMap))->AddGridMapReference(GridCoord(gx, gy));
+        GridMaps[gx][gy] = m_parentMap->GridMaps[gx][gy];
+        return;
+    }
+
+    if (GridMaps[gx][gy] && !reload)
+        return;
+
+    //map already load, delete it before reloading (Is it necessary? Do we really need the ability the reload maps during runtime?)
+    if (GridMaps[gx][gy])
+    {
+        sLog->outInfo(LOG_FILTER_MAPS, "Unloading previously loaded map %u before reloading.", GetId());
+
+        delete (GridMaps[gx][gy]);
+        GridMaps[gx][gy]=NULL;
+    }
+
+    // map file name
+    char *tmp=NULL;
+    int len = sWorld->GetDataPath().length()+strlen("maps/%04u_%02u_%02u.map")+1;
+    tmp = new char[len];
+    snprintf(tmp, len, (char *)(sWorld->GetDataPath()+"maps/%04u_%02u_%02u.map").c_str(), GetId(), gx, gy);
+    sLog->outInfo(LOG_FILTER_MAPS, "Loading map %s", tmp);
+    // loading data
+    GridMaps[gx][gy] = new GridMap();
+    if (!GridMaps[gx][gy]->loadData(tmp))
+    {
+        sLog->outError(LOG_FILTER_MAPS, "Error loading map file: \n %s\n", tmp);
+    }
+    delete [] tmp;
+}
+
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     LoadMap(gx, gy);
     if (i_InstanceId == 0)
-    {
-       LoadVMap(gx, gy);                                   // Only load the data for the base map
-       LoadMMap(gx, gy);
-    }
+        LoadVMap(gx, gy);                                   // Only load the data for the base map
 }
 
 void Map::InitStateMachine()
@@ -1454,7 +1439,6 @@ bool Map::UnloadGrid(NGridType& ngrid, bool unloadAll)
             }
             // x and y are swapped
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
-            MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId(), gx, gy);
         }
         else
             ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridCoord(gx, gy));

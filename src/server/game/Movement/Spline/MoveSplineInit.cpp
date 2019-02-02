@@ -22,12 +22,15 @@
 #include "Unit.h"
 #include "Transport.h"
 #include "Vehicle.h"
-#include "PathGenerator.h"
 
 namespace Movement
 {
     UnitMoveType SelectSpeedType(uint32 moveFlags)
     {
+        /*! Not sure about MOVEMENTFLAG_CAN_FLY here - do creatures that can fly
+            but are on ground right now also have it? If yes, this needs a more
+            dynamic check, such as is flying now
+        */
         if (moveFlags & (MOVEMENTFLAG_FLYING | MOVEMENTFLAG_CAN_FLY | MOVEMENTFLAG_DISABLE_GRAVITY))
         {
             if (moveFlags & MOVEMENTFLAG_BACKWARD /*&& speed_obj.flight >= speed_obj.flight_back*/)
@@ -111,6 +114,9 @@ namespace Movement
 
     void MoveSplineInit::Launch()
     {
+        if (&unit == nullptr)
+            return;
+
         MoveSpline& move_spline = *unit.movespline;
 
         Location real_position(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZMinusOffset(), unit.GetOrientation());
@@ -126,7 +132,8 @@ namespace Movement
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
         // Don't compute for transport movement if the unit is in a motion between two transports
-        if (!move_spline.Finalized() && move_spline.onTransport == (unit.GetTransGUID() != 0))
+        if (!move_spline.Finalized() && move_spline.Initialized() && move_spline.onTransport == (unit.GetTransGUID() != 0)
+            && !(move_spline.splineflags.transportEnter && args.flags.transportExit))
             real_position = move_spline.ComputePosition();
 
         // should i do the things that user should do? - no.
@@ -138,29 +145,31 @@ namespace Movement
         args.initialOrientation = real_position.orientation;
         move_spline.onTransport = (unit.GetTransGUID() != 0);
 
+
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
-
-        if (args.flags.walkmode)
-            moveFlags |= MOVEMENTFLAG_WALKING;
-        else
-            moveFlags &= ~MOVEMENTFLAG_WALKING;
-
         moveFlags |= MOVEMENTFLAG_FORWARD;
 
         if (moveFlags & MOVEMENTFLAG_ROOT)
             moveFlags &= ~MOVEMENTFLAG_MASK_MOVING;
 
         if (!args.HasVelocity)
-            args.velocity = unit.ToUnit() ? unit.GetSpeed(SelectSpeedType(moveFlags)) : 1.0f;
-
-        if (!args.Validate())
         {
-            sLog->outInfo(LOG_FILTER_WORLDSERVER, "CAN'T VALIDATE");
-            return;
+            // If spline is initialized with SetWalk method it only means we need to select
+            // walk move speed for it but not add walk flag to unit
+            uint32 moveFlagsForSpeed = moveFlags;
+            if (args.flags.walkmode)
+                moveFlagsForSpeed |= MOVEMENTFLAG_WALKING;
+            else
+                moveFlagsForSpeed &= ~MOVEMENTFLAG_WALKING;
+
+            args.velocity = unit.GetSpeed(SelectSpeedType(moveFlagsForSpeed));
         }
 
-        if (moveFlags & MOVEMENTFLAG_ROOT)
-            moveFlags &= ~MOVEMENTFLAG_MASK_MOVING;
+        if (args.velocity == 0.0f)
+        {
+            sLog->outError(LOG_FILTER_GENERAL, "MoveSplineInit::Launch: velocity is 0.0, it will be set to 1.0.");
+            args.velocity = 1.0f;
+        }
 
         unit.m_movementInfo.SetMovementFlags(moveFlags);
         move_spline.Initialize(args);
@@ -344,6 +353,9 @@ namespace Movement
 
     void MoveSplineInit::Stop(bool force)
     {
+        if (&unit == nullptr)
+            return;
+
         MoveSpline& move_spline = *unit.movespline;
 
         if (force)
@@ -372,6 +384,10 @@ namespace Movement
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
         args.splineId = splineIdGen.NewId();
+
+        if (&unit == nullptr)
+            return;
+
         // Elevators also use MOVEMENTFLAG_ONTRANSPORT but we do not keep track of their position changes
         args.TransformForTransport = unit.GetTransGUID();
         // mix existing state into new
@@ -400,19 +416,8 @@ namespace Movement
         args.flags.EnableFacingAngle();
     }
 
-    void MoveSplineInit::MoveTo(Vector3 const& dest, bool generatePath, bool forceDestination)
+    void MoveSplineInit::MoveTo(Vector3 const& dest)
     {
-        if (generatePath)
-        {
-            PathGenerator path(&unit);
-            bool result = path.CalculatePath(dest.x, dest.y, dest.z, forceDestination);
-            if (result && !(path.GetPathType() & PATHFIND_NOPATH))
-            {
-                MovebyPath(path.GetPath());
-                return;
-            }
-        }
-
         args.path_Idx_offset = 0;
         args.path.resize(2);
         TransportPathTransform transform(unit, args.TransformForTransport);
