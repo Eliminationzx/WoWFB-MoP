@@ -6934,7 +6934,7 @@ void Spell::EffectLeap(SpellEffIndex /*effIndex*/)
 
     Position pos;
     destTarget->GetPosition(&pos);
-    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 2.0f), 0.0f);
+    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + 2.0f), m_caster->GetRelativeAngle(destTarget));
     unitTarget->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation(), unitTarget == m_caster);
 }
 
@@ -7122,16 +7122,22 @@ void Spell::EffectCharge(SpellEffIndex effIndex)
         float angle = unitTarget->GetRelativeAngle(m_caster);
         Position pos;
 
-        unitTarget->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
-        unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectSize(), angle);
+        if (m_preGeneratedPath.GetPathType() == PATHFIND_BLANK)
+        {
+            unitTarget->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+            unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectSize(), angle);
 
-        // Try to find the target feet
-        unitTarget->GetMap()->getObjectHitPos(unitTarget->GetPhaseMask(), pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize(), pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0.f);
+            // Try to find the target feet
+            unitTarget->GetMap()->getObjectHitPos(unitTarget->GetPhaseMask(), pos.m_positionX, pos.m_positionY, pos.m_positionZ + unitTarget->GetObjectSize(), pos.m_positionX, pos.m_positionY, pos.m_positionZ, pos.m_positionX, pos.m_positionY, pos.m_positionZ, 0.f);
 
-        if (uint32 triggerSpell = m_spellInfo->Effects[effIndex].TriggerSpell)
-            m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, SPEED_CHARGE, EVENT_CHARGE, std::make_shared<TriggerAfterMovement>(unitTarget->GetGUID(), TRIGGER_AFTER_MOVEMENT_CAST, triggerSpell));
+            if (uint32 triggerSpell = m_spellInfo->Effects[effIndex].TriggerSpell)
+                m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ, SPEED_CHARGE, EVENT_CHARGE, std::make_shared<TriggerAfterMovement>(unitTarget->GetGUID(), TRIGGER_AFTER_MOVEMENT_CAST, triggerSpell));
+            else
+                m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);;
+        }
         else
-            m_caster->GetMotionMaster()->MoveCharge(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+            m_caster->GetMotionMaster()->MoveCharge(m_preGeneratedPath);
+       
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->ToPlayer()->SetFallInformation(0, m_caster->GetPositionZ());

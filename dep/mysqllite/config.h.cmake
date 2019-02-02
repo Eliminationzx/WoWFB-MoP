@@ -169,7 +169,9 @@
 #cmakedefine HAVE_GETPWUID 1
 #cmakedefine HAVE_GETRLIMIT 1
 #cmakedefine HAVE_GETRUSAGE 1
+#if _MSC_VER < 1900
 #cmakedefine HAVE_GETTIMEOFDAY 1
+#endif
 #cmakedefine HAVE_GETWD 1
 #cmakedefine HAVE_GMTIME_R 1
 #cmakedefine gmtime_r @gmtime_r@
@@ -493,10 +495,13 @@
 #cmakedefine ssize_t @ssize_t@
 #cmakedefine strcasecmp @strcasecmp@
 #cmakedefine strncasecmp @strncasecmp@
+#if _MSC_VER < 1900
 #cmakedefine snprintf @snprintf@
+#endif
 #cmakedefine strtok_r @strtok_r@
 #cmakedefine strtoll @strtoll@
 #cmakedefine strtoull @strtoull@
+#cmakedefine tzname @tzname@
 #cmakedefine vsnprintf @vsnprintf@
 #if (_MSC_VER > 1310)
 # define HAVE_SETENV

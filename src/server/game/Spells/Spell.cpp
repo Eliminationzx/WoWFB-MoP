@@ -544,7 +544,7 @@ SpellValue::SpellValue(SpellInfo const* proto)
 Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags, uint64 originalCasterGUID, bool skipCheck) :
 m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
 m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster)
-, m_spellValue(new SpellValue(m_spellInfo)),
+, m_spellValue(new SpellValue(m_spellInfo)), m_preGeneratedPath(caster),
 m_damage(0), m_healing(0), m_final_damage(0), m_absorbed_damage(0)
 {
     m_customError = SPELL_CUSTOM_ERROR_NONE;
@@ -1742,6 +1742,22 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
 
     float dist;
     float angle = targetType.CalcDirectionAngle();
+	
+	if (m_caster->HasUnitMovementFlag(10)) // backward right   
+		angle = static_cast<float>(-3*M_PI/4);      
+    else if (m_caster->HasUnitMovementFlag(9)) // forward right 
+		angle = static_cast<float>(-M_PI/4);       
+	else if (m_caster->HasUnitMovementFlag(8)) // strafe right  
+		angle = static_cast<float>(-M_PI/2);       
+	else if (m_caster->HasUnitMovementFlag(6)) // backward left 
+		angle = static_cast<float>(3*M_PI/4);      
+	else if (m_caster->HasUnitMovementFlag(5)) // forward left  
+		angle = static_cast<float>(M_PI/4);       
+	else if (m_caster->HasUnitMovementFlag(4)) // strafe left   
+		angle = static_cast<float>(M_PI/2);     
+	else if (m_caster->HasUnitMovementFlag(2)) // backward      
+		angle = static_cast<float>(M_PI);  
+	
     float objSize = m_caster->GetObjectSize();
     if (targetType.GetTarget() == TARGET_DEST_CASTER_SUMMON)
         dist = PET_FOLLOW_DIST;
@@ -6592,11 +6608,13 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
 
     if (runesOk || !runeCostID)
         return SPELL_CAST_OK;
-
+	 
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return SPELL_CAST_OK;
 
-    Player* player = (Player*)m_caster;
+	Player* player = m_caster->ToPlayer();
+     if (!player)
+         return SPELL_CAST_OK;
 
     if (player->getClass() != CLASS_DEATH_KNIGHT)
         return SPELL_CAST_OK;
@@ -6614,12 +6632,11 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
     for (uint32 i = 0; i < RUNE_DEATH; ++i)
     {
         runeCost[i] = src->RuneCost[i];
-        if (Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this, false);
+         if (Player* modOwner = m_caster->GetSpellModOwner())
+             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
     }
 
     runeCost[RUNE_DEATH] = MAX_RUNES;                       // calculated later
-    runeCost[RUNE_DEATH] += src->RuneCost[RUNE_DEATH];
 
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
@@ -6631,6 +6648,8 @@ SpellCastResult Spell::CheckRuneCost(uint32 runeCostID)
     for (uint32 i = 0; i < RUNE_DEATH; ++i)
         if (runeCost[i] > 0)
             runeCost[RUNE_DEATH] += runeCost[i];
+		
+		runeCost[RUNE_DEATH] += src->RuneCost[RUNE_DEATH];
 
     if (runeCost[RUNE_DEATH] > MAX_RUNES)
         return SPELL_FAILED_NO_POWER;                       // not sure if result code is correct
@@ -6652,135 +6671,67 @@ void Spell::TakeRunePower(bool didHit)
 
     int32 runeCost[NUM_RUNE_TYPES];                         // blood, frost, unholy, death
 
-    for (uint32 i = 0; i < RUNE_DEATH; ++i)
-    {
-        runeCost[i] = runeCostData->RuneCost[i];
-        if (Player* modOwner = m_caster->GetSpellModOwner())
-        {
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
-
-            if (runeCost[i] < 0)
-                runeCost[i] = 0;
-        }
-    }
+     for (uint32 i = 0; i < RUNE_DEATH; ++i)
+     {
+         runeCost[i] = runeCostData->RuneCost[i];
+         if (Player* modOwner = m_caster->GetSpellModOwner())
+             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCost[i], this);
+     }
 
     runeCost[RUNE_DEATH] = 0;                               // calculated later
 
-    for (uint32 i = 0; i < MAX_RUNES; ++i)
-    {
-        RuneType rune = player->GetCurrentRune(i);
-        if (player->GetRuneCooldown(i) || !runeCost[rune])
-            continue;
+     for (uint32 i = 0; i < MAX_RUNES; ++i)
+     {
+         RuneType rune = player->GetCurrentRune(i);
+         if (!player->GetRuneCooldown(i) && runeCost[rune] > 0)
+         {
+             player->SetRuneCooldown(i, didHit ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+             player->SetDeathRuneUsed(i, false);
+             runeCost[rune]--;
+         }
+     }
 
-        uint32 cooldown = ((m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE) > 0 || didHit) ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN);
-        player->SetRuneCooldown(i, cooldown);
-        player->SetDeathRuneUsed(i, false);
-
-        switch (m_spellInfo->Id)
-        {
-            case 45477: // Icy Touch
-            case 45902: // Blood Strike
-            case 48721: // Blood Boil
-            case 50842: // Pestilence
-            case 85948: // Festering Strike
-            {
-                // Reaping
-                if (player->HasAura(56835))
-                {
-                    if (!player->IsRunePermanentlyConverted(i)) // do not convert rune, that alredy converted permanently
-                        player->AddRuneBySpell(i, RUNE_DEATH, 56835);
-                }
-                break;
-            }
-            case 49998: // Death Strike
-            {
-                // Blood Rites
-                if (player->HasAura(50034))
-                {
-                    player->AddRuneBySpell(i, RUNE_DEATH, 50034);
-                }
-                break;
-            }
-            default:
-                break;
-        }
-
-        runeCost[rune]--;
-    }
-
-    /* In MOP there is a some spell, that use death rune, e.g - 73975, so don't reset it*/
-    runeCost[RUNE_DEATH] = runeCostData->RuneCost[RUNE_DEATH];
-    runeCost[RUNE_DEATH] += runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
-
+runeCost[RUNE_DEATH] = runeCost[RUNE_BLOOD] + runeCost[RUNE_UNHOLY] + runeCost[RUNE_FROST];
+    if (!runeCost[RUNE_DEATH])
+        runeCost[RUNE_DEATH] = runeCostData->RuneCost[RUNE_DEATH];
+	
     if (runeCost[RUNE_DEATH] > 0)
-    {
-        for (uint32 i = 0; i < MAX_RUNES; ++i)
-        {
-            RuneType rune = player->GetCurrentRune(i);
-            if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
-            {
-                uint32 cooldown = ((m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE) > 0 || didHit) ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN);
-                player->SetRuneCooldown(i, cooldown);
-                runeCost[rune]--;
+     {
+         for (uint32 i = 0; i < MAX_RUNES; ++i)
+         {
+             RuneType rune = player->GetCurrentRune(i);
+             if (!player->GetRuneCooldown(i) && rune == RUNE_DEATH)
+             {
+                 uint32 cooldown = ((m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_DK_DEATH_STRIKE) > 0 || didHit) ? player->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN);
+                 player->SetRuneCooldown(i, cooldown);
+                 runeCost[rune]--;
+ 
+                 bool takePower = didHit;
+                 if (uint32 spell = player->GetRuneConvertSpell(i))
+                     takePower = spell != 54637;
+ 
+                 // keep Death Rune type if missed or player has Blood of the North
+                 if (takePower)
+                 {
+                     player->RestoreBaseRune(i);
+                     player->SetDeathRuneUsed(i, true);
+                 }
+ 
+                 if (runeCost[RUNE_DEATH] == 0)
+                     break;
+             }
+         }
+     }
 
-                bool takePower = didHit;
-                if (uint32 spell = player->GetRuneConvertSpell(i))
-                    takePower = didHit && spell != 54637;
-
-                if (player->IsRunePermanentlyConverted(i))
-                    takePower = false;
-
-                // keep Death Rune type if missed or player has Blood of the North or rune is permanently converted
-                if (takePower)
-                {
-                    player->RestoreBaseRune(i);
-                    player->SetDeathRuneUsed(i, true);
-                }
-
-                switch (m_spellInfo->Id)
-                {
-                    case 45477: // Icy Touch
-                    case 45902: // Blood Strike
-                    case 48721: // Blood Boil
-                    case 50842: // Pestilence
-                    case 85948: // Festering Strike
-                    {
-                        // Reaping
-                        if (player->HasAura(56835))
-                        {
-                            if (!player->IsRunePermanentlyConverted(i)) // do not convert rune, that alredy converted permanently
-                                player->AddRuneBySpell(i, RUNE_DEATH, 56835);
-                        }
-                        break;
-                    }
-                    case 49998: // Death Strike
-                    {
-                        // Blood Rites
-                        if (player->HasAura(50034))
-                        {
-                            player->AddRuneBySpell(i, RUNE_DEATH, 50034);
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-
-                if (runeCost[RUNE_DEATH] == 0)
-                    break;
-            }
-        }
-    }
-
-    // you can gain some runic power when use runes
-    if (didHit)
-    {
-        if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
-        {
-            AddPct(rp, player->GetTotalAuraModifier(SPELL_AURA_MOD_RUNE_REGEN_SPEED));
-            player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
-        }
-    }
+	// you can gain some runic power when use runes
+     if (didHit)
+     {
+         if (int32 rp = int32(runeCostData->runePowerGain * sWorld->getRate(RATE_POWER_RUNICPOWER_INCOME)))
+         {
+             AddPct(rp, player->GetTotalAuraModifier(SPELL_AURA_MOD_RUNE_REGEN_SPEED));
+             player->ModifyPower(POWER_RUNIC_POWER, int32(rp));
+         }
+     }
 }
 
 void Spell::TakeReagents()
@@ -7485,6 +7436,25 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (Unit* target = m_targets.GetUnitTarget())
                         if (!target->isAlive())
                             return SPELL_FAILED_BAD_TARGETS;
+
+                if (GetSpellInfo()->NeedsExplicitUnitTarget())
+                {
+                    Unit* target = m_targets.GetUnitTarget();
+                    if (!target)
+                        return SPELL_FAILED_DONT_REPORT;
+
+                    Position pos;
+                    target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+                    target->GetFirstCollisionPosition(pos, CONTACT_DISTANCE, target->GetRelativeAngle(m_caster));
+
+                    m_preGeneratedPath.SetPathLengthLimit(m_spellInfo->GetMaxRange(true) * 1.5f);
+                    bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize());
+                    if (m_preGeneratedPath.GetPathType() & PATHFIND_SHORT)
+                        return SPELL_FAILED_OUT_OF_RANGE;
+                    else if (!result || m_preGeneratedPath.GetPathType() & PATHFIND_NOPATH)
+                        return SPELL_FAILED_NOPATH;
+                }
+
                 break;
             }
             case SPELL_EFFECT_SKINNING:

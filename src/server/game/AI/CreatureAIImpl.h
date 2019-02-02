@@ -354,6 +354,15 @@ inline void UnitAI::DoCastAOE(uint32 spellId, bool triggered)
     me->CastSpell((Unit*)NULL, spellId, triggered);
 }
 
+inline void UnitAI::DoCastRandom(uint32 spellId, float dist, bool triggered, int32 aura, uint32 position)
+{
+    if (!triggered && me->HasUnitState(UNIT_STATE_CASTING))
+        return;
+
+    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, position, dist, true, aura))
+        me->CastSpell(target, spellId, triggered);
+}
+
 inline Creature* CreatureAI::DoSummon(uint32 entry, const Position& pos, uint32 despawnTime, TempSummonType summonType)
 {
     return me->SummonCreature(entry, pos, summonType, despawnTime);

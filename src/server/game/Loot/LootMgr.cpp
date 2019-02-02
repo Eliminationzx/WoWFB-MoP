@@ -325,7 +325,7 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
             return false;
         }
 
-        if (maxcount < mincountOrRef)                       // wrong max count
+        if (maxcount < uint32(mincountOrRef))               // wrong max count
         {
             sLog->outError(LOG_FILTER_SQL, "Table '%s' entry %d item %d: max count (%u) less that min count (%i) - skipped", store.GetName(), entry, itemid, int32(maxcount), mincountOrRef);
             return false;

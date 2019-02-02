@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
 * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
 *
@@ -812,7 +812,7 @@ void SpellMgr::SetSpellDifficultyId(uint32 spellId, uint32 id)
 
 uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const
 {
-    // Dbc supprimée au passage a MoP
+    // Dbc supprim? au passage a MoP
     return spellId;
     /*if (!GetSpellInfo(spellId))
     return spellId;
@@ -4552,15 +4552,10 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].BasePoints = 20;
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
                     break;
-                case 2818:  // Deadly Poison
-                    spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
-                    break;
                 case 108212:// Burst of Speed
                     spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
                     spellInfo->Effects[0].BasePoints = 70;
-                    spellInfo->Effects[1].TriggerSpell = 0;
+                    spellInfo->Effects[1].TriggerSpell = 137573;
                     break;
                 case 31224: // Cloak of Shadows
                     spellInfo->Effects[0].BasePoints = -1000;
@@ -4571,6 +4566,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                     break;
+				case 2818:  // Deadly Poison
                 case 8680:  // Wound Poison
                 case 3409:  // Crippling Poison
                 case 5760:  // Mind-numbing Poison
@@ -4938,7 +4934,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[2].Effect = SPELL_EFFECT_TRIGGER_SPELL;
                     spellInfo->Effects[2].TargetA = TARGET_UNIT_CASTER;
                     spellInfo->Effects[2].BasePoints = 10;
-                    spellInfo->Effects[2].TriggerSpell = 136511;
+                    spellInfo->Effects[2].TriggerSpell = 140384;
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1); // 10s
                     break;
                 case 82691: // Ring of Frost
@@ -6495,6 +6491,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 91304: // Shadow Whip
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
+				case 34709: // Shadow Sight
+					spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
+					break;
                 // Atramedes
                 case 77611: // Resonating Clash interrupt
                     spellInfo->Effects[EFFECT_0].SetRadiusIndex(28);

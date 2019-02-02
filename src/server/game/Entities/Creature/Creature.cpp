@@ -259,6 +259,10 @@ void Creature::RemoveCorpse(bool setSpawnTime)
     // Should get removed later, just keep "compatibility" with scripts
     if (setSpawnTime)
         m_respawnTime = time(NULL) + respawnDelay;
+	
+    // Sometimes falling creatures get stuck with falling spline. Create new spline before we relocate
+    delete movespline;
+    movespline = new Movement::MoveSpline(this);
 
     float x, y, z, o;
     GetRespawnPosition(x, y, z, &o);
@@ -450,27 +454,31 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData* data)
         ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
     }
 
-    //! Suspect it works this way:
-    //! If creature can walk and fly (usually with pathing)
-    //! Set MOVEMENTFLAG_CAN_FLY. Otherwise if it can only fly
-    //! Set MOVEMENTFLAG_DISABLE_GRAVITY
-    //! The only time I saw Movement Flags: DisableGravity, CanFly, Flying (50332672) on the same unit
-    //! it was a vehicle
-    if (cInfo->InhabitType & INHABIT_AIR && cInfo->InhabitType & INHABIT_GROUND)
-        SetCanFly(true);
-    else if (cInfo->InhabitType & INHABIT_AIR)
-        SetDisableGravity(true);
-    /*! Implemented in LoadCreatureAddon. Suspect there's a rule for UNIT_BYTE_1_FLAG_HOVER
-        in relation to DisableGravity also.
+    // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
+    float ground = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZMinusOffset());
 
-    else if (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE_1_FLAG_HOVER)
-        SetHover(true);
+    bool isInAir = (G3D::fuzzyGt(GetPositionZMinusOffset(), ground + 0.05f) || G3D::fuzzyLt(GetPositionZMinusOffset(), ground - 0.05f)); // Can be underground too, prevent the falling
 
-    */
+    if (GetCreatureTemplate()->InhabitType & INHABIT_AIR && isInAir && !HasUnitMovementFlag(MOVEMENTFLAG_FALLING))
+    {
+        if (GetCreatureTemplate()->InhabitType & INHABIT_GROUND)
+            SetCanFly(true);
+        else
+            SetDisableGravity(true);
+    }
+    else
+    {
+        SetCanFly(false);
+        SetDisableGravity(false);
+    }
 
-    // TODO: Shouldn't we check whether or not the creature is in water first?
+    if (!isInAir)
+        RemoveUnitMovementFlag(MOVEMENTFLAG_FALLING);
+
     if (cInfo->InhabitType & INHABIT_WATER && IsInWater())
         AddUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
+    else
+        RemoveUnitMovementFlag(MOVEMENTFLAG_SWIMMING);
 
     return true;
 }

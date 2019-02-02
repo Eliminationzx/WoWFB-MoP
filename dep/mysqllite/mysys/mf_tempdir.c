@@ -22,6 +22,10 @@
 #define DELIM ':'
 #endif
 
+#if _MSC_VER >= 1900 // Removed in Visual Studio 2015
+#define P_tmpdir "tmp/"
+#endif
+
 my_bool init_tmpdir(MY_TMPDIR *tmpdir, const char *pathlist)
 {
   char *end, *copy;

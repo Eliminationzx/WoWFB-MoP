@@ -77,13 +77,13 @@ void LoadGameObjectModelList()
             sLog->outError(LOG_FILTER_MAPS, "File '%s' seems to be corrupted!", VMAP::GAMEOBJECT_MODELS);
             break;
         }
-
+        /*
         if (v1.isNaN() || v2.isNaN())
         {
             sLog->outDebug(LOG_FILTER_MAPS, "File '%s' Model '%s' has invalid v1%s v2%s values!", VMAP::GAMEOBJECT_MODELS, std::string(buff, name_length).c_str(), v1.toString().c_str(), v2.toString().c_str());
             continue;
         }
-
+        */
         model_list.insert
         (
             ModelList::value_type( displayId, GameobjectModelData(std::string(buff, name_length), AABox(v1, v2)) )

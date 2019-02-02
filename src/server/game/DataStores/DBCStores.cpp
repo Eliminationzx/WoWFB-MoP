@@ -619,6 +619,7 @@ void LoadDBCStores(const std::string& dataPath)
                     case 999:   // theramore's fall horde
                     case 1130:  // Blood on the Snow
                     case 1050:  // Assault on Zan'vess
+					case 1031:  // Arena of Annihilation
                         entry->type = 4; // hack
                         break;
                 }
@@ -1009,7 +1010,7 @@ void LoadDBCStores(const std::string& dataPath)
             str += *i + "\n";
 
         sLog->outError(LOG_FILTER_GENERAL, "Some required *.dbc files (%u from %d) not found or not compatible:\n%s", (uint32)bad_dbc_files.size(), DBCFileCount, str.c_str());
-        exit(1);
+        //exit(1);
     }
 
     // Check loaded DBC files proper version
@@ -1020,7 +1021,7 @@ void LoadDBCStores(const std::string& dataPath)
         !sSpellStore.LookupEntry(150017)       )      // Last spell added in 5.4.0 (17399)
     {
         sLog->outError(LOG_FILTER_GENERAL, "You have _outdated_ DBC files. Please extract correct versions from current using client.");
-        exit(1);
+        //exit(1);
     }
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Initialized %d DBC data stores in %u ms", DBCFileCount, GetMSTimeDiffToNow(oldMSTime));

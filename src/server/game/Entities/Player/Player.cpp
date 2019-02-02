@@ -9039,6 +9039,9 @@ Expansion Player::GetExpByLevel()
 
 void Player::RewardGuildReputation(Quest const* quest)
 {
+	if (!GetGuild())
+		return;
+
     uint32 rep = 0;
 
     switch (GetExpByLevel())
@@ -17804,7 +17807,7 @@ void Player::SendPreparedQuest(uint64 guid)
                 if ((quest->IsAutoComplete() && quest->IsRepeatable() && !quest->IsDailyOrWeekly()) || quest->HasFlag(QUEST_FLAGS_AUTOCOMPLETE))
                     PlayerTalkClass->SendQuestGiverRequestItems(quest, guid, CanCompleteRepeatableQuest(quest), true);
                 else
-                    PlayerTalkClass->SendQuestGiverQuestDetails(quest, guid, true);
+                    PlayerTalkClass->SendQuestGiverQuestDetails(quest, guid, false);
             }
         }
     }

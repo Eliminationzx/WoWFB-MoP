@@ -39,6 +39,7 @@ ACE_Pointer_Hash<TYPE>::operator () (TYPE t) const
   // the hash back to a pointer.
 #  pragma warning(push)
 #  pragma warning(disable : 4311)   /* Truncate pointer to unsigned long */
+#  pragma warning(disable : 4302)	/* 'reinterpret_cast': truncation from 'ACE_Future_Rep<T> ' to 'unsigned long */
 #endif /* ACE_WIN64 */
   return reinterpret_cast<unsigned long> (t);
 #if defined (ACE_WIN64)

@@ -89,8 +89,8 @@ namespace Movement
 
         /* Initializes simple A to B mition, A is current unit's position, B is destination
          */
-        void MoveTo(const Vector3& destination);
-        void MoveTo(float x, float y, float z);
+        void MoveTo(const Vector3& destination, bool generatePath = true, bool forceDestination = false);
+        void MoveTo(float x, float y, float z, bool generatePath = true, bool forceDestination = false);
 
         /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
          * Needed for waypoint movement where path splitten into parts
@@ -101,9 +101,15 @@ namespace Movement
          * if not enabled linear spline mode will be choosen. Disabled by default
          */
         void SetSmooth();
-        /* Enables CatmullRom spline interpolation mode, enables flying animation. Disabled by default
+
+        /* Waypoints in packets will be sent without compression
+         */
+        void SetUncompressed();
+
+        /* Enables flying animation. Disabled by default
          */
         void SetFly();
+
         /* Enables walk mode. Disabled by default
          */
         void EnableTaxiFlight();
@@ -111,21 +117,27 @@ namespace Movement
         */
 
         void SetWalk(bool enable);
+
         /* Makes movement cyclic. Disabled by default
          */
         void SetCyclic();
+
         /* Enables falling mode. Disabled by default
          */
         void SetFall();
+
         /* Enters transport. Disabled by default
          */
         void SetTransportEnter();
+
         /* Exits transport. Disabled by default
          */
         void SetTransportExit();
+
         /* Inverses unit model orientation. Disabled by default
          */
         void SetOrientationInversed();
+
         /* Fixes unit's model rotation. Disabled by default
          */
         void SetOrientationFixed(bool enable);
@@ -151,6 +163,7 @@ namespace Movement
     inline void MoveSplineInit::SetFly() { args.flags.flying = true; }
     inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable; }
     inline void MoveSplineInit::SetSmooth() { args.flags.EnableCatmullRom(); }
+    inline void MoveSplineInit::SetUncompressed() { args.flags.uncompressedPath = true; }
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true; }
     inline void MoveSplineInit::SetVelocity(float vel) { args.velocity = vel; args.HasVelocity = true; }
     inline void MoveSplineInit::SetOrientationInversed() { args.flags.orientationInversed = true;}
@@ -165,10 +178,10 @@ namespace Movement
         std::transform(controls.begin(), controls.end(), args.path.begin(), TransportPathTransform(unit, args.TransformForTransport));
     }
 
-    inline void MoveSplineInit::MoveTo(float x, float y, float z)
+    inline void MoveSplineInit::MoveTo(float x, float y, float z, bool generatePath, bool forceDestination)
     {
         Vector3 v(x, y, z);
-        MoveTo(v);
+        MoveTo(v, generatePath, forceDestination);
     }
 
     inline void MoveSplineInit::SetParabolic(float amplitude, float time_shift)

@@ -30,6 +30,7 @@
 #include "RandomMovementGenerator.h"
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
+#include "PathGenerator.h"
 #include <cassert>
 
 #define FORCED_MOVEMENT_UPDATE_TIMER 1000;
@@ -504,18 +505,18 @@ void MotionMaster::MoveFollowExact(Unit* target, float dist, float angle, Moveme
     }
 }
 
-void MotionMaster::MovePoint(uint32 id, float x, float y, float z)
+void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generatePath)
 {
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outDebug(LOG_FILTER_GENERAL, "Player (GUID: %u) targeted point (Id: %u X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), id, x, y, z);
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z), MOTION_SLOT_ACTIVE);
+        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath), MOTION_SLOT_ACTIVE);
     }
     else
     {
         sLog->outDebug(LOG_FILTER_GENERAL, "Creature (Entry: %u GUID: %u) targeted point (ID: %u X: %f Y: %f Z: %f)",
             _owner->GetEntry(), _owner->GetGUIDLow(), id, x, y, z);
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z), MOTION_SLOT_ACTIVE);
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath), MOTION_SLOT_ACTIVE);
     }
 }
 
@@ -675,7 +676,7 @@ void MotionMaster::MoveBackward(uint32 id, float x, float y, float z, float spee
     Mutate(new EffectMovementGenerator(id), MOTION_SLOT_CONTROLLED);
 }
 
-void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id, std::shared_ptr<TriggerAfterMovement const> afterMovement)
+void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id, std::shared_ptr<TriggerAfterMovement const> afterMovement, bool generatePath)
 {
     if (Impl[MOTION_SLOT_CONTROLLED] && Impl[MOTION_SLOT_CONTROLLED]->GetMovementGeneratorType() != DISTRACT_MOTION_TYPE)
         return;
@@ -683,18 +684,32 @@ void MotionMaster::MoveCharge(float x, float y, float z, float speed, uint32 id,
     if (_owner->GetTypeId() == TYPEID_PLAYER)
     {
         sLog->outDebug(LOG_FILTER_GENERAL, "Player (GUID: %u) charge point (X: %f Y: %f Z: %f)", _owner->GetGUIDLow(), x, y, z);
-        Mutate(new PointMovementGenerator<Player>(id, x, y, z, speed, afterMovement), MOTION_SLOT_CONTROLLED);
+        Mutate(new PointMovementGenerator<Player>(id, x, y, z, generatePath, speed, afterMovement), MOTION_SLOT_CONTROLLED);
     }
     else
     {
         sLog->outDebug(LOG_FILTER_GENERAL, "Creature (Entry: %u GUID: %u) charge point (X: %f Y: %f Z: %f)",
             _owner->GetEntry(), _owner->GetGUIDLow(), x, y, z);
-        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, speed, afterMovement), MOTION_SLOT_CONTROLLED);
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, speed, afterMovement), MOTION_SLOT_CONTROLLED);
     }
 
     if (_owner->ToPlayer())
         _owner->ToPlayer()->SetTeleportFlagForAnticheat(true);
 }
+
+void MotionMaster::MoveCharge(PathGenerator const& path)
+{
+    G3D::Vector3 dest = path.GetActualEndPosition();
+
+    MoveCharge(dest.x, dest.y, dest.z, SPEED_CHARGE, EVENT_CHARGE_PREPATH);
+
+    // Charge movement is not started when using EVENT_CHARGE_PREPATH
+    Movement::MoveSplineInit init(*_owner);
+    init.MovebyPath(path.GetPath());
+    init.SetVelocity(SPEED_CHARGE);
+    init.Launch();
+}
+
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 {
