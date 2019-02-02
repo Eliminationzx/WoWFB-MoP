@@ -1,8 +1,8 @@
 /*
-	* Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
-	* ------------------------------------------------------------
-	* Do whatever you want with this code but DO NOT remove the
-	* copyright and respect it's authors.
+    * Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
+    * ------------------------------------------------------------
+    * Do whatever you want with this code but DO NOT remove the
+    * copyright and respect it's authors.
 */
 
 // todo: cleanup and code rest
@@ -16,6 +16,7 @@
 #include "Unit.h"
 #include "UnitAI.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
 #include "SpellScript.h"
 #include "SpellAuraEffects.h"
 #include "Spell.h"
@@ -49,33 +50,33 @@ public:
 
         bool OnGossipHello(Player* player, GameObject* go)
         {
-        	if (used == false)
-        	{
+            if (used == false)
+            {
                 go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND);
 
-            	used = true;
+                used = true;
 
-        		Choice = urand(1, 5);
-        	}
+                Choice = urand(1, 5);
+            }
 
-        	if (player->HasAura(SPELL_FORTITUDE_OF_NIUZAO))
-        		player->RemoveAurasDueToSpell(SPELL_FORTITUDE_OF_NIUZAO);
+            if (player->HasAura(SPELL_FORTITUDE_OF_NIUZAO))
+                player->RemoveAurasDueToSpell(SPELL_FORTITUDE_OF_NIUZAO);
 
-        	if (player->HasAura(SPELL_WISDOM_OF_YULON))
-            	player->RemoveAurasDueToSpell(SPELL_WISDOM_OF_YULON);
+            if (player->HasAura(SPELL_WISDOM_OF_YULON))
+                player->RemoveAurasDueToSpell(SPELL_WISDOM_OF_YULON);
 
-        	if (player->HasAura(SPELL_CHI_JIS_HOPE))
-            	player->RemoveAurasDueToSpell(SPELL_CHI_JIS_HOPE);
+            if (player->HasAura(SPELL_CHI_JIS_HOPE))
+                player->RemoveAurasDueToSpell(SPELL_CHI_JIS_HOPE);
 
-        	if (player->HasAura(SPELL_XUENS_STRENGTH))
-            	player->RemoveAurasDueToSpell(SPELL_XUENS_STRENGTH);
+            if (player->HasAura(SPELL_XUENS_STRENGTH))
+                player->RemoveAurasDueToSpell(SPELL_XUENS_STRENGTH);
 
-        	Creature* trigger = go->FindNearestCreature(NPC_TIME_LOST_SHRINE_TRIGGER, 5.0f); // An npc needs to be spawned in the same coordinates for the shrine
+            Creature* trigger = go->FindNearestCreature(NPC_TIME_LOST_SHRINE_TRIGGER, 5.0f); // An npc needs to be spawned in the same coordinates for the shrine
 
             return true;
         }
 
-		void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (used == false)
                 return;
@@ -87,18 +88,18 @@ public:
             }
 
             else
-            	BackToUse -= diff;
+                BackToUse -= diff;
         }
 
     private:
-    	uint32 BackToUse;
+        uint32 BackToUse;
 
-    	uint8 Choice;
+        uint8 Choice;
 
-    	bool used;
+        bool used;
     };
 
-	GameObjectAI* GetAI(GameObject* go) const 
+    GameObjectAI* GetAI(GameObject* go) const 
     {
         return new go_time_lost_shrine_tiAI(go);
     }
@@ -116,7 +117,7 @@ public:
         uint64 playerGUID;
         uint32 WingsTimer;
 
-		bool OnGossipHello(Player* player, GameObject* go)
+        bool OnGossipHello(Player* player, GameObject* go)
         {
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Touch the statue.", GOSSIP_SENDER_MAIN, 1);
 
@@ -125,37 +126,37 @@ public:
             return true;
         }
 
-		bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
+        bool OnGossipSelect(Player* player, GameObject* go, uint32 sender, uint32 action)
         {
-        	player->PlayerTalkClass->ClearMenus();
-        	player->CLOSE_GOSSIP_MENU();
+            player->PlayerTalkClass->ClearMenus();
+            player->CLOSE_GOSSIP_MENU();
 
-        	switch (action)
-        	{
-        		case 1:
-        			player->CastSpell(player, 144387, true); // knockback in the air
-        			playerGUID = player->GetGUID();
-        			used = true;
-        			WingsTimer = 6000;
-        			break;
-        		default:
-        			break;
-        	}
+            switch (action)
+            {
+                case 1:
+                    player->CastSpell(player, 144387, true); // knockback in the air
+                    playerGUID = player->GetGUID();
+                    used = true;
+                    WingsTimer = 6000;
+                    break;
+                default:
+                    break;
+            }
 
-        	return true;
+            return true;
         }
 
-		void UpdateAI(uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (used == false)
-            	return;
+                return;
 
             if (WingsTimer <= diff)
             {
                 if (Player* player = ObjectAccessor::GetPlayer(*go, playerGUID))
                 {
-                	player->CastSpell(player, 144385, true);
-                	used = false;
+                    player->CastSpell(player, 144385, true);
+                    used = false;
                 }
             }
 
@@ -167,7 +168,7 @@ public:
         bool used;
     };
 
-	GameObjectAI* GetAI(GameObject* go) const 
+    GameObjectAI* GetAI(GameObject* go) const 
     {
         return new go_gleaming_crane_statue_tiAI(go);
     }
@@ -185,23 +186,23 @@ public:
         void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-             	caster->CastSpell(caster, 144391, true);
+                caster->CastSpell(caster, 144391, true);
         }
 
         void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
             if (Unit* caster = GetCaster())
-            	caster->CastSpell(caster, 148162, true);
+                caster->CastSpell(caster, 148162, true);
         }
 
-		void Register()
+        void Register()
         {
             OnEffectApply += AuraEffectApplyFn(spell_timeless_isle_crane_wings_AuraScript::OnApply, EFFECT_0, SPELL_AURA_FEATHER_FALL, AURA_EFFECT_HANDLE_REAL);
             OnEffectRemove += AuraEffectRemoveFn(spell_timeless_isle_crane_wings_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-	AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const 
     {
         return new spell_timeless_isle_crane_wings_AuraScript();
     }
@@ -221,13 +222,13 @@ public:
             GetCaster()->SetMaxHealth(GetCaster()->GetHealthPct() - 1.0f);
         }
 
-		void Register()
+        void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_timeless_isle_cauterize_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-	AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const 
     {
         return new spell_timeless_isle_cauterize_AuraScript();
     }
@@ -247,13 +248,13 @@ public:
             GetCaster()->DealDamage(GetCaster(), 50000, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
         }
 
-		void Register()
+        void Register()
         {
             OnEffectPeriodic += AuraEffectPeriodicFn(spell_timeless_isle_burning_fury_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         }
     };
 
-	AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const 
     {
         return new spell_timeless_isle_burning_fury_AuraScript();
     }
@@ -1896,9 +1897,9 @@ public:
     {
         npc_timeless_dragonsAI(Creature* creature) : ScriptedAI(creature)
         {
-			//me->SetUnitMovementFlags
-			me->SetCanFly(true);
-			me->SetDisableGravity(true);
+            //me->SetUnitMovementFlags
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
         }
 
         uint32 uiBreathTimer;
@@ -1908,14 +1909,14 @@ public:
         {
             uiBreathTimer = 4*IN_MILLISECONDS;
             uiBlossomTimer = 10*IN_MILLISECONDS;
-			me->SetCanFly(true);
-			me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
         }
 
         void EnterCombat(Unit* /*who*/) 
         {
-			me->SetCanFly(true);
-			me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->SetDisableGravity(true);
         }
 
         void UpdateAI(const uint32 diff)
@@ -3071,7 +3072,7 @@ public:
 
 void AddSC_timeless_isle()
 {
-	// creatures
+    // creatures
     new npc_timeless_turtles();
     new npc_timeless_faction_sentries();
     new npc_timeless_adders();
@@ -3098,12 +3099,12 @@ void AddSC_timeless_isle()
     new npc_nice_sprite();
     new npc_ordon_candlekeeper();
     new npc_emperor_shaohao();
-	
-	// gameobject
+    
+    // gameobject
     new go_time_lost_shrine_ti();
     new go_gleaming_crane_statue_ti();
-	
-	// spells
+    
+    // spells
     new spell_timeless_isle_crane_wings();
     new spell_timeless_isle_cauterize();
     new spell_timeless_isle_burning_fury();

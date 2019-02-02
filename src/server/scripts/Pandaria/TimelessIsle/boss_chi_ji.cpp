@@ -1,12 +1,13 @@
 /*
-	* Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
-	* ------------------------------------------------------------
-	* Do whatever you want with this code but DO NOT remove the
-	* copyright and respect it's authors.
+    * Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
+    * ------------------------------------------------------------
+    * Do whatever you want with this code but DO NOT remove the
+    * copyright and respect it's authors.
 */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "MoveSplineInit.h"
@@ -19,22 +20,22 @@
 
 enum Spells
 {
-	SPELL_FIRESTORM					= 144461,
-	SPELL_INSPIRING_SONG			= 144468,
-	SPELL_BEACON_OF_HOPE			= 144473,
-	SPELL_BLAZING_SONG				= 144471,
-	SPELL_CRANE_RUSH				= 144470,
-	SPELL_FIRESTORM_VISUAL			= 144463,
+    SPELL_FIRESTORM					= 144461,
+    SPELL_INSPIRING_SONG			= 144468,
+    SPELL_BEACON_OF_HOPE			= 144473,
+    SPELL_BLAZING_SONG				= 144471,
+    SPELL_CRANE_RUSH				= 144470,
+    SPELL_FIRESTORM_VISUAL			= 144463,
     SPELL_BLAZING_NOVA_AURA         = 144493,
-	SPELL_BLAZING_NOVA				= 144494,
+    SPELL_BLAZING_NOVA				= 144494,
     SPELL_BEACON_OF_HOPE_AURA       = 144475
 };
 
 enum Events
 {
-	EVENT_FIRESTORM					= 1,
-	EVENT_INSPIRING_SONG,
-	EVENT_BEACON_OF_HOPE,	
+    EVENT_FIRESTORM					= 1,
+    EVENT_INSPIRING_SONG,
+    EVENT_BEACON_OF_HOPE,	
     EVENT_HEALTH_66_PERCENT,
     EVENT_HEALTH_33_PERCENT,
     EVENT_SHAO_DO_OUTRO,
@@ -281,12 +282,12 @@ class boss_chi_ji : public CreatureScript
                             if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
                                 shao->AI()->DoAction(ACTION_NIUZAO);
 
-							Movement::MoveSplineInit init(*me);
-							Position home = me->GetHomePosition();
-							init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
-							init.SetWalk(true);
-							init.Launch();
-							me->SetOrientation(home.GetOrientation());
+                            Movement::MoveSplineInit init(*me);
+                            Position home = me->GetHomePosition();
+                            init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+                            init.SetWalk(true);
+                            init.Launch();
+                            me->SetOrientation(home.GetOrientation());
 
                             //me->DisappearAndDie();
                             death = false;
@@ -373,7 +374,7 @@ class mob_child_of_chi_ji : public CreatureScript
 
             }
 
-			void DoAction(const int32 action)
+            void DoAction(const int32 action)
             {
                 switch (action)
                 {
@@ -401,7 +402,7 @@ class mob_child_of_chi_ji : public CreatureScript
                 }
             };
 
-			void UpdateAI(const uint32 diff)
+            void UpdateAI(const uint32 diff)
             {
                 events.Update(diff);
                 switch (events.ExecuteEvent())

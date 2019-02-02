@@ -1,12 +1,13 @@
 /*
-	* Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
-	* ------------------------------------------------------------
-	* Do whatever you want with this code but DO NOT remove the
-	* copyright and respect it's authors.
+    * Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
+    * ------------------------------------------------------------
+    * Do whatever you want with this code but DO NOT remove the
+    * copyright and respect it's authors.
 */
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "SpellScript.h"
 #include "ObjectMgr.h"
 #include "ScriptMgr.h"
 #include "MoveSplineInit.h"
@@ -330,12 +331,12 @@ class boss_niuzao : public CreatureScript
                             if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
                                 shao->AI()->DoAction(ACTION_YULON);
 
-							Movement::MoveSplineInit init(*me);
-							Position home = me->GetHomePosition();
-							init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
-							init.SetWalk(true);
-							init.Launch();
-							me->SetOrientation(home.GetOrientation());
+                            Movement::MoveSplineInit init(*me);
+                            Position home = me->GetHomePosition();
+                            init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+                            init.SetWalk(true);
+                            init.Launch();
+                            me->SetOrientation(home.GetOrientation());
 
                             //me->DisappearAndDie();
                             death = false;
@@ -374,7 +375,7 @@ class spell_niuzao_headbutt : public SpellScriptLoader
 
         class spell_niuzao_headbutt_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_niuzao_headbutt_SpellScript)
+            PrepareSpellScript(spell_niuzao_headbutt_SpellScript);
 
             void RemoveThreat(SpellEffIndex /*eff*/)
             {
@@ -405,7 +406,7 @@ class spell_niuzao_charge : public SpellScriptLoader
 
         class spell_niuzao_charge_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_niuzao_charge_AuraScript)
+            PrepareAuraScript(spell_niuzao_charge_AuraScript);
 
             void HandleEffectApply(AuraEffect const* pAuraEffect, AuraEffectHandleModes eMode)
             {

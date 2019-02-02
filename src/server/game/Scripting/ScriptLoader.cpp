@@ -1850,20 +1850,20 @@ void AddPandarieScripts()
     //AddSC_boss_oondasta();
     
     /* -------------------------------- */
-	/*  Timeless Isle - JunkyBulgaria   */
+    /*  Timeless Isle - JunkyBulgaria   */
     /* -------------------------------- */
 
     // Generic Scripts
-	AddSC_timeless_isle(); // island (global), partially includes celestial npcs 
+    AddSC_timeless_isle(); // island (global), partially includes celestial npcs 
 
     // Ordos
-	AddSC_boss_ordos();
+    AddSC_boss_ordos();
 
     // Celestials
-	AddSC_boss_yu_lon();
-	AddSC_boss_xuen();
-	AddSC_boss_niuzao();
-	AddSC_boss_chi_ji();
+    AddSC_boss_yu_lon();
+    AddSC_boss_xuen();
+    AddSC_boss_niuzao();
+    AddSC_boss_chi_ji();
 
     // Rares
     AddSC_rare_mob_bufo();
