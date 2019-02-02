@@ -18,12 +18,7 @@
 #include "AnticheatMgr.h"
 #include "ScriptLoader.h"
 
-//examples
-void AddSC_example_creature();
-void AddSC_example_escort();
-void AddSC_example_gossip_codebox();
-void AddSC_example_misc();
-void AddSC_example_commandscript();
+// Other
 void AddSC_DuelReset();
 void AddSC_DuelZone();
 void AddSC_fast_arena_start();
@@ -55,7 +50,6 @@ void AddSC_monk_spell_scripts();
 void AddSC_mastery_spell_scripts();
 void AddSC_quest_spell_scripts();
 void AddSC_item_spell_scripts();
-void AddSC_example_spell_scripts();
 void AddSC_holiday_spell_scripts();
 
 void AddSC_SmartSCripts();
@@ -958,7 +952,6 @@ void AddSC_chat_log();
 
 void AddScripts()
 {
-    AddExampleScripts();
     AddSpellScripts();
     AddSC_SmartSCripts();
     AddSC_npc_toy();
@@ -983,15 +976,6 @@ void AddScripts()
 #endif
 }
 
-void AddExampleScripts()
-{
-    AddSC_example_creature();
-    AddSC_example_escort();
-    AddSC_example_gossip_codebox();
-    AddSC_example_misc();
-    AddSC_example_commandscript();
-}
-
 void AddSpellScripts()
 {
     AddSC_deathknight_spell_scripts();
@@ -1009,7 +993,6 @@ void AddSpellScripts()
     AddSC_mastery_spell_scripts();
     AddSC_quest_spell_scripts();
     AddSC_item_spell_scripts();
-    AddSC_example_spell_scripts();
     AddSC_holiday_spell_scripts();
 }
 
