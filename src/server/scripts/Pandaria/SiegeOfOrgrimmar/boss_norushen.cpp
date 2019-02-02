@@ -1164,11 +1164,11 @@ class npc_norushen_lorewalker_cho_2 : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
                         default:
                            break;
-                    }
+                    }*/
                 }
             }
 

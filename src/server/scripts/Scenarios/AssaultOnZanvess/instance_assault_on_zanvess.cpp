@@ -78,7 +78,7 @@ class instance_assault_on_zanvess : public InstanceMapScript
                  
                  m_ScenarioCreatures[STEP_4].push_back(
                     ScenarioCreature(ScenarioCreature::SpawnMode::SPAWN_ON_STEP, NPC_COMMANDER_TELVRAK, 
-                    { -1272.06, 4582.9f, 127.723f, 6.01117f }));
+                    { -1272.06f, 4582.9f, 127.723f, 6.01117f }));
             }
 
             void ProcessScenarioCreatures(ScenarioSteps scenarioStep)
@@ -180,11 +180,11 @@ class instance_assault_on_zanvess : public InstanceMapScript
 
             void OnGameObjectCreate(GameObject* go)
             {
-                switch (go->GetEntry())
+                /*switch (go->GetEntry())
                 {
                     default: 
                         break;
-                }
+                }*/
             }
 
 		    void SetData(uint32 type, uint32 data)
@@ -247,13 +247,13 @@ class instance_assault_on_zanvess : public InstanceMapScript
 
             uint64 GetData64(uint32 type)
             {
-                switch (type)
+                /*switch (type)
                 {
                     
                     default:
                         break;
                 }
-
+                */
                 return 0;
             }
 

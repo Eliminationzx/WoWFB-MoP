@@ -2119,7 +2119,7 @@ class spell_dk_presences : public SpellScriptLoader
             }
         };
         
-        class spell_dk_presences_AuraScript : public AuraScript
+        /*class spell_dk_presences_AuraScript : public AuraScript
         {
         public:
             spell_dk_presences_AuraScript() : m_timer(0) { }
@@ -2159,7 +2159,7 @@ class spell_dk_presences : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_dk_presences_AuraScript();
-        }
+        }*/
 
         SpellScript* GetSpellScript() const
         {

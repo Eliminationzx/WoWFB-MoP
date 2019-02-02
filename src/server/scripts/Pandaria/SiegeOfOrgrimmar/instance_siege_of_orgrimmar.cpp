@@ -93,6 +93,13 @@ class instance_siege_of_orgrimmar : public InstanceMapScript
                 lorewalkerChoIntro              = 0;
                 lorewalkerChoIntroImmerseus     = 0;
                 beachCaptured = 0;
+                
+                GarroshRightDoor = 0;
+                GarroshRightDoor = 0;
+
+                GarroshGuid = 0;
+                GarroshThrallGuid = 0;
+                GarroshHeartOfYshaaraj = 0;
             }
 
             void OnPlayerEnter(Player* player)
@@ -235,18 +242,11 @@ class instance_siege_of_orgrimmar : public InstanceMapScript
                     case NPC_HISEK_THE_SWARMKEEPER:
                         paragonsOfTheKlaxxiGuid[8] = creature->GetGUID();
                         break;
-                    case NPC_GARROSH_HELLSCREAM:
-                        garroshHellscreamGuid = creature->GetGUID();
-                        break;
                     case NPC_LOREWALKER_CHO_1:
                         if (creature->GetPositionZ() < 400.0f)
-                        {
                             lorewalkerCho1GUID = creature->GetGUID();
-                        }
                         else
-                        {
                             lorewalkerCho2GUID = creature->GetGUID();
-                        }
                         break;
                     case NPC_VANITY:
                         vanityGUID = creature->GetGUID();
@@ -256,6 +256,16 @@ class instance_siege_of_orgrimmar : public InstanceMapScript
                         break;
                     case NPC_ZEAL:
                         zealGUID = creature->GetGUID();
+                        break;
+                    case BOSS_GARROSH_HELLSCREAM:
+                        garroshHellscreamGuid = creature->GetGUID();
+                        GarroshGuid = creature->GetGUID();
+                        break;
+                    case CREATURE_HEART_OF_YSHAARAJ_MAIN:
+                        GarroshHeartOfYshaaraj = creature->GetGUID();
+                        break;
+                    case CREATURE_THRALL:
+                        GarroshThrallGuid = creature->GetGUID();
                         break;
                     default:
                         break;
@@ -527,6 +537,11 @@ class instance_siege_of_orgrimmar : public InstanceMapScript
                     case DATA_EARTHBREAKER_HAROMM: return korkronDarkShamansGuid[0];
                     case DATA_WAVEBINDER_KARDRIS: return korkronDarkShamansGuid[1];
                     case DATA_GENERAL_NAZGRIM: return generalNazgrimGuid;
+                    case DATA_GARROSH_HEART_OF_YSHAARAJ: return GarroshHeartOfYshaaraj; break;
+                    case DATA_GARROSH_HELLSCREAM: return GarroshGuid; break;
+                    case DATA_THRALL: return GarroshThrallGuid; break;
+                    case DATA_LEFT_DOOR_GARROSH: return GarroshLeftDoor; break;
+                    case DATA_RIGHT_DOOR_GARROSH: return GarroshRightDoor; break;
                     default:
                         break;
                 }
@@ -942,6 +957,12 @@ class instance_siege_of_orgrimmar : public InstanceMapScript
 
             bool secondGalakrasIntroDone;
             uint32 destroyedCannonsCount;
+            
+            uint64 GarroshGuid;
+            uint64 GarroshThrallGuid;
+            uint64 GarroshHeartOfYshaaraj;
+            uint64 GarroshRightDoor;
+            uint64 GarroshLeftDoor;
         };
 };
 

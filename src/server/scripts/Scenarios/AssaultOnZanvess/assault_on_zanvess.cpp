@@ -164,14 +164,14 @@ class npc_assault_on_zanvess_sky_admiral_rogers : public CreatureScript
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     return;
 
-                if (uint32 eventId = events.ExecuteEvent())
+                /*if (uint32 eventId = events.ExecuteEvent())
                 {
                     switch (eventId)
                     {
                         default:
                             break;
                     }
-                }
+                }*/
             }
 
         private:
@@ -271,11 +271,11 @@ class npc_assault_on_zanvess_rear_admiral_zigg : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
                         default:
                             break;
-                    }
+                    }*/
                 }
             }
 
@@ -362,11 +362,11 @@ class npc_assault_on_zanvess_skyfire_gyrocopter : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
                         default:
                             break;
-                    }
+                    }*/
                 }
             }
 
@@ -457,11 +457,11 @@ class npc_assault_on_zanvess_korkron_gunship : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
                         default:
                             break;
-                    }
+                    }*/
                 }
             }
 

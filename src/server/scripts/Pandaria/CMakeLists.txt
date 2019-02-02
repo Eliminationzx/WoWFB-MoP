@@ -20,6 +20,7 @@ file(GLOB_RECURSE sources_TerraceOfEndlessSpring Pandaria/TerraceOfEndlessSpring
 file(GLOB_RECURSE sources_ThroneOfThunder Pandaria/ThroneOfThunder/*.hpp Pandaria/ThroneOfThunder/*.cpp Pandaria/ThroneOfThunder/*.hxx)
 file(GLOB_RECURSE sources_SiegeOfOrgrimmar Pandaria/SiegeOfOrgrimmar/*.hpp Pandaria/SiegeOfOrgrimmar/*.cpp Pandaria/SiegeOfOrgrimmar/*.hxx)
 file(GLOB_RECURSE sources_WanderingIsland Pandaria/WanderingIsland/*.hpp Pandaria/WanderingIsland/*.cpp Pandaria/WanderingIsland/*.hxx)
+file(GLOB_RECURSE sources_TimelessIsle Pandaria/TimelessIsle/*.hpp Pandaria/TimelessIsle/*.cpp Pandaria/TimelessIsle/*.hxx Pandaria/TimelessIsle/Rares/*.cpp)
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
@@ -35,12 +36,11 @@ set(scripts_STAT_SRCS
   ${sources_ThroneOfThunder}
   ${sources_SiegeOfOrgrimmar}
   ${sources_WanderingIsland}
+  ${sources_TimelessIsle}
 
   Pandaria/boss_sha_of_anger.cpp
   Pandaria/boss_galion.cpp
   Pandaria/boss_nalak.cpp
-  Pandaria/boss_chi_ji.cpp
-  Pandaria/boss_ordos.cpp
   Pandaria/boss_oondasta.cpp
   
   Pandaria/celestial_challenge.cpp
@@ -64,8 +64,6 @@ set(scripts_STAT_SRCS
   Pandaria/isle_of_thunder.h
   Pandaria/isle_of_thunder.cpp
   Pandaria/isle_of_giants.cpp
-  Pandaria/timeless_isle.cpp
-  Pandaria/timeless_isle.h
 )
 
 message("  -> Prepared: Pandaria")
