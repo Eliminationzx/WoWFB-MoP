@@ -100,7 +100,8 @@ enum RogueSpells
     ROGUE_SPELL_SHADOWSTEP_TELEPORT_EFFECT       = 36563,
     ROGUE_SPELL_KIDNEY_SHOT                      = 408,
     ROGUE_SPELL_REVEALING_STRIKE                 = 84617,
-    ROGUE_SPELL_DETECTION                        = 56814
+    ROGUE_SPELL_DETECTION                        = 56814,
+    ROGUE_SPELL_BURST_OF_SPEED_EFFECT            = 137573
 };
 
 // Called by Ambush - 8676, Garrote - 703 and Cheap Shot - 1833
