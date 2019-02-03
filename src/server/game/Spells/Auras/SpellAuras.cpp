@@ -1327,7 +1327,7 @@ bool Aura::IsDeathPersistent() const
 
 bool Aura::CanBeSaved() const
 {
-    if (IsPassive())
+    if (IsPassive() || (GetSpellInfo()->HasAttribute(SPELL_ATTR0_HIDDEN_CLIENTSIDE) && GetSpellInfo()->Stances))
         return false;
 
     // do not save channel auras
