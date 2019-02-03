@@ -23441,6 +23441,11 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         ToPlayer()->SetTeleportFlagForAnticheat(true);
 }
 
+bool Unit::IsFalling() const
+{
+    return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR) || movespline->isFalling();
+}
+
 void Unit::SetCanFly(bool apply)
 {
     if (apply)
