@@ -1330,8 +1330,13 @@ bool Aura::CanBeSaved() const
     if (IsPassive())
         return false;
 
+    // do not save channel auras
+    if (GetSpellInfo()->IsChanneled())
+        return false;
+
+    // Check if aura is single target, not only spell info
     if (GetCasterGUID() != GetOwner()->GetGUID())
-        if (GetSpellInfo()->IsSingleTarget())
+        if (GetSpellInfo()->IsSingleTarget() || IsSingleTarget())
             return false;
 
     if (GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_ARMOR_SPECIALIZATION)
@@ -1349,11 +1354,27 @@ bool Aura::CanBeSaved() const
     if (HasEffectType(SPELL_AURA_CONTROL_VEHICLE))
         return false;
 
+    // do not save bind sight auras!
+    if (HasEffectType(SPELL_AURA_BIND_SIGHT))
+        return false;
+
+    // no charming auras (taking direct control)
+    if (HasEffectType(SPELL_AURA_MOD_POSSESS) || HasEffectType(SPELL_AURA_MOD_POSSESS_PET))
+        return false;
+
+    // no charming auras can be saved
+    if (HasEffectType(SPELL_AURA_MOD_CHARM) || HasEffectType(SPELL_AURA_AOE_CHARM))
+        return false;
+
     // don't save auras removed by proc system
     if (IsUsingCharges() && !GetCharges())
         return false;
 
     if (sSpellMgr->IsInSpellAurasNotSave(GetId()))
+        return false;
+
+    // don't save permanent auras triggered by items, they'll be recasted on login if necessary
+    if (GetCastItemGUID() && IsPermanent())
         return false;
 
     return true;

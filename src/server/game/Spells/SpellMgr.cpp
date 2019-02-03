@@ -6492,8 +6492,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
                 case 34709: // Shadow Sight
-					spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
-					break;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
+                    break;
                 // Atramedes
                 case 77611: // Resonating Clash interrupt
                     spellInfo->Effects[EFFECT_0].SetRadiusIndex(28);
