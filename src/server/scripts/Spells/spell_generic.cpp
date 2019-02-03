@@ -4251,7 +4251,7 @@ class spell_gen_reconfigured_remote_shock : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const override
         {
             return new spell_gen_reconfigured_remote_shock_SpellScript();
         }
@@ -4289,6 +4289,59 @@ class spell_gen_kukurus_cache_key_opening : public SpellScriptLoader
         {
             return new spell_gen_kukurus_cache_key_opening_SpellScript();
         }
+};
+
+class spell_gen_pvp_opening_trigger : public SpellScriptLoader 
+{
+public:
+    spell_gen_pvp_opening_trigger() : SpellScriptLoader("spell_gen_pvp_opening_trigger") { }
+
+    class spell_gen_pvp_opening_trigger_SpellScript : public SpellScript {
+        PrepareSpellScript(spell_gen_pvp_opening_trigger_SpellScript);
+
+        void SelectGoTarget(WorldObject*& target)
+        {
+            if (GameObject* obj = GetCaster()->FindNearestGameObjectOfLockType(LOCKTYPE_PVP_OPEN, GetSpellInfo()->GetMaxRange()))
+                target = obj;
+        }
+
+        void Register() override 
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_gen_pvp_opening_trigger_SpellScript::SelectGoTarget, EFFECT_0, TARGET_DEST_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override 
+    {
+        return new spell_gen_pvp_opening_trigger_SpellScript();
+    }
+};
+
+class spell_gen_pvp_opening : public SpellScriptLoader 
+{
+public:
+    spell_gen_pvp_opening() : SpellScriptLoader("spell_gen_pvp_opening") { }
+
+    class spell_gen_pvp_opening_SpellScript : public SpellScript 
+    {
+        PrepareSpellScript(spell_gen_pvp_opening_SpellScript);
+
+        void SelectGoTarget(WorldObject*& target)
+        {
+            if (GameObject* obj = GetCaster()->FindNearestGameObjectOfLockType(LOCKTYPE_PVP_OPEN, GetSpellInfo()->GetMaxRange()))
+                target = obj;
+        }
+
+        void Register() override
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_gen_pvp_opening_SpellScript::SelectGoTarget, EFFECT_1, TARGET_DEST_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override 
+    {
+        return new spell_gen_pvp_opening_SpellScript();
+    }
 };
 
 void AddSC_generic_spell_scripts()
@@ -4391,4 +4444,6 @@ void AddSC_generic_spell_scripts()
     new spell_arena_shadow_sight();
     new spell_gen_reconfigured_remote_shock();
     new spell_gen_kukurus_cache_key_opening();
+    new spell_gen_pvp_opening_trigger();
+    new spell_gen_pvp_opening();
 }

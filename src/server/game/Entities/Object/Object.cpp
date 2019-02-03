@@ -3399,6 +3399,15 @@ GameObject* WorldObject::FindNearestGameObjectOfType(GameobjectTypes type, float
     return go;
 }
 
+GameObject* WorldObject::FindNearestGameObjectOfLockType(LockType type, float range) const
+{
+    GameObject* go = NULL;
+    JadeCore::NearestGameObjectLockTypeInObjectRangeCheck checker(*this, type, range);
+    JadeCore::GameObjectLastSearcher<JadeCore::NearestGameObjectLockTypeInObjectRangeCheck> searcher(this, go, checker);
+    VisitNearbyGridObject(range, searcher);
+    return go;
+}
+
 Player* WorldObject::FindNearestPlayer(float range, bool alive)
 {
     Player* player = NULL;

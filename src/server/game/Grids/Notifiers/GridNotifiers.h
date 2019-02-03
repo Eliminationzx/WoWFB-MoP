@@ -800,6 +800,31 @@ namespace JadeCore
 
     };
 
+    class NearestGameObjectLockTypeInObjectRangeCheck
+    {
+    public:
+        NearestGameObjectLockTypeInObjectRangeCheck(WorldObject const& obj, LockType type, float range) : i_obj(obj), i_type(type), i_range(range) { }
+
+        bool operator()(GameObject* go)
+        {
+            LockEntry const *lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->GetLockId());
+            if (lockInfo && lockInfo->Index[1] == i_type && i_obj.IsWithinDistInMap(go, i_range))
+            {
+                i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+
+    private:
+        WorldObject const& i_obj;
+        LockType i_type;
+        float  i_range;
+
+        // prevent clone this object
+        NearestGameObjectLockTypeInObjectRangeCheck(NearestGameObjectLockTypeInObjectRangeCheck const&);
+    };
+
     // Unit checks
 
     class MostHPMissingInRange

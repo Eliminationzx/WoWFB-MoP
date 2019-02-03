@@ -21,3 +21,10 @@ INSERT INTO `spell_linked_spell` VALUES ('23214', '31726', '0', 'Summon Charger'
 INSERT INTO `spell_linked_spell` VALUES ('34767', '31726', '0', 'Summon Charger - Blood Elf');
 INSERT INTO `spell_linked_spell` VALUES ('34769', '31726', '0', 'Summon Warhorse - Blood Elf');
 INSERT INTO `spell_linked_spell` VALUES ('48778', '50772', '0', 'Acherus Deathcharger - Summon Unholy Mount Visual');
+
+-- PvP Opening visual
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_gen_pvp_opening';
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_gen_pvp_opening_trigger';
+INSERT INTO spell_script_names VALUE 
+(24390, 'spell_gen_pvp_opening'),
+(24391, 'spell_gen_pvp_opening_trigger');
