@@ -7772,17 +7772,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_CASTER_AURASTATE;
                 }
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetMapId() == 998)
-                    {
-                        if (BattlegroundKT* bg = dynamic_cast<BattlegroundKT*>(m_caster->ToPlayer()->GetBattleground()))
-                        {
-                            if (bg->HaveOrb(m_caster->GetGUID()))
-                                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                        }
-                    }
-                }
+                // Battleground KT check orb state
+                if (m_caster->HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+                    return SPELL_FAILED_CASTER_AURASTATE;
                 break;
             }
             case SPELL_AURA_MOD_RANGED_HASTE:
