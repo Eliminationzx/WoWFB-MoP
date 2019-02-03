@@ -57,7 +57,6 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "GuildMgr.h"
-#include "BattlegroundKT.h"
 
 void AppareanceData::Save(Unit* unit)
 {
@@ -7901,18 +7900,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // hex & mount
                 if (m_caster->HasAura(51514))
                     return SPELL_FAILED_CONFUSED;
-                    
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetMapId() == 998)
-                    {
-                        if (BattlegroundKT* bg = dynamic_cast<BattlegroundKT*>(m_caster->ToPlayer()->GetBattleground()))
-                        {
-                            if (bg->HaveOrb(m_caster->GetGUID()))
-                                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                        }
-                    }
-                }
+                
+                // Battleground KT check orb state
+                if (m_caster->HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+                    return SPELL_FAILED_CASTER_AURASTATE;
 
                 break;
             }
@@ -7921,17 +7912,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->HasAura(34709))                     // Shadow Sight
                     return SPELL_FAILED_CASTER_AURASTATE;
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetMapId() == 998)
-                    {
-                        if (BattlegroundKT* bg = dynamic_cast<BattlegroundKT*>(m_caster->ToPlayer()->GetBattleground()))
-                        {
-                            if (bg->HaveOrb(m_caster->GetGUID()))
-                                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                        }
-                    }
-                }
+                // Battleground KT check orb state
+                if (m_caster->HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+                    return SPELL_FAILED_CASTER_AURASTATE;
                 break;
             }
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:

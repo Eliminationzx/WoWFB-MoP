@@ -5421,6 +5421,17 @@ bool Unit::HasNegativeAuraWithAttribute(uint32 flag, uint64 guid)
     return false;
 }
 
+bool Unit::HasAuraWithAttribute(uint32 flag, uint64 guid)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (aura->GetSpellInfo()->Attributes & flag && (!guid || aura->GetCasterGUID() == guid))
+            return true;
+    }
+    return false;
+}
+
 bool Unit::HasAuraWithNegativeCaster(uint32 spellid)
 {
     for (AuraApplicationMap::const_iterator itr = m_appliedAuras.lower_bound(spellid); itr != m_appliedAuras.upper_bound(spellid); ++itr)
@@ -23281,6 +23292,10 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
 {
     // Must be called only from aura handler
     if (!isAlive() || GetVehicleKit() == vehicle || vehicle->GetBase()->IsOnVehicle(this))
+        return;
+
+    // Battleground KT check orb state
+    if (HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
         return;
 
     if (m_vehicle)
