@@ -23533,11 +23533,17 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
     if (!JadeCore::IsValidMapCoord(x, y, z, orientation))
         return false;
 
-    bool turn = (GetOrientation() != orientation);
-    bool relocated = (teleport || GetPositionX() != x || GetPositionY() != y || GetPositionZ() != z);
+    // Check if angular distance changed
+    bool const turn = G3D::fuzzyGt(M_PI - fabs(fabs(GetOrientation() - orientation) - M_PI), 0.0f);
 
     if (turn)
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
+
+    // G3D::fuzzyEq won't help here, in some cases magnitudes differ by a little more than G3D::eps, but should be considered equal
+    bool const relocated = (teleport ||
+        std::fabs(GetPositionX() - x) > 0.001f ||
+        std::fabs(GetPositionY() - y) > 0.001f ||
+        std::fabs(GetPositionZ() - z) > 0.001f);
 
     if (relocated)
     {
