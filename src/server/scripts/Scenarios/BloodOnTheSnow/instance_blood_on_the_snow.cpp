@@ -78,14 +78,15 @@ class instance_blood_on_the_snow : public InstanceMapScript
                 }
             }
 
-            void OnGameObjectCreate(GameObject* go)
+            // unused
+            /*void OnGameObjectCreate(GameObject* go)
             {
                 switch (go->GetEntry())
                 {
                     default: 
                         break;
                 }
-            }
+            }*/
 
 		    void SetData(uint32 type, uint32 data)
             {

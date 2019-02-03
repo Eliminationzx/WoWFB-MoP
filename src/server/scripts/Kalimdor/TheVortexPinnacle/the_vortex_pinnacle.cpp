@@ -1,8 +1,8 @@
-#include"ScriptPCH.h"
+п»ї#include"ScriptPCH.h"
 #include "the_vortex_pinnacle.h"
 
 
-// Перепрыгивания в вихрях пока не реализованы
+// иє¬й‡Јз©Ѕжѓ‘е¤–й™ќ? ?ж·іжҐпЈ·?з¦Ћй­Џ ејµ й‡ЈиґЌп¦єиЌ»й™ќ?
 
 enum Creatures
 {

@@ -1355,6 +1355,8 @@ class go_challenge_orb : public GameObjectScript
                 if (!l_Instance->instance->IsChallengeMode() || l_Instance->IsChallengeModeStarted())
                 {
                     p_Player->PlayerTalkClass->SendCloseGossip();
+                    if (GameObject* yellow_door = p_GameObject->FindNearestGameObject(211989, 999.99f)) yellow_door->Delete();
+                    p_GameObject->Delete();
                     return false;
                 }
 

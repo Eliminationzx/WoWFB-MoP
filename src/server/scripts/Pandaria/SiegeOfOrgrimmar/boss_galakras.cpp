@@ -1937,10 +1937,10 @@ class npc_galakras_dragonmaw_grunt_1 : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
 
-                    }
+                    }*/
                 }
 
                 DoMeleeAttackIfReady();
@@ -1999,10 +1999,10 @@ class npc_galakras_dragonmaw_grunt_2 : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
 
-                    }
+                    }*/
                 }
 
                 DoMeleeAttackIfReady();
@@ -2057,10 +2057,10 @@ class npc_galakras_dragonmaw_proto_drake : public CreatureScript
 
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    /*switch (eventId)
                     {
 
-                    }
+                    }*/
                 }
 
                 DoMeleeAttackIfReady();

@@ -18,15 +18,11 @@
 #include "AnticheatMgr.h"
 #include "ScriptLoader.h"
 
-//examples
-void AddSC_example_creature();
-void AddSC_example_escort();
-void AddSC_example_gossip_codebox();
-void AddSC_example_misc();
-void AddSC_example_commandscript();
+// Other
 void AddSC_DuelReset();
 void AddSC_DuelZone();
 void AddSC_fast_arena_start();
+void AddSC_misc_scripts();
 
 // BG
 void AddSC_BattlegroundDGScripts();
@@ -54,7 +50,6 @@ void AddSC_monk_spell_scripts();
 void AddSC_mastery_spell_scripts();
 void AddSC_quest_spell_scripts();
 void AddSC_item_spell_scripts();
-void AddSC_example_spell_scripts();
 void AddSC_holiday_spell_scripts();
 
 void AddSC_SmartSCripts();
@@ -294,6 +289,9 @@ void AddSC_wetlands();
 //kalimdor
 void AddSC_instance_ragefire_chasm();
 void AddSC_ragefire_chasm();
+void AddSC_boss_adarogg();
+void AddSC_boss_koranthal();
+void AddSC_boss_slagmaw();
 void AddSC_boss_lava_guard_gordoth();
 
 void AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -774,9 +772,7 @@ void AddSC_boss_commander_rimok();
 void AddSC_boss_raigonn();
 void AddSC_boss_sha_of_anger();
 void AddSC_boss_galion();
-void AddSC_boss_chi_ji();
 void AddSC_boss_nalak();
-void AddSC_boss_ordos();
 void AddSC_instance_mogu_shan_palace();             // Mogu'Shan Palace
 void AddSC_boss_trial_of_the_king();
 void AddSC_boss_gekkan();
@@ -866,9 +862,66 @@ void AddSC_WanderingIsland_South();
 void AddSC_isle_of_giants();
 //void AddSC_boss_oondasta();
 
-void AddSC_timeless_isle();
-
 void AddSC_celestial_challenge();
+
+/* -------------------------------- */
+/*  Timeless Isle - JunkyBulgaria   */
+/* -------------------------------- */
+
+// Generic Scripts
+void AddSC_timeless_isle(); // island (global), partially includes celestial npcs 
+
+// Ordos
+void AddSC_boss_ordos();
+
+// Celestials
+void AddSC_boss_yu_lon();
+void AddSC_boss_xuen();
+void AddSC_boss_niuzao();
+void AddSC_boss_chi_ji();
+
+// Rares
+void AddSC_rare_mob_bufo();
+void AddSC_rare_mob_champion_of_the_black_flame();
+void AddSC_rare_mob_chelon();
+void AddSC_rare_mob_cinderfall();
+void AddSC_rare_mob_cranegnasher();
+void AddSC_rare_mob_dread_ship_vazuvius();
+void AddSC_rare_mob_emerald_gander();
+void AddSC_rare_mob_evermaw();
+void AddSC_rare_mob_flintlord_gairan();
+void AddSC_rare_mob_garnia();
+void AddSC_rare_mob_golganarr();
+void AddSC_rare_mob_great_turtle_furyshell();
+void AddSC_rare_mob_gu_chi_the_swarmbringer();
+void AddSC_rare_mob_huolon();
+void AddSC_rare_mob_imperial_python();
+void AddSC_rare_mob_ironfur_steelhorn();
+void AddSC_rare_mob_jakur_of_ordon();
+void AddSC_rare_mob_karkanos();
+void AddSC_rare_mob_leafmender();
+void AddSC_rare_mob_monstrous_spineclaw();
+void AddSC_rare_mob_rattleskew();
+void AddSC_rare_mob_rock_moss();
+void AddSC_rare_mob_sperlurk();
+void AddSC_rare_mob_spirit_of_jadefire();
+void AddSC_rare_mob_stinkbraid();
+void AddSC_rare_mob_tsavo_ka();
+void AddSC_rare_mob_urdur_the_cauterizer();
+void AddSC_rare_mob_watcher_osu();
+void AddSC_rare_mob_zesqua();
+void AddSC_rare_mob_zhu_gon_the_sour();
+void AddSC_rare_mob_archereus_of_flame();
+
+
+/* -------------------------------- */
+
+/* --------------------------------- */
+/*  Arena of Annihilation - Cybran   */
+/* --------------------------------- */
+void AddSC_instance_arena_of_annihilation();
+void AddSC_arena_of_annihilation();
+/* --------------------------------- */
 
 void AddSC_instance_theramores_fall_a();
 void AddSC_instance_theramores_fall_h();
@@ -899,7 +952,6 @@ void AddSC_chat_log();
 
 void AddScripts()
 {
-    AddExampleScripts();
     AddSpellScripts();
     AddSC_SmartSCripts();
     AddSC_npc_toy();
@@ -919,17 +971,9 @@ void AddScripts()
     AddSC_DuelReset();
     AddSC_DuelZone();
     AddSC_fast_arena_start();
+    AddSC_misc_scripts();
     AddScenarioScripts();
 #endif
-}
-
-void AddExampleScripts()
-{
-    AddSC_example_creature();
-    AddSC_example_escort();
-    AddSC_example_gossip_codebox();
-    AddSC_example_misc();
-    AddSC_example_commandscript();
 }
 
 void AddSpellScripts()
@@ -949,7 +993,6 @@ void AddSpellScripts()
     AddSC_mastery_spell_scripts();
     AddSC_quest_spell_scripts();
     AddSC_item_spell_scripts();
-    AddSC_example_spell_scripts();
     AddSC_holiday_spell_scripts();
 }
 
@@ -1246,6 +1289,9 @@ void AddKalimdorScripts()
 #ifdef SCRIPTS
     AddSC_instance_ragefire_chasm();
     AddSC_ragefire_chasm();
+    AddSC_boss_adarogg();
+    AddSC_boss_koranthal();
+    AddSC_boss_slagmaw();
     AddSC_boss_lava_guard_gordoth();
 
     AddSC_blackfathom_deeps();              //Blackfathom Depths
@@ -1700,9 +1746,7 @@ void AddPandarieScripts()
     AddSC_boss_raigonn();
     AddSC_boss_sha_of_anger();                      // Pandaria World Bosses
     AddSC_boss_galion();
-    AddSC_boss_chi_ji();
     AddSC_boss_nalak();
-    AddSC_boss_ordos();
     AddSC_instance_shadopan_monastery();            // Shadopan Monastery
     AddSC_shadopan_monastery();
     AddSC_boss_gu_cloudstrike();
@@ -1787,8 +1831,57 @@ void AddPandarieScripts()
 
     AddSC_isle_of_giants();
     //AddSC_boss_oondasta();
+    
+    /* -------------------------------- */
+    /*  Timeless Isle - JunkyBulgaria   */
+    /* -------------------------------- */
 
-    AddSC_timeless_isle();
+    // Generic Scripts
+    AddSC_timeless_isle(); // island (global), partially includes celestial npcs 
+
+    // Ordos
+    AddSC_boss_ordos();
+
+    // Celestials
+    AddSC_boss_yu_lon();
+    AddSC_boss_xuen();
+    AddSC_boss_niuzao();
+    AddSC_boss_chi_ji();
+
+    // Rares
+    AddSC_rare_mob_bufo();
+    AddSC_rare_mob_champion_of_the_black_flame();
+    AddSC_rare_mob_chelon();
+    AddSC_rare_mob_cinderfall();
+    AddSC_rare_mob_cranegnasher();
+    AddSC_rare_mob_dread_ship_vazuvius();
+    AddSC_rare_mob_emerald_gander();
+    AddSC_rare_mob_evermaw();
+    AddSC_rare_mob_flintlord_gairan();
+    AddSC_rare_mob_garnia();
+    AddSC_rare_mob_golganarr();
+    AddSC_rare_mob_great_turtle_furyshell();
+    AddSC_rare_mob_gu_chi_the_swarmbringer();
+    AddSC_rare_mob_huolon();
+    AddSC_rare_mob_imperial_python();
+    AddSC_rare_mob_ironfur_steelhorn();
+    AddSC_rare_mob_jakur_of_ordon();
+    AddSC_rare_mob_karkanos();
+    AddSC_rare_mob_leafmender();
+    AddSC_rare_mob_monstrous_spineclaw();
+    AddSC_rare_mob_rattleskew();
+    AddSC_rare_mob_rock_moss();
+    AddSC_rare_mob_sperlurk();
+    AddSC_rare_mob_spirit_of_jadefire();
+    AddSC_rare_mob_stinkbraid();
+    AddSC_rare_mob_tsavo_ka();
+    AddSC_rare_mob_urdur_the_cauterizer();
+    AddSC_rare_mob_watcher_osu();
+    AddSC_rare_mob_zesqua();
+    AddSC_rare_mob_zhu_gon_the_sour();
+    AddSC_rare_mob_archereus_of_flame();
+
+    /* -------------------------------- */
 
     AddSC_celestial_challenge();
 
@@ -1799,6 +1892,13 @@ void AddScenarioScripts()
 {
 #ifdef SCRIPTS
 
+    /* --------------------------------- */
+    /*  Arena of Annihilation - Cybran   */
+    /* --------------------------------- */
+    AddSC_instance_arena_of_annihilation();
+    AddSC_arena_of_annihilation();
+    /* --------------------------------- */
+    
     AddSC_instance_theramores_fall_a();
     AddSC_instance_theramores_fall_h();
     AddSC_theramores_fall_a();

@@ -105,6 +105,11 @@ enum Data
 
     DATA_EARTHBREAKER_HAROMM,
     DATA_WAVEBINDER_KARDRIS,
+    
+    DATA_GARROSH_HEART_OF_YSHAARAJ,
+    DATA_THRALL,
+    DATA_LEFT_DOOR_GARROSH,
+    DATA_RIGHT_DOOR_GARROSH,
 };
 
 enum Creatures
@@ -202,10 +207,9 @@ enum Creatures
     NPC_HISEK_THE_SWARMKEEPER           = 71153,
 
     // Garrosh Hellscream
-    NPC_GARROSH_HELLSCREAM              = 71865,
-    NPC_SIEGE_ENGINEER                  = 71984,
-	NPC_WARBRINGER_KORKRON              = 71979,
-	NPC_WOLF_RIDER_FARSEER              = 71983
+    BOSS_GARROSH_HELLSCREAM             = 71865,
+    CREATURE_THRALL                     = 73483,
+    CREATURE_HEART_OF_YSHAARAJ_MAIN     = 72215,
 };
 
 enum GameObjects

@@ -31,6 +31,10 @@ set(scripts_STAT_SRCS
   Scenarios/AssaultOnZanvess/assault_on_zanvess.h
   Scenarios/AssaultOnZanvess/assault_on_zanvess.cpp
   Scenarios/AssaultOnZanvess/instance_assault_on_zanvess.cpp
+  
+  Scenarios/ArenaOfAnnihilation/arena_of_annihilation.h
+  Scenarios/ArenaOfAnnihilation/arena_of_annihilation.cpp
+  Scenarios/ArenaOfAnnihilation/instance_arena_of_annihilation.cpp
 )
 
 message("  -> Prepared: Scenarios")

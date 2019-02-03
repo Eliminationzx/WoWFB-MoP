@@ -1,0 +1,57 @@
+#include "ScriptPCH.h"
+
+#ifndef ARENA_OF_ANNIHILATION_H
+#define ARENA_OF_ANNIHILATION_H
+
+#define SCENARIO_ID 58
+
+// Need to find correct criteria ids
+enum Criterias
+{
+    CRITERIA_GONG_RANG        = 20810,
+    CRITERIA_SCARSHELL        = 19336,
+    CRITERIA_JOLGRUM          = 19337,
+    CRITERIA_LITTLE_LIUYANG   = 21922,
+    CRITERIA_CHAGAN_FIREHOOF  = 19341,
+    CRITERIA_FINAL_CHALLENGER = 20587,
+};
+
+enum Data
+{
+    DATA_GONG,
+
+    // STEP 1
+    DATA_SCARSHELL,
+
+    // STEP 2
+    DATA_JOLGRUM,
+
+    // STEP 3
+    DATA_LITTLE_LIUYANG,
+
+    // STEP 4
+    DATA_CHAGAN_FIREHOOF,
+
+    // FINAL CHALLENGER
+    DATA_MAKI_WATERBLADE,
+    DATA_SATAY_BYU,
+    DATA_CLOUDBENDER_KOBO,
+};
+
+enum Creatures
+{
+    NPC_SCARSHELL        = 63311,
+    NPC_JOLGRUM          = 63312,
+    NPC_LITTLE_LIUYANG   = 63313,
+    NPC_CHAGAN_FIREHOOF  = 63318,
+    NPC_MAKI_WATERBLADE  = 64280,
+    NPC_SATAY_BYU        = 64281,
+    NPC_CLOUDBENDER_KOBO = 63316,
+};
+
+enum GameObjects
+{
+    GOBJECT_GONG = 212974,
+};
+
+#endif

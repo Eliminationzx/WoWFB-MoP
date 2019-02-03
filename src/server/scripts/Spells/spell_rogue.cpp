@@ -100,7 +100,8 @@ enum RogueSpells
     ROGUE_SPELL_SHADOWSTEP_TELEPORT_EFFECT       = 36563,
     ROGUE_SPELL_KIDNEY_SHOT                      = 408,
     ROGUE_SPELL_REVEALING_STRIKE                 = 84617,
-    ROGUE_SPELL_DETECTION                        = 56814
+    ROGUE_SPELL_DETECTION                        = 56814,
+    ROGUE_SPELL_BURST_OF_SPEED_EFFECT            = 137573
 };
 
 // Called by Ambush - 8676, Garrote - 703 and Cheap Shot - 1833
@@ -1947,6 +1948,35 @@ class spell_rog_deadly_throw : public SpellScriptLoader
         }
 };
 
+// Burst of Speed
+class spell_rog_burst_of_speed : public SpellScriptLoader
+{
+public:
+    spell_rog_burst_of_speed() : SpellScriptLoader("spell_rog_burst_of_speed") { }
+
+    class spell_rog_burst_of_speed_SpellScript : public SpellScript
+    {
+	PrepareSpellScript(spell_rog_burst_of_speed_SpellScript);
+
+        void HandleOnHit()
+        {
+            if (Player* _player = GetCaster()->ToPlayer())
+		       _player->CastSpell(_player, ROGUE_SPELL_BURST_OF_SPEED_EFFECT, true);
+        }
+
+        void Register() override
+        {
+            OnHit += SpellHitFn(spell_rog_burst_of_speed_SpellScript::HandleOnHit);
+        }
+
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_rog_burst_of_speed_SpellScript();
+    }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -1970,6 +2000,7 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_paralytic_poison();
     new spell_rog_shiv();
     new spell_rog_poisons();
+    new spell_rog_burst_of_speed();
     //new spell_rog_recuperate();
     new spell_rog_preparation();
     new spell_rog_deadly_poison();

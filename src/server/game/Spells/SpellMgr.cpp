@@ -4552,11 +4552,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[1].BasePoints = 20;
                     spellInfo->Effects[1].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
                     break;
-                case 2818:  // Deadly Poison
-                    spellInfo->Attributes |= SPELL_ATTR0_IMPOSSIBLE_DODGE_PARRY_BLOCK;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REDIRECTED;
-                    spellInfo->AttributesEx |= SPELL_ATTR1_CANT_BE_REFLECTED;
-                    break;
                 case 108212:// Burst of Speed
                     spellInfo->AttributesEx |= SPELL_ATTR1_NOT_BREAK_STEALTH;
                     spellInfo->Effects[0].BasePoints = 70;
@@ -4571,6 +4566,7 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                     break;
+                case 2818:  // Deadly Poison
                 case 8680:  // Wound Poison
                 case 3409:  // Crippling Poison
                 case 5760:  // Mind-numbing Poison
@@ -6495,6 +6491,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 91304: // Shadow Whip
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
+                case 34709: // Shadow Sight
+					spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
+					break;
                 // Atramedes
                 case 77611: // Resonating Clash interrupt
                     spellInfo->Effects[EFFECT_0].SetRadiusIndex(28);
