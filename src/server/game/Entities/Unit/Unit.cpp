@@ -5421,7 +5421,7 @@ bool Unit::HasNegativeAuraWithAttribute(uint32 flag, uint64 guid)
     return false;
 }
 
-bool Unit::HasAuraWithAttribute(uint32 flag, uint64 guid)
+bool Unit::HasAuraWithAttributeCu(uint32 flag, uint64 guid)
 {
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
     {

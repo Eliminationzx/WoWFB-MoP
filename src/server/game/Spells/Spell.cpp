@@ -7763,7 +7763,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
 
                 // Battleground KT check orb state
-                if (m_caster->HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+                if (m_caster->HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
                     return SPELL_FAILED_CASTER_AURASTATE;
                 break;
             }
@@ -7884,7 +7884,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_CONFUSED;
                 
                 // Battleground KT check orb state
-                if (m_caster->HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+                if (m_caster->HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
                     return SPELL_FAILED_CASTER_AURASTATE;
 
                 break;
@@ -7895,7 +7895,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_CASTER_AURASTATE;
 
                 // Battleground KT check orb state
-                if (m_caster->HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+                if (m_caster->HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
                     return SPELL_FAILED_CASTER_AURASTATE;
                 break;
             }
