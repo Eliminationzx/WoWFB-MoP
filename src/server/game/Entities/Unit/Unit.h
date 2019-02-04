@@ -1873,6 +1873,7 @@ class Unit : public WorldObject
         void RemoveAurasByType(AuraType auraType, uint64 casterGUID = 0, Aura* aura = nullptr, uint32 exceptAuraId = 0, bool negative = true, bool positive = true);
         void RemoveNotOwnSingleTargetAuras(uint32 newPhase = 0x0);
         void RemoveAurasWithInterruptFlags(uint32 flag, uint32 except = 0);
+        void RemoveAurasWithPreventionType(uint32 preventionType, uint32 except = 0);
         void RemoveFlagsAuras();
         void RemoveAurasWithAttribute(uint32 flags);
         void RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID);
@@ -1930,6 +1931,7 @@ class Unit : public WorldObject
         bool HasAuraTypeWithValue(AuraType auratype, int32 value) const;
         bool HasNegativeAuraWithInterruptFlag(uint32 flag, uint64 guid = 0);
         bool HasNegativeAuraWithAttribute(uint32 flag, uint64 guid = 0);
+        bool HasAuraWithAttributeCu(uint32 flag, uint64 guid = 0);
         bool HasAuraWithMechanic(uint32 mechanicMask);
         bool HasAuraWithNegativeCaster(uint32 spellid);
 
@@ -2345,6 +2347,7 @@ class Unit : public WorldObject
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
 
+        bool IsFalling() const;
         bool isMoving() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING); }
         void RemoveMovingFlags(){ return m_movementInfo.StopMoving(); }
         bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_TURNING); }

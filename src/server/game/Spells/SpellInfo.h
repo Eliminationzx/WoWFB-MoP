@@ -202,6 +202,7 @@ enum SpellCustomAttributes
     SPELL_ATTR0_CU_PVE_PROC_ONLY                 = 0x01000000, // spell proc only against non player entity
     SPELL_ATTR0_CU_REDUCE_33                     = 0x02000000,
     SPELL_ATTR0_CU_REDUCE_75                     = 0x04000000,
+    SPELL_ATTR0_CU_KT_ORB                        = 0x08000000,
     SPELL_ATTR0_CU_NEGATIVE                      = SPELL_ATTR0_CU_NEGATIVE_EFF0 | SPELL_ATTR0_CU_NEGATIVE_EFF1 | SPELL_ATTR0_CU_NEGATIVE_EFF2,
 };
 

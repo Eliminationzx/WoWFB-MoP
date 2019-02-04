@@ -679,7 +679,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
                         break;
                     }
-                    case 85692: // Fel Storm
+                    case 85692: // Doom Bolt
                     {
                         if (Unit* owner = m_caster->GetOwner())
                             damage += int32(owner->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SPELL) * 0.9f);

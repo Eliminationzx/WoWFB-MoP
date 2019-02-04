@@ -3546,6 +3546,9 @@ void AuraEffect::HandleAuraModPacify(AuraApplication const* aurApp, uint8 mode, 
 
     if (apply)
     {
+        // Remove auras with prevention type pacify
+        target->RemoveAurasWithPreventionType(SPELL_PREVENTION_TYPE_PACIFY, GetId());
+
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
         target->AttackStop();
     }
@@ -5229,7 +5232,6 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     {
         if (GetMiscValueB() & 1 << i || !GetMiscValueB()) // 0 is also used for all stats
         {
-            // test fix for health
             if (i == STAT_STAMINA)
             {
                 float oldModifier = target->GetModifierValue(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT);
@@ -7166,6 +7168,11 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         return;
 
                     caster->CastSpell(target, 148008, true);
+                    break;
+                }
+                case 146184: // Wrath
+                {
+                    caster->CastCustomSpell(target, 146202, &m_amount, 0, 0, true, 0, this);
                     break;
                 }
                 case 110310: // Dampening

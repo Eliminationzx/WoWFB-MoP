@@ -57,7 +57,6 @@
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "GuildMgr.h"
-#include "BattlegroundKT.h"
 
 void AppareanceData::Save(Unit* unit)
 {
@@ -1187,26 +1186,14 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
     SpellTargetObjectTypes objectType = targetType.GetObjectType();
     SpellTargetCheckTypes selectionType = targetType.GetCheckType();
     ConditionContainer* condList = m_spellInfo->Effects[effIndex].ImplicitTargetConditions;
-    float coneAngle = ((m_caster->GetTypeId() == TYPEID_PLAYER) ? M_PI * (2.0f / 3.0f) : M_PI / 2.0f);
+    float coneAngle = static_cast<float>(4.0f * M_PI / 5.0f);
+    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
 
-    if (m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_110 ||
-        m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_129)
-        coneAngle = M_PI/6;
+    // Workaround for some spells that don't have RadiusEntry set in dbc (but SpellRange instead)
+    if (G3D::fuzzyEq(radius, 0.f))
+        radius = m_spellInfo->GetMaxRange(m_spellInfo->IsPositiveEffect(effIndex), m_caster, this);
 
-    switch (m_spellInfo->Id)
-    {
-        case 118094:
-            coneAngle = M_PI/2;
-            break;
-        case 118105:
-            coneAngle = M_PI/4;
-            break;
-        case 118106:
-            coneAngle = M_PI/6;
-            break;
-    }
-
-    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue->RadiusMod;
+    radius *= m_spellValue->RadiusMod;
 
     if (uint32 containerTypeMask = GetSearcherTypeMask(objectType, condList))
     {
@@ -2354,7 +2341,7 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
                 if (Unit* unitTarget = (*itr)->ToUnit())
                 {
                     uint32 deficit = unitTarget->GetMaxHealth() - unitTarget->GetHealth();
-                    if ((deficit > maxHPDeficit || foundItr == tempTargets.end()) && target->IsWithinDist(unitTarget, jumpRadius) && target->IsWithinLOSInMap(unitTarget))
+                    if (deficit > maxHPDeficit && target->IsWithinDist(unitTarget, jumpRadius) && target->IsWithinLOSInMap(unitTarget))
                     {
                         foundItr = itr;
                         maxHPDeficit = deficit;
@@ -3668,6 +3655,8 @@ bool Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         return false;
     }
     LoadScripts();
+    
+    OnSpellLaunch();
 
     if ((m_triggeredByAuraSpell && m_triggeredByAuraSpell->Id == 101056) || IsDarkSimulacrum())
         isStolen = true;
@@ -7773,17 +7762,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_CASTER_AURASTATE;
                 }
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetMapId() == 998)
-                    {
-                        if (BattlegroundKT* bg = dynamic_cast<BattlegroundKT*>(m_caster->ToPlayer()->GetBattleground()))
-                        {
-                            if (bg->HaveOrb(m_caster->GetGUID()))
-                                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                        }
-                    }
-                }
+                // Battleground KT check orb state
+                if (m_caster->HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
+                    return SPELL_FAILED_CASTER_AURASTATE;
                 break;
             }
             case SPELL_AURA_MOD_RANGED_HASTE:
@@ -7901,18 +7882,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // hex & mount
                 if (m_caster->HasAura(51514))
                     return SPELL_FAILED_CONFUSED;
-                    
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetMapId() == 998)
-                    {
-                        if (BattlegroundKT* bg = dynamic_cast<BattlegroundKT*>(m_caster->ToPlayer()->GetBattleground()))
-                        {
-                            if (bg->HaveOrb(m_caster->GetGUID()))
-                                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                        }
-                    }
-                }
+                
+                // Battleground KT check orb state
+                if (m_caster->HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
+                    return SPELL_FAILED_CASTER_AURASTATE;
 
                 break;
             }
@@ -7921,17 +7894,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->HasAura(34709))                     // Shadow Sight
                     return SPELL_FAILED_CASTER_AURASTATE;
 
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (m_caster->GetMapId() == 998)
-                    {
-                        if (BattlegroundKT* bg = dynamic_cast<BattlegroundKT*>(m_caster->ToPlayer()->GetBattleground()))
-                        {
-                            if (bg->HaveOrb(m_caster->GetGUID()))
-                                return SPELL_FAILED_NOT_IN_BATTLEGROUND;
-                        }
-                    }
-                }
+                // Battleground KT check orb state
+                if (m_caster->HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
+                    return SPELL_FAILED_CASTER_AURASTATE;
                 break;
             }
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
@@ -10038,6 +10003,13 @@ void Spell::PrepareTriggersExecutedOnHit()
     }
 }
 
+void Spell::OnSpellLaunch()
+{
+    // Spell generic pvp opening
+    if (m_spellInfo->Id == 21651)
+        m_caster->CastSpell(m_caster, 24390, false);
+}
+
 // Global cooldowns management
 enum GCDLimits
 {
@@ -10365,11 +10337,8 @@ bool WorldObjectSpellConeTargetCheck::operator()(WorldObject* target)
     }
     else
     {
-        if (!_caster->isInFront(target, _coneAngle))
-        {
-            if (_caster->GetTypeId() != TYPEID_PLAYER || _caster->GetDistance2d(target) > 3.0f || !_caster->isInFront(target, M_PI))
-                return false;
-        }
+        if (!_caster->isInFront(target, _coneAngle) && !_caster->IsInDist(target, _caster->GetObjectSize()))
+            return false;
     }
     return WorldObjectSpellAreaTargetCheck::operator ()(target);
 }

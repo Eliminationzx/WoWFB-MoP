@@ -1956,12 +1956,12 @@ public:
 
     class spell_rog_burst_of_speed_SpellScript : public SpellScript
     {
-	PrepareSpellScript(spell_rog_burst_of_speed_SpellScript);
-
+        PrepareSpellScript(spell_rog_burst_of_speed_SpellScript);
+        
         void HandleOnHit()
         {
             if (Player* _player = GetCaster()->ToPlayer())
-		       _player->CastSpell(_player, ROGUE_SPELL_BURST_OF_SPEED_EFFECT, true);
+               _player->CastSpell(_player, ROGUE_SPELL_BURST_OF_SPEED_EFFECT, true);
         }
 
         void Register() override

@@ -93,14 +93,7 @@ class boss_xuen : public CreatureScript
             void Reset()
             {
                 events.Reset();
-                _Reset();
-
-                if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }
-
+                _Reset();               
                 me->SetWalk(true);
                 me->setActive(true);
             }
@@ -130,8 +123,7 @@ class boss_xuen : public CreatureScript
 
                     dmg = 0;
                     Talk(SAY_DEATH);
-                    
-                    me->setFaction(FACTION_FRIENDLY);
+                    me->setFaction(35);
                    
                     me->StopMoving();
                     me->RemoveAllAuras();
@@ -156,9 +148,8 @@ class boss_xuen : public CreatureScript
 
                 if (point == 1)
                 {
-                    events.ScheduleEvent(EVENT_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
+                    events.ScheduleEvent(EVENT_SHAO_DO_INTRO, 15000);
                     me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->setFaction(FACTION_HOSTILE_NEUTRAL);
                     me->SetHomePosition(_timelessIsleMiddle);
                 }
             }
@@ -207,12 +198,12 @@ class boss_xuen : public CreatureScript
                         case EVENT_SHAO_DO_INTRO:
                         {
                             Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, CELESTIAL_COURT_BOSS_INTRO_TIMER_2);
+                            events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 15000);
                             break;
                         }
                         case EVENT_SHAO_DO_INTRO_ATTACKABLE:
                         {
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->setFaction(190);
                             me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                             break;
                         }
@@ -267,13 +258,12 @@ class boss_xuen : public CreatureScript
                                 if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
                                     shao->AI()->DoAction(ACTION_CHIJI);
 
-								Movement::MoveSplineInit init(*me);
-								Position home = me->GetHomePosition();
-								init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
-								init.SetWalk(true);
-								init.Launch();
-								me->SetOrientation(home.GetOrientation());
-
+                                Movement::MoveSplineInit init(*me);
+                                Position home = me->GetHomePosition();
+                                init.MoveTo(float(-747.933594), float(-4947.194824), float(-6.276601));
+                                init.SetWalk(true);
+                                init.SetFacing(float(5.700478));
+                                init.Launch();
                                 //me->DisappearAndDie();
                                 death = false;
                             }

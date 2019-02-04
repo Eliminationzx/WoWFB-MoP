@@ -156,7 +156,9 @@ enum WarlockSpells
     WARLOCK_DEMON_SEDUCE                    = 6358,
     WARLOCK_DEMON_SPELL_LOCK                = 19647,
     WARLOCK_DEMON_AXE_TOSS                  = 89766,
-    WARLOCK_BLOODY_FEAR_EFFECT              = 137143
+    WARLOCK_BLOODY_FEAR_EFFECT              = 137143,
+    WARLOCK_IMMOLATION_AURA_DAMAGE_INFERNAL = 20153,
+    WARLOCK_IMMOLATION_AURA_DAMAGE_ABYSSAL  = 143323
 };
 
 // Demonic Slash - 114175
@@ -4172,6 +4174,38 @@ class spell_warl_void_and_shadow_shield : public SpellScriptLoader
         }
 };
 
+class spell_warl_pet_immolation_aura : public SpellScriptLoader
+{
+public:
+    spell_warl_pet_immolation_aura() : SpellScriptLoader("spell_warl_pet_immolation_aura") { }
+
+    class spell_warl_pet_immolation_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_pet_immolation_aura_AuraScript);
+
+        void HandleTriggerSpell(AuraEffect const* /*aurEff*/)
+        {
+            if (Unit* target = GetTarget())
+            {
+                if (target->GetTypeId() != TYPEID_UNIT)
+                    return;
+
+                target->CastSpell(target, target->GetEntry() != 89 ? WARLOCK_IMMOLATION_AURA_DAMAGE_ABYSSAL : WARLOCK_IMMOLATION_AURA_DAMAGE_INFERNAL, true);
+            }
+        }
+
+        void Register()
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_warl_pet_immolation_aura_AuraScript::HandleTriggerSpell, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_warl_pet_immolation_aura_AuraScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_fury_ward();
@@ -4254,4 +4288,5 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_demonic_slash();
     new spell_warl_soul_fire();
     new spell_warl_void_and_shadow_shield();
+    new spell_warl_pet_immolation_aura();
 }

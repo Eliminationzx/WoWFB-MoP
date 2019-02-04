@@ -4061,8 +4061,11 @@ AuraApplication * Unit::_CreateAuraApplication(Aura* aura, uint32 effMask)
 {
     // can't apply aura on unit which is going to be deleted - to not create a memory leak
     ASSERT(!m_cleanupDone);
-    // aura musn't be removed
-    ASSERT(!aura->IsRemoved());
+
+    // just return if the aura has been already removed
+    // this can happen if OnEffectHitTarget() script hook killed the unit or the aura owner (which can be different)
+    if (aura->IsRemoved())
+        return NULL;
 
     // aura mustn't be already applied on target
     ASSERT (!aura->IsAppliedOnTarget(GetGUID()) && "Unit::_CreateAuraApplication: aura musn't be applied on target");
@@ -4852,6 +4855,23 @@ void Unit::RemoveFlagsAuras()
     }
 }
 
+void Unit::RemoveAurasWithPreventionType(uint32 preventionType, uint32 except)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (!except || aura->GetId() != except)
+        {
+            if (aura->GetSpellInfo()->PreventionType == preventionType)
+            {
+                RemoveAura(iter);
+                continue;
+            }
+        }
+        ++iter;
+    }
+}
+
 void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID)
 {
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
@@ -5007,15 +5027,15 @@ void Unit::RemoveNonPassivesAuras()
         {
             switch (base->GetId())
             {
-            case 110310:
-            case 121164:
-            case 121175:
-            case 121176:
-            case 121177:
-            {
-                ++aurIter;
-                continue;
-            }
+                case 110310:
+                case 121164:
+                case 121175:
+                case 121176:
+                case 121177:
+                {
+                    ++aurIter;
+                    continue;
+                }
             }
             RemoveOwnedAura(aurIter);
         }
@@ -5413,6 +5433,17 @@ bool Unit::HasNegativeAuraWithAttribute(uint32 flag, uint64 guid)
     {
         Aura const* aura = iter->second->GetBase();
         if (!iter->second->IsPositive() && aura->GetSpellInfo()->Attributes & flag && (!guid || aura->GetCasterGUID() == guid))
+            return true;
+    }
+    return false;
+}
+
+bool Unit::HasAuraWithAttributeCu(uint32 flag, uint64 guid)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (aura->GetSpellInfo()->AttributesCu & flag && (!guid || aura->GetCasterGUID() == guid))
             return true;
     }
     return false;
@@ -21857,7 +21888,7 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[7]);
-    SendMessageToSet(&data, false);
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SendPlaySpellVisual(uint32 id, Unit* target, float travelSpeed, bool thisAsPos /*= false*/, bool speedAsTime /*= false*/)
@@ -23280,6 +23311,10 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
     if (!isAlive() || GetVehicleKit() == vehicle || vehicle->GetBase()->IsOnVehicle(this))
         return;
 
+    // Battleground KT check orb state
+    if (HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
+        return;
+
     if (m_vehicle)
     {
         if (m_vehicle == vehicle)
@@ -23438,6 +23473,11 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         ToPlayer()->SetTeleportFlagForAnticheat(true);
 }
 
+bool Unit::IsFalling() const
+{
+    return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR) || movespline->isFalling();
+}
+
 void Unit::SetCanFly(bool apply)
 {
     if (apply)
@@ -23525,11 +23565,17 @@ bool Unit::UpdatePosition(float x, float y, float z, float orientation, bool tel
     if (!JadeCore::IsValidMapCoord(x, y, z, orientation))
         return false;
 
-    bool turn = (GetOrientation() != orientation);
-    bool relocated = (teleport || GetPositionX() != x || GetPositionY() != y || GetPositionZ() != z);
+    // Check if angular distance changed
+    bool const turn = G3D::fuzzyGt(M_PI - fabs(fabs(GetOrientation() - orientation) - M_PI), 0.0f);
 
     if (turn)
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
+
+    // G3D::fuzzyEq won't help here, in some cases magnitudes differ by a little more than G3D::eps, but should be considered equal
+    bool const relocated = (teleport ||
+        std::fabs(GetPositionX() - x) > 0.001f ||
+        std::fabs(GetPositionY() - y) > 0.001f ||
+        std::fabs(GetPositionZ() - z) > 0.001f);
 
     if (relocated)
     {

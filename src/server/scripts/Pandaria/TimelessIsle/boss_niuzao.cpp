@@ -88,13 +88,6 @@ class boss_niuzao : public CreatureScript
             {
                 events.Reset();
                 _Reset();
-
-                if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }
-
                 me->RemoveAllAuras();
                 summons.DespawnAll();
                 _charges = 0;
@@ -169,10 +162,8 @@ class boss_niuzao : public CreatureScript
                                     unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
 
                     dmg = 0;
-                    Talk(SAY_DEATH);
-                    
-                    me->setFaction(FACTION_FRIENDLY);
-                   
+                    Talk(SAY_DEATH);                    
+                    me->setFaction(35);                   
                     me->StopMoving();
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->Clear();
@@ -199,8 +190,7 @@ class boss_niuzao : public CreatureScript
                 {
                     case 1:
                     {
-                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
-                        me->setFaction(FACTION_HOSTILE_NEUTRAL);
+                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO, 15000);
                         me->SetFacingTo(MIDDLE_FACING_ANGLE);
                         me->SetHomePosition(_timelessIsleMiddle);
                         break;
@@ -265,12 +255,12 @@ class boss_niuzao : public CreatureScript
                     case EVENT_NIUZAO_SHAO_DO_INTRO:
                     {
                         Talk(SAY_INTRO);
-                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE, CELESTIAL_COURT_BOSS_INTRO_TIMER_2);
+                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE, 15000);
                         break;
                     }
                     case EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE:
                     {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        me->setFaction(190);
                         me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                         break;
                     }
@@ -321,7 +311,7 @@ class boss_niuzao : public CreatureScript
                     case EVENT_NIUZAO_SHAO_DO_OUTRO:
                     {
                         if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                            shao->AI()->Talk(EMPEROR_TALK_OUTRO_CHIJI);
+                            shao->AI()->Talk(EMPEROR_TALK_OUTRO_NIUZAO);
                         break;
                     }
                     case EVENT_NIUZAO_DEATH:
@@ -333,12 +323,10 @@ class boss_niuzao : public CreatureScript
 
                             Movement::MoveSplineInit init(*me);
                             Position home = me->GetHomePosition();
-                            init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+                            init.MoveTo(float(-553.501099), float(-5086.039062), float(-6.277227));
                             init.SetWalk(true);
+                            init.SetFacing(float(2.653933));
                             init.Launch();
-                            me->SetOrientation(home.GetOrientation());
-
-                            //me->DisappearAndDie();
                             death = false;
                         }
                         break;

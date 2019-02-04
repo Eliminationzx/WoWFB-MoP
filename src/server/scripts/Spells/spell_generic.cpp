@@ -4251,7 +4251,7 @@ class spell_gen_reconfigured_remote_shock : public SpellScriptLoader
             }
         };
 
-        SpellScript* GetSpellScript() const
+        SpellScript* GetSpellScript() const override
         {
             return new spell_gen_reconfigured_remote_shock_SpellScript();
         }
@@ -4291,8 +4291,99 @@ class spell_gen_kukurus_cache_key_opening : public SpellScriptLoader
         }
 };
 
+class spell_gen_pvp_opening_trigger : public SpellScriptLoader 
+{
+public:
+    spell_gen_pvp_opening_trigger() : SpellScriptLoader("spell_gen_pvp_opening_trigger") { }
+
+    class spell_gen_pvp_opening_trigger_SpellScript : public SpellScript {
+        PrepareSpellScript(spell_gen_pvp_opening_trigger_SpellScript);
+
+        void SelectGoTarget(WorldObject*& target)
+        {
+            if (GameObject* obj = GetCaster()->FindNearestGameObjectOfLockType(LOCKTYPE_PVP_OPEN, GetSpellInfo()->GetMaxRange()))
+                target = obj;
+        }
+
+        void Register() override 
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_gen_pvp_opening_trigger_SpellScript::SelectGoTarget, EFFECT_0, TARGET_DEST_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override 
+    {
+        return new spell_gen_pvp_opening_trigger_SpellScript();
+    }
+};
+
+class spell_gen_pvp_opening : public SpellScriptLoader 
+{
+public:
+    spell_gen_pvp_opening() : SpellScriptLoader("spell_gen_pvp_opening") { }
+
+    class spell_gen_pvp_opening_SpellScript : public SpellScript 
+    {
+        PrepareSpellScript(spell_gen_pvp_opening_SpellScript);
+
+        void SelectGoTarget(WorldObject*& target)
+        {
+            if (GameObject* obj = GetCaster()->FindNearestGameObjectOfLockType(LOCKTYPE_PVP_OPEN, GetSpellInfo()->GetMaxRange()))
+                target = obj;
+        }
+
+        void Register() override
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_gen_pvp_opening_SpellScript::SelectGoTarget, EFFECT_1, TARGET_DEST_NEARBY_ENTRY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const override 
+    {
+        return new spell_gen_pvp_opening_SpellScript();
+    }
+};
+
+// spell 147280 - Time-Lost Wisdom
+class spell_time_lost_wisdom : public SpellScriptLoader
+{
+    public:
+        spell_time_lost_wisdom() : SpellScriptLoader("spell_time_lost_wisdom") { }
+
+        class spell_time_lost_wisdom_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_time_lost_wisdom_SpellScript);
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    switch (urand(0, 4))
+                    {
+                        case 0: target->CastSpell(target, 147281, true); break;
+                        case 1: target->CastSpell(target, 147282, true); break;
+                        case 2: target->CastSpell(target, 147283, true); break;
+                        case 3: target->CastSpell(target, 147284, true); break;
+                        case 4: target->CastSpell(target, 147285, true); break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_time_lost_wisdom_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_time_lost_wisdom_SpellScript();
+        }
+};
+
 void AddSC_generic_spell_scripts()
 {
+    new spell_time_lost_wisdom();
     new spell_gen_absorb0_hitlimit1();
     new spell_gen_aura_of_anger();
     new spell_gen_av_drekthar_presence();
@@ -4391,4 +4482,6 @@ void AddSC_generic_spell_scripts()
     new spell_arena_shadow_sight();
     new spell_gen_reconfigured_remote_shock();
     new spell_gen_kukurus_cache_key_opening();
+    new spell_gen_pvp_opening_trigger();
+    new spell_gen_pvp_opening();
 }

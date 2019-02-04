@@ -180,7 +180,7 @@ class boss_yan_zhu_the_uncasked : public CreatureScript
             }
 
             void EnterCombat(Unit* /*who*/)
-			{
+            {
                 if (m_Instance)
                 {
                     m_Instance->SetBossState(DATA_YANZHU_THE_UNCASKED_EVENT, IN_PROGRESS);
@@ -273,7 +273,7 @@ class boss_yan_zhu_the_uncasked : public CreatureScript
                 summons.Summon(summon);
                 summon->setActive(true);
 
-		        if (me->isInCombat())
+                if (me->isInCombat())
                     summon->SetInCombatWithZone();
 
                 if (summon->GetEntry() == NPC_FIZZY_BUBBLE)

@@ -119,7 +119,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         // Event spells
         case SPELLFAMILY_UNK1:
             return DIMINISHING_NONE;
-        case SPELLFAMILY_UNK6: // Special abitilies
+        case SPELLFAMILY_WARLOCK_PET: // Special abitilies
         {
             switch (spellproto->Id)
             {
@@ -812,7 +812,7 @@ void SpellMgr::SetSpellDifficultyId(uint32 spellId, uint32 id)
 
 uint32 SpellMgr::GetSpellIdForDifficulty(uint32 spellId, Unit const* caster) const
 {
-    // Dbc supprimée au passage a MoP
+    // Dbc supprimÃ©e au passage a MoP
     return spellId;
     /*if (!GetSpellInfo(spellId))
     return spellId;
@@ -3519,6 +3519,12 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
+                case 121164: // PURPLE
+                case 121175: // ORANGE
+                case 121176: // GREEN
+                case 121177: // YELLOW
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_KT_ORB;
+                    break;
                 case 144317:
                     spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
                     break;
@@ -4666,6 +4672,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
                     spellInfo->Effects[0].TriggerSpell = 129476;
+                    break;
+                case 19483:// Immolation (infernal/abyssal)
+                    spellInfo->Effects[0].TriggerSpell = 0;
                     break;
                 case 1949:// Hellfire
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
@@ -6492,8 +6501,8 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_0].TargetA = TARGET_UNIT_TARGET_ANY;
                     break;
                 case 34709: // Shadow Sight
-					spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
-					break;
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
+                    break;
                 // Atramedes
                 case 77611: // Resonating Clash interrupt
                     spellInfo->Effects[EFFECT_0].SetRadiusIndex(28);

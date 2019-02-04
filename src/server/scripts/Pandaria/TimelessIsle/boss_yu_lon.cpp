@@ -111,13 +111,7 @@ class boss_yu_lon_celestial : public CreatureScript
 
                 for (auto itr : _wallList)
                     itr->AI()->DoAction(WALL_ACTION_RETURN);
-
-                if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }
-
+                    
                 summons.DespawnAll();
                 me->SetWalk(true);
                 me->setActive(true);
@@ -149,11 +143,10 @@ class boss_yu_lon_celestial : public CreatureScript
                                 if (unit->ToPlayer())
                                     unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
 
-                    dmg = 0;
+                    dmg = 0;                  
                     Talk(SAY_DEATH);
                     
-                    me->setFaction(FACTION_FRIENDLY);
-                   
+                    me->setFaction(35);      
                     me->StopMoving();
                     me->RemoveAllAuras();
                     me->GetMotionMaster()->Clear();
@@ -170,7 +163,6 @@ class boss_yu_lon_celestial : public CreatureScript
                     death = true;
                 }
             }
-
             void MovementInform(uint32 type, uint32 point)
             {
                 if (type != POINT_MOTION_TYPE)
@@ -178,9 +170,8 @@ class boss_yu_lon_celestial : public CreatureScript
 
                 if (point == 1)
                 {
-                    events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
+                    events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO, 15000);
                     me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->setFaction(FACTION_HOSTILE_NEUTRAL);
                     me->GetCreatureListWithEntryInGrid(_wallList, MOB_JADEFIRE_WALL, 250.0f);
                     me->SetHomePosition(_timelessIsleMiddle);
                 }
@@ -264,12 +255,12 @@ class boss_yu_lon_celestial : public CreatureScript
                         case EVENT_TIMER_SHAO_DO_INTRO:
                         {
                             Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, CELESTIAL_COURT_BOSS_INTRO_TIMER_2);
+                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, 15000);
                             break;
                         }
                         case EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE:
                         {
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->setFaction(190);
                             me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                             break;
                         }
@@ -309,7 +300,7 @@ class boss_yu_lon_celestial : public CreatureScript
                         case EVENT_TIMER_SHAO_DO_OUTRO:
                         {
                             if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                shao->AI()->Talk(EMPEROR_TALK_OUTRO_CHIJI);
+                                shao->AI()->Talk(EMPEROR_TALK_OUTRO_YULON);
                             break;
                         }
                         case EVENT_TIMER_DEATH:
@@ -319,14 +310,12 @@ class boss_yu_lon_celestial : public CreatureScript
                                 if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
                                     shao->AI()->DoAction(ACTION_XUEN);
 
-								Movement::MoveSplineInit init(*me);
-								Position home = me->GetHomePosition();
-								init.MoveTo(float(-746.665405), float(-5083.675781), float(-6.227572));
-								init.SetWalk(true);
-								init.SetFacing(float(0.952623));
-								init.Launch();
-
-                                //me->DisappearAndDie();
+                                Movement::MoveSplineInit init(*me);
+                                Position home = me->GetHomePosition();
+                                init.MoveTo(float(-746.665405), float(-5083.675781), float(-6.227572));
+                                init.SetWalk(true);
+                                init.SetFacing(float(0.952623));
+                                init.Launch();
                                 death = false;
                             }
                             break;

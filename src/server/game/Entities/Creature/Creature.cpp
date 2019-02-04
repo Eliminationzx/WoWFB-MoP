@@ -260,6 +260,10 @@ void Creature::RemoveCorpse(bool setSpawnTime)
     if (setSpawnTime)
         m_respawnTime = time(NULL) + respawnDelay;
 
+    // if corpse was removed during falling, the falling will continue and override relocation to respawn position
+    if (IsFalling())
+        StopMoving();
+
     float x, y, z, o;
     GetRespawnPosition(x, y, z, &o);
     SetHomePosition(x, y, z, o);
@@ -348,8 +352,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 /*team*/, const CreatureData* data
 
     SetName(normalInfo->Name);                              // at normal entry always
 
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH, minfo->combat_reach);
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, (isPet() ? 1.0f : minfo->bounding_radius) * GetObjectScale());
+    SetFloatValue(UNIT_FIELD_COMBATREACH, (isPet() ? DEFAULT_COMBAT_REACH : minfo->combat_reach) * GetObjectScale());
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
     SetFloatValue(UNIT_MOD_CAST_HASTE, 1.0f);

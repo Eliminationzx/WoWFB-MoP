@@ -43,7 +43,7 @@ Location MoveSpline::ComputePosition() const
         ;// MoveSplineFlag::Animation disables falling or parabolic movement
     else if (splineflags.parabolic)
         computeParabolicElevation(c.z);
-    else if (splineflags.falling)
+    else if (isFalling())
         computeFallElevation(c.z);
 
     if (splineflags.done && splineflags.isFacing())
@@ -140,7 +140,7 @@ void MoveSpline::init_spline(const MoveSplineInitArgs& args)
     }
 
     // init spline timestamps
-    if (splineflags.falling)
+    if (isFalling())
     {
         FallInitializer init(spline.getPoint(spline.first()).z);
         spline.initLengths(init);

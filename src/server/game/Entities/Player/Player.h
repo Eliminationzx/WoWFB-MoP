@@ -320,6 +320,7 @@ struct PlayerInfo
     uint16 displayId_f;
     PlayerCreateInfoItems item;
     PlayerCreateInfoSpells spell;
+    PlayerCreateInfoSpells castSpells;
     PlayerCreateInfoActions action;
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
@@ -3413,6 +3414,7 @@ class Player : public Unit, public GridObject<Player>
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
         uint32 m_regenTimerCount;
+        uint32 m_foodEmoteTimerCount;
         uint32 m_holyPowerRegenTimerCount;
         uint32 m_chiPowerRegenTimerCount;
         uint32 m_burningEmbersRegenTimerCount;
