@@ -10019,7 +10019,7 @@ void Spell::OnSpellLaunch()
 {
     // Spell generic pvp opening
     if (m_spellInfo->Id == 21651)
-        m_caster->CastSpell(unitTarget, 24390, false);
+        m_caster->CastSpell(m_caster, 24390, false);
 }
 
 // Global cooldowns management
