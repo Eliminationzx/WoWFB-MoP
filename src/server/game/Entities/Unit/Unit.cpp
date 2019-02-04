@@ -4855,6 +4855,23 @@ void Unit::RemoveFlagsAuras()
     }
 }
 
+void Unit::RemoveAurasWithPreventionType(uint32 preventionType, uint32 except)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (!except || aura->GetId() != except)
+        {
+            if (aura->GetSpellInfo()->PreventionType == preventionType)
+            {
+                RemoveAura(iter);
+                continue;
+            }
+        }
+        ++iter;
+    }
+}
+
 void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID)
 {
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
@@ -5010,15 +5027,15 @@ void Unit::RemoveNonPassivesAuras()
         {
             switch (base->GetId())
             {
-            case 110310:
-            case 121164:
-            case 121175:
-            case 121176:
-            case 121177:
-            {
-                ++aurIter;
-                continue;
-            }
+                case 110310:
+                case 121164:
+                case 121175:
+                case 121176:
+                case 121177:
+                {
+                    ++aurIter;
+                    continue;
+                }
             }
             RemoveOwnedAura(aurIter);
         }
@@ -5421,12 +5438,12 @@ bool Unit::HasNegativeAuraWithAttribute(uint32 flag, uint64 guid)
     return false;
 }
 
-bool Unit::HasAuraWithAttribute(uint32 flag, uint64 guid)
+bool Unit::HasAuraWithAttributeCu(uint32 flag, uint64 guid)
 {
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
     {
         Aura const* aura = iter->second->GetBase();
-        if (aura->GetSpellInfo()->Attributes & flag && (!guid || aura->GetCasterGUID() == guid))
+        if (aura->GetSpellInfo()->AttributesCu & flag && (!guid || aura->GetCasterGUID() == guid))
             return true;
     }
     return false;
@@ -21871,7 +21888,7 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[7]);
-    SendMessageToSet(&data, false);
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SendPlaySpellVisual(uint32 id, Unit* target, float travelSpeed, bool thisAsPos /*= false*/, bool speedAsTime /*= false*/)
@@ -23295,7 +23312,7 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
         return;
 
     // Battleground KT check orb state
-    if (HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+    if (HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
         return;
 
     if (m_vehicle)

@@ -2829,7 +2829,7 @@ class playerScript_mapshift_krasarang : public PlayerScript
     public:
         playerScript_mapshift_krasarang() : PlayerScript("playerScript_mapshift_krasarang") { }
 
-		void OnUpdateZone(Player* p_Player, uint32 p_NewZoneId, uint32 p_OldZoneId, uint32 p_NewAreaId, uint32 p_OldAreaId) override
+        void OnUpdateZone(Player* p_Player, uint32 p_NewZoneId, uint32 p_OldZoneId, uint32 p_NewAreaId, uint32 p_OldAreaId) override
         {
             if (p_Player && p_NewZoneId == 6134) ///< Krasarang Wilds
             {
@@ -2893,34 +2893,34 @@ class playerScript_enter_chi_ji_temple : public PlayerScript
     public:
         playerScript_enter_chi_ji_temple() : PlayerScript("playerScript_enter_chi_ji_temple") { }
 
-		/// Save Phasemask and GUID of player entering the area, remove it when leaving
-		std::map<uint64, uint32> m_PlayerGUIDs;
+        /// Save Phasemask and GUID of player entering the area, remove it when leaving
+        std::map<uint64, uint32> m_PlayerGUIDs;
 
-		void OnUpdateZone(Player* p_Player, uint32 p_NewZoneId, uint32 p_OldZoneId, uint32 p_NewAreaId, uint32 p_OldAreaId) override
+        void OnUpdateZone(Player* p_Player, uint32 p_NewZoneId, uint32 p_OldZoneId, uint32 p_NewAreaId, uint32 p_OldAreaId) override
         {
             /// Temple of Niuzao
             if (p_NewAreaId == 6048)
             {
-				m_PlayerGUIDs.insert(std::make_pair(p_Player->GetGUID(), p_Player->GetPhaseMask()));
+                m_PlayerGUIDs.insert(std::make_pair(p_Player->GetGUID(), p_Player->GetPhaseMask()));
 
-				/// Celestial Blessings
+                /// Celestial Blessings
                 if (p_Player->GetQuestStatus(32805) == QUEST_STATUS_INCOMPLETE)
                     p_Player->SetPhaseMask(2, true);
             }
-			else if (p_OldAreaId == 6048)
-			{
-				for (auto l_Itr = m_PlayerGUIDs.begin(); l_Itr != m_PlayerGUIDs.end(); l_Itr++)
-				{
-					if (l_Itr->first == p_Player->GetGUID())
-					{
-						p_Player->SetPhaseMask(l_Itr->second, true);
-						l_Itr = m_PlayerGUIDs.erase(l_Itr);
+            else if (p_OldAreaId == 6048)
+            {
+                for (auto l_Itr = m_PlayerGUIDs.begin(); l_Itr != m_PlayerGUIDs.end(); l_Itr++)
+                {
+                    if (l_Itr->first == p_Player->GetGUID())
+                    {
+                        p_Player->SetPhaseMask(l_Itr->second, true);
+                        l_Itr = m_PlayerGUIDs.erase(l_Itr);
 
-						if (l_Itr == m_PlayerGUIDs.end())
-							break;
-					}
-				}
-			}
+                        if (l_Itr == m_PlayerGUIDs.end())
+                            break;
+                    }
+                }
+            }
         }
 };
 
