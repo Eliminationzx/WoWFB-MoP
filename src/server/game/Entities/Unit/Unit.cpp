@@ -5027,15 +5027,15 @@ void Unit::RemoveNonPassivesAuras()
         {
             switch (base->GetId())
             {
-            case 110310:
-            case 121164:
-            case 121175:
-            case 121176:
-            case 121177:
-            {
-                ++aurIter;
-                continue;
-            }
+                case 110310:
+                case 121164:
+                case 121175:
+                case 121176:
+                case 121177:
+                {
+                    ++aurIter;
+                    continue;
+                }
             }
             RemoveOwnedAura(aurIter);
         }

@@ -3519,10 +3519,10 @@ void SpellMgr::LoadSpellCustomAttr()
 
             switch (spellInfo->Id)
             {
-                case 121217: // Yellow Ball Aura
-                case 121219: // Purple Ball Aura
-                case 121220: // Green Ball Aura
-                case 121221: // Orange Ball Aura
+                case 121164: // PURPLE
+                case 121175: // ORANGE
+                case 121176: // GREEN
+                case 121177: // YELLOW
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_KT_ORB;
                     break;
                 case 144317:
