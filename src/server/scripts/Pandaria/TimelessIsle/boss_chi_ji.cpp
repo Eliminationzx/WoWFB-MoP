@@ -76,11 +76,11 @@ class boss_chi_ji : public CreatureScript
                 events.Reset();
                 _Reset();
 
-                if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
+                /*if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
                 {
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                     me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }
+                }*/
 
                 summons.DespawnAll();
                 me->SetWalk(true);
