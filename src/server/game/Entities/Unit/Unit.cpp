@@ -21871,7 +21871,7 @@ void Unit::SendPlaySpellVisualKit(uint32 id, uint32 unkParam)
     data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[7]);
-    SendMessageToSet(&data, false);
+    SendMessageToSet(&data, true);
 }
 
 void Unit::SendPlaySpellVisual(uint32 id, Unit* target, float travelSpeed, bool thisAsPos /*= false*/, bool speedAsTime /*= false*/)
