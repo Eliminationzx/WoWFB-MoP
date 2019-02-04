@@ -3546,6 +3546,9 @@ void AuraEffect::HandleAuraModPacify(AuraApplication const* aurApp, uint8 mode, 
 
     if (apply)
     {
+        // Remove auras with prevention type pacify
+        target->RemoveAurasWithPreventionType(SPELL_PREVENTION_TYPE_PACIFY, GetId());
+
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
         target->AttackStop();
     }

@@ -4855,6 +4855,23 @@ void Unit::RemoveFlagsAuras()
     }
 }
 
+void Unit::RemoveAurasWithPreventionType(uint32 preventionType, uint32 except)
+{
+    for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
+    {
+        Aura const* aura = iter->second->GetBase();
+        if (!except || aura->GetId() != except)
+        {
+            if (aura->GetSpellInfo()->PreventionType == preventionType)
+            {
+                RemoveAura(iter);
+                continue;
+            }
+        }
+        ++iter;
+    }
+}
+
 void Unit::RemoveAurasWithFamily(SpellFamilyNames family, uint32 familyFlag1, uint32 familyFlag2, uint32 familyFlag3, uint64 casterGUID)
 {
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end();)
