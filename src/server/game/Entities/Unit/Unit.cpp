@@ -23295,7 +23295,7 @@ void Unit::_EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* a
         return;
 
     // Battleground KT check orb state
-    if (HasAuraWithAttribute(SPELL_ATTR0_CU_KT_ORB))
+    if (HasAuraWithAttributeCu(SPELL_ATTR0_CU_KT_ORB))
         return;
 
     if (m_vehicle)
