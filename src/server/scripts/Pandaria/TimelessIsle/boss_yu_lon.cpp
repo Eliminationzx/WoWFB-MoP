@@ -112,13 +112,8 @@ class boss_yu_lon_celestial : public CreatureScript
                 for (auto itr : _wallList)
                     itr->AI()->DoAction(WALL_ACTION_RETURN);
 
-                if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }
-
                 summons.DespawnAll();
+                me->setFaction(35);
                 me->SetWalk(true);
                 me->setActive(true);
             }
@@ -152,7 +147,7 @@ class boss_yu_lon_celestial : public CreatureScript
                     dmg = 0;
                     Talk(SAY_DEATH);
                     
-                    me->setFaction(FACTION_FRIENDLY);
+                    me->setFaction(35);
                    
                     me->StopMoving();
                     me->RemoveAllAuras();
@@ -264,12 +259,13 @@ class boss_yu_lon_celestial : public CreatureScript
                         case EVENT_TIMER_SHAO_DO_INTRO:
                         {
                             Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, CELESTIAL_COURT_BOSS_INTRO_TIMER_2);
+                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, 3000);
                             break;
                         }
                         case EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE:
                         {
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->setFaction(190);
                             me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                             break;
                         }

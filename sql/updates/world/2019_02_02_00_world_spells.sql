@@ -41,3 +41,8 @@ INSERT INTO `spell_areatrigger` VALUES ('62618', '1', '8', '8', 'spell_area_prie
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_warl_pet_immolation_aura';
 INSERT INTO spell_script_names VALUE 
 (19483, 'spell_warl_pet_immolation_aura');
+
+-- Fix spell 147280
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_time_lost_wisdom';
+INSERT INTO spell_script_names VALUE 
+(24390, 'spell_time_lost_wisdom');
