@@ -1186,26 +1186,14 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
     SpellTargetObjectTypes objectType = targetType.GetObjectType();
     SpellTargetCheckTypes selectionType = targetType.GetCheckType();
     ConditionContainer* condList = m_spellInfo->Effects[effIndex].ImplicitTargetConditions;
-    float coneAngle = ((m_caster->GetTypeId() == TYPEID_PLAYER) ? M_PI * (2.0f / 3.0f) : M_PI / 2.0f);
+    float coneAngle = static_cast<float>(4.0f * M_PI / 5.0f);
+    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster);
 
-    if (m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_110 ||
-        m_spellInfo->Effects[effIndex].TargetA.GetTarget() == TARGET_UNIT_CONE_ENEMY_129)
-        coneAngle = M_PI/6;
+    // Workaround for some spells that don't have RadiusEntry set in dbc (but SpellRange instead)
+    if (G3D::fuzzyEq(radius, 0.f))
+        radius = m_spellInfo->GetMaxRange(m_spellInfo->IsPositiveEffect(effIndex), m_caster, this);
 
-    switch (m_spellInfo->Id)
-    {
-        case 118094:
-            coneAngle = M_PI/2;
-            break;
-        case 118105:
-            coneAngle = M_PI/4;
-            break;
-        case 118106:
-            coneAngle = M_PI/6;
-            break;
-    }
-
-    float radius = m_spellInfo->Effects[effIndex].CalcRadius(m_caster) * m_spellValue->RadiusMod;
+    radius *= m_spellValue->RadiusMod;
 
     if (uint32 containerTypeMask = GetSearcherTypeMask(objectType, condList))
     {
@@ -10349,11 +10337,8 @@ bool WorldObjectSpellConeTargetCheck::operator()(WorldObject* target)
     }
     else
     {
-        if (!_caster->isInFront(target, _coneAngle))
-        {
-            if (_caster->GetTypeId() != TYPEID_PLAYER || _caster->GetDistance2d(target) > 3.0f || !_caster->isInFront(target, M_PI))
-                return false;
-        }
+        if (!_caster->isInFront(target, _coneAngle) && !_caster->IsInDist(target, _caster->GetObjectSize()))
+            return false;
     }
     return WorldObjectSpellAreaTargetCheck::operator ()(target);
 }
