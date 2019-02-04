@@ -29,6 +29,6 @@ INSERT INTO spell_script_names VALUE
 (24390, 'spell_gen_pvp_opening'),
 (24391, 'spell_gen_pvp_opening_trigger');
 
--- fix spell proc 146183
+-- Fix spell proc 146183
 DELETE FROM `spell_proc_event` WHERE `entry` IN (146183);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `SpellFamilyMask3`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES ('146183', '0', '0', '0', '0', '0', '0', '65876', '0', '0', '0', '7');
