@@ -3414,7 +3414,7 @@ class Player : public Unit, public GridObject<Player>
         // Gamemaster whisper whitelist
         WhisperListContainer WhisperList;
         uint32 m_regenTimerCount;
-		uint32 m_regenTimerCount;
+        uint32 m_foodEmoteTimerCount;
         uint32 m_holyPowerRegenTimerCount;
         uint32 m_chiPowerRegenTimerCount;
         uint32 m_burningEmbersRegenTimerCount;
