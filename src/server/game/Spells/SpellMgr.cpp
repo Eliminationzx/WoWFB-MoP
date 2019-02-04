@@ -4069,6 +4069,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     break;
                 // SPELLS
+                case 20153: // Immolation
+                    spellInfo->OverrideSpellList.push_back(143323);
+                    break;
                 case 688:   // Summon Imp
                     spellInfo->OverrideSpellList.push_back(112866); // Summon Fel Imp
                     break;
