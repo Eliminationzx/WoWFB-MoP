@@ -76,12 +76,7 @@ class boss_chi_ji : public CreatureScript
                 events.Reset();
                 _Reset();
 
-                /*if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }*/
-
+                me->setFaction(35);
                 summons.DespawnAll();
                 me->SetWalk(true);
                 me->setActive(true);
@@ -151,7 +146,7 @@ class boss_chi_ji : public CreatureScript
                     dmg = 0;
                     Talk(SAY_DEATH);
                     
-                    me->setFaction(FACTION_FRIENDLY);
+                    me->setFaction(35);
                    
                     me->StopMoving();
                     me->RemoveAllAuras();
@@ -231,7 +226,8 @@ class boss_chi_ji : public CreatureScript
                     }
                     case EVENT_SHAO_DO_INTRO_ATTACKABLE:
                     {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        me->setFaction(190);
                         me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                         break;
                     }
