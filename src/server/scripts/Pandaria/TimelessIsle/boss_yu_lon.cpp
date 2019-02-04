@@ -165,6 +165,16 @@ class boss_yu_lon_celestial : public CreatureScript
                     death = true;
                 }
             }
+            
+            void EnterEvadeMode()
+            {
+                me->SetReactState(REACT_PASSIVE);
+                events.Reset();
+                me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+                events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, 15000);
+
+                ScriptedAI::EnterEvadeMode();
+            }
 
             void MovementInform(uint32 type, uint32 point)
             {
