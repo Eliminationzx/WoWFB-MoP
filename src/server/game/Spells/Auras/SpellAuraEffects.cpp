@@ -7513,10 +7513,10 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                 {
                     case 19483: // Immolation
                     {
-                        if (caster->GetTypeId() != TYPEID_UNIT)
+                        if (target->GetTypeId() != TYPEID_UNIT)
                             break;
 
-                        triggerSpellId = caster->GetEntry() == 89 ? 20153 : 143323;
+                        triggerSpellId = target->GetEntry() == 89 ? 20153 : 143323;
                         break;
                     }
                 }
