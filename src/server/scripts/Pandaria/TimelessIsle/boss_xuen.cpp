@@ -93,14 +93,9 @@ class boss_xuen : public CreatureScript
             void Reset()
             {
                 events.Reset();
-                _Reset();
+                _Reset();               
 
-                if (me->getFaction() == FACTION_HOSTILE_NEUTRAL)
-                {
-                    me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                }
-
+                me->setFaction(35);
                 me->SetWalk(true);
                 me->setActive(true);
             }
@@ -131,7 +126,7 @@ class boss_xuen : public CreatureScript
                     dmg = 0;
                     Talk(SAY_DEATH);
                     
-                    me->setFaction(FACTION_FRIENDLY);
+                    me->setFaction(35);
                    
                     me->StopMoving();
                     me->RemoveAllAuras();
@@ -207,12 +202,13 @@ class boss_xuen : public CreatureScript
                         case EVENT_SHAO_DO_INTRO:
                         {
                             Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, CELESTIAL_COURT_BOSS_INTRO_TIMER_2);
+                            events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 3000);
                             break;
                         }
                         case EVENT_SHAO_DO_INTRO_ATTACKABLE:
                         {
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                            me->setFaction(190);
                             me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                             break;
                         }
@@ -269,10 +265,10 @@ class boss_xuen : public CreatureScript
 
 								Movement::MoveSplineInit init(*me);
 								Position home = me->GetHomePosition();
-								init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+								init.MoveTo(float(-747.933594), float(-4947.194824), float(-6.276601));
 								init.SetWalk(true);
+                                init.SetFacing(float(5.700478));
 								init.Launch();
-								me->SetOrientation(home.GetOrientation());
 
                                 //me->DisappearAndDie();
                                 death = false;

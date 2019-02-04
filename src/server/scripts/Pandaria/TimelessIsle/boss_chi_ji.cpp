@@ -280,12 +280,10 @@ class boss_chi_ji : public CreatureScript
 
                             Movement::MoveSplineInit init(*me);
                             Position home = me->GetHomePosition();
-                            init.MoveTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ());
+                            init.MoveTo(float(-553.893250), float(-4945.380371), float(-6.277442));
                             init.SetWalk(true);
+                            init.SetFacing(float(3.803745));
                             init.Launch();
-                            me->SetOrientation(home.GetOrientation());
-
-                            //me->DisappearAndDie();
                             death = false;
                         }
                         break;

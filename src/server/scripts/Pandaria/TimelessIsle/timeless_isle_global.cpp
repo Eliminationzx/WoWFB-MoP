@@ -284,11 +284,11 @@ public:
         {
             me->setActive(true);
             events.Reset();
-            _yulon = true;
+            _yulon = false;
             _xuen = false;
             _chiji = false;
             _niuzao = false;
-            events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 5000);
+            events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 75000);
         }
 
         void DoAction(const int32 action)
@@ -309,7 +309,7 @@ public:
                     break;
             }
 
-            events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 8500);
+            events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 25000);
         }
 
         void UpdateAI(const uint32 diff)
@@ -369,7 +369,7 @@ public:
                         _niuzao = false;
                     }
 
-                    events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 5000);
+                    events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 75000);
                     break;
                 }
                 default:
