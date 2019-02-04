@@ -164,6 +164,7 @@ class boss_yu_lon_celestial : public CreatureScript
                     events.ScheduleEvent(EVENT_TIMER_DEATH, 13000);
                     death = true;
                 }
+                EnterEvadeMode();
             }
             
             void EnterEvadeMode()
