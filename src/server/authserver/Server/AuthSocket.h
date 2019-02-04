@@ -23,16 +23,6 @@
 #include "BigNumber.h"
 #include "RealmSocket.h"
 
-enum eStatus
-{
-    STATUS_CHALLENGE,
-    STATUS_LOGON_PROOF,
-    STATUS_RECON_PROOF,
-    STATUS_PATCH,      // unused in JadeCore
-    STATUS_AUTHED,
-    STATUS_CLOSED
-};
-
 // Handle login commands
 class AuthSocket: public RealmSocket::Session
 {
@@ -63,6 +53,16 @@ public:
     ACE_Thread_Mutex patcherLock;
 
 private:
+    enum eStatus
+    {
+        STATUS_CHALLENGE,
+        STATUS_LOGON_PROOF,
+        STATUS_RECON_PROOF,
+        STATUS_PATCH,      // unused in JadeCore
+        STATUS_AUTHED,
+        STATUS_CLOSED
+    };
+
     RealmSocket& socket_;
     RealmSocket& socket(void) { return socket_; }
 

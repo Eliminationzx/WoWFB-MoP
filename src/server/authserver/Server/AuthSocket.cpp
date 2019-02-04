@@ -177,18 +177,6 @@ private:
     Patches _patches;
 };
 
-const AuthHandler table[] =
-{
-    { AUTH_LOGON_CHALLENGE,     STATUS_CHALLENGE,   &AuthSocket::_HandleLogonChallenge    },
-    { AUTH_LOGON_PROOF,         STATUS_LOGON_PROOF, &AuthSocket::_HandleLogonProof        },
-    { AUTH_RECONNECT_CHALLENGE, STATUS_CHALLENGE,   &AuthSocket::_HandleReconnectChallenge},
-    { AUTH_RECONNECT_PROOF,     STATUS_RECON_PROOF, &AuthSocket::_HandleReconnectProof    },
-    { REALM_LIST,               STATUS_AUTHED,      &AuthSocket::_HandleRealmList         },
-    { XFER_ACCEPT,              STATUS_PATCH,       &AuthSocket::_HandleXferAccept        },
-    { XFER_RESUME,              STATUS_PATCH,       &AuthSocket::_HandleXferResume        },
-    { XFER_CANCEL,              STATUS_PATCH,       &AuthSocket::_HandleXferCancel        }
-};
-
 #define AUTH_TOTAL_COMMANDS 8
 
 // Holds the MD5 hash of client patches present on the server
@@ -219,6 +207,18 @@ void AuthSocket::OnClose(void)
 // Read the packet from the client
 void AuthSocket::OnRead()
 {
+    const AuthHandler table[] =
+    {
+        { AUTH_LOGON_CHALLENGE,     STATUS_CHALLENGE,   &AuthSocket::_HandleLogonChallenge },
+        { AUTH_LOGON_PROOF,         STATUS_LOGON_PROOF, &AuthSocket::_HandleLogonProof },
+        { AUTH_RECONNECT_CHALLENGE, STATUS_CHALLENGE,   &AuthSocket::_HandleReconnectChallenge },
+        { AUTH_RECONNECT_PROOF,     STATUS_RECON_PROOF, &AuthSocket::_HandleReconnectProof },
+        { REALM_LIST,               STATUS_AUTHED,      &AuthSocket::_HandleRealmList },
+        { XFER_ACCEPT,              STATUS_PATCH,       &AuthSocket::_HandleXferAccept },
+        { XFER_RESUME,              STATUS_PATCH,       &AuthSocket::_HandleXferResume },
+        { XFER_CANCEL,              STATUS_PATCH,       &AuthSocket::_HandleXferCancel }
+    };
+
     #define MAX_AUTH_LOGON_CHALLENGES_IN_A_ROW 3
     uint32 challengesInARow = 0;
     uint8 _cmd;
