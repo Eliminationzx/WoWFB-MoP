@@ -32,3 +32,7 @@ INSERT INTO spell_script_names VALUE
 -- Fix spell proc 146183
 DELETE FROM `spell_proc_event` WHERE `entry` IN (146183);
 INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `SpellFamilyMask3`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES ('146183', '0', '0', '0', '0', '0', '0', '65876', '0', '0', '0', '7');
+
+-- Power Word: Barrier
+DELETE FROM spell_areatrigger WHERE ScriptName = 'spell_area_priest_power_word_barrier';
+INSERT INTO `spell_areatrigger` VALUES ('62618', '1', '8', '8', 'spell_area_priest_power_word_barrier', 'Power Word: Barrier');
