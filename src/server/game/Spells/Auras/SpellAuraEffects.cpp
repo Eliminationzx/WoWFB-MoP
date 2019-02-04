@@ -5229,7 +5229,6 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
     {
         if (GetMiscValueB() & 1 << i || !GetMiscValueB()) // 0 is also used for all stats
         {
-            // test fix for health
             if (i == STAT_STAMINA)
             {
                 float oldModifier = target->GetModifierValue(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT);

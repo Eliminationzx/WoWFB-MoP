@@ -5426,7 +5426,7 @@ bool Unit::HasAuraWithAttribute(uint32 flag, uint64 guid)
     for (AuraApplicationMap::iterator iter = m_appliedAuras.begin(); iter != m_appliedAuras.end(); ++iter)
     {
         Aura const* aura = iter->second->GetBase();
-        if (aura->GetSpellInfo()->Attributes & flag && (!guid || aura->GetCasterGUID() == guid))
+        if (aura->GetSpellInfo()->AttributesCu & flag && (!guid || aura->GetCasterGUID() == guid))
             return true;
     }
     return false;
