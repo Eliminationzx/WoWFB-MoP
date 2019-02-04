@@ -221,12 +221,12 @@ class boss_chi_ji : public CreatureScript
                     case EVENT_SHAO_DO_INTRO:
                     {
                         Talk(SAY_INTRO);
-                        events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, CELESTIAL_COURT_BOSS_INTRO_TIMER_2);
+                        events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 3000);
                         break;
                     }
                     case EVENT_SHAO_DO_INTRO_ATTACKABLE:
                     {
-                        //me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         me->setFaction(190);
                         me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                         break;
