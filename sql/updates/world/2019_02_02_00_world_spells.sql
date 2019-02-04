@@ -28,3 +28,7 @@ DELETE FROM spell_script_names WHERE ScriptName = 'spell_gen_pvp_opening_trigger
 INSERT INTO spell_script_names VALUE 
 (24390, 'spell_gen_pvp_opening'),
 (24391, 'spell_gen_pvp_opening_trigger');
+
+-- Power Word: Barrier
+DELETE FROM spell_areatrigger WHERE ScriptName = 'spell_area_priest_power_word_barrier';
+INSERT INTO `spell_areatrigger` VALUES ('62618', '1', '8', '8', 'spell_area_priest_power_word_barrier', 'Power Word: Barrier');
