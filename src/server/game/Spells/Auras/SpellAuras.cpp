@@ -201,7 +201,9 @@ void AuraApplication::BuildBitsUpdatePacket(ByteBuffer& data, bool remove) const
 
     Aura const* aura = GetBase();
     uint32 flags = _flags;
-    if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
+
+    bool hidenDuration = aura->GetSpellInfo()->HasAttribute(SPELL_ATTR5_HIDE_DURATION) || aura->IsPersistanceArea();
+    if (aura->GetMaxDuration() > 0 && !hidenDuration)
         flags |= AFLAG_DURATION;
 
     uint8 count = 0;
@@ -240,7 +242,9 @@ void AuraApplication::BuildBytesUpdatePacket(ByteBuffer& data, bool remove, uint
 
     Aura const* aura = GetBase();
     uint32 flags = _flags;
-    if (aura->GetMaxDuration() > 0 && !(aura->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_HIDE_DURATION))
+
+    bool hidenDuration = aura->GetSpellInfo()->HasAttribute(SPELL_ATTR5_HIDE_DURATION) || aura->IsPersistanceArea();
+    if (aura->GetMaxDuration() > 0 && !hidenDuration)
         flags |= AFLAG_DURATION;
 
     if (!(flags & AFLAG_CASTER))
@@ -1313,6 +1317,15 @@ bool Aura::HasMoreThanOneEffectForType(AuraType auraType) const
     }
 
     return count > 1;
+}
+
+bool Aura::IsPersistanceArea() const
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (HasEffect(i) && GetSpellInfo()->Effects[i].IsEffect(SPELL_EFFECT_PERSISTENT_AREA_AURA))
+            return true;
+
+    return false;
 }
 
 bool Aura::IsPassive() const
