@@ -119,7 +119,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
         // Event spells
         case SPELLFAMILY_UNK1:
             return DIMINISHING_NONE;
-        case SPELLFAMILY_UNK6: // Special abitilies
+        case SPELLFAMILY_WARLOCK_PET: // Special abitilies
         {
             switch (spellproto->Id)
             {

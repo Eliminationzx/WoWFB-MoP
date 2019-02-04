@@ -7507,6 +7507,21 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
     {
         switch (auraSpellInfo->SpellFamilyName)
         {
+            case SPELLFAMILY_WARLOCK_PET:
+            {
+                switch (auraId)
+                {
+                    case 19483: // Immolation
+                    {
+                        if (caster->GetTypeId() != TYPEID_UNIT)
+                            break;
+
+                        triggerSpellId = caster->GetEntry() == 89 ? 20153 : 143323;
+                        break;
+                    }
+                }
+                break;
+            }
             case SPELLFAMILY_GENERIC:
             {
                 switch (auraId)
