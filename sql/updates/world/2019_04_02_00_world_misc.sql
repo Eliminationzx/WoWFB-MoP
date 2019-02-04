@@ -6,3 +6,8 @@ INSERT INTO `gameobject` VALUES ('527094', '222793', '870', '0', '0', '1', '1', 
 
 -- Immolation for Abyssal and Infernal
 UPDATE creature_template_addon SET auras='19483' WHERE entry IN (89, 58997);
+
+-- Fix npc 59000
+UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_terror_and_doom_guard' WHERE (`entry`='59000');
+UPDATE `creature_template` SET `ScriptName`='npc_terror_and_doom_guard' WHERE (`entry`='11859');
+
