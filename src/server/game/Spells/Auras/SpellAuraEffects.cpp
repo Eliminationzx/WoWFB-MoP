@@ -7168,6 +7168,11 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     caster->CastSpell(target, 148008, true);
                     break;
                 }
+                case 146184: // Wrath
+                {
+                    caster->CastCustomSpell(target, 146202, &m_amount, 0, 0, true, 0, this);
+                    break;
+                }
                 case 110310: // Dampening
                 {
                     if (!caster)
