@@ -193,8 +193,8 @@ class boss_niuzao : public CreatureScript
                 {
                     case 1:
                     {
-                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
-                        me->setFaction(FACTION_HOSTILE_NEUTRAL);
+                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO, 15000);
+                        //me->setFaction(FACTION_HOSTILE_NEUTRAL);
                         me->SetFacingTo(MIDDLE_FACING_ANGLE);
                         me->SetHomePosition(_timelessIsleMiddle);
                         break;
@@ -259,7 +259,7 @@ class boss_niuzao : public CreatureScript
                     case EVENT_NIUZAO_SHAO_DO_INTRO:
                     {
                         Talk(SAY_INTRO);
-                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE, 3000);
+                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE, 15000);
                         break;
                     }
                     case EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE:
@@ -315,7 +315,7 @@ class boss_niuzao : public CreatureScript
                     case EVENT_NIUZAO_SHAO_DO_OUTRO:
                     {
                         if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                            shao->AI()->Talk(EMPEROR_TALK_OUTRO_CHIJI);
+                            shao->AI()->Talk(EMPEROR_TALK_OUTRO_NIUZAO);
                         break;
                     }
                     case EVENT_NIUZAO_DEATH:

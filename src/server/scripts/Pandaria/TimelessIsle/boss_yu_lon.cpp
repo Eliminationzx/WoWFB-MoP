@@ -174,9 +174,9 @@ class boss_yu_lon_celestial : public CreatureScript
 
                 if (point == 1)
                 {
-                    events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
+                    events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO, 15000);
                     me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->setFaction(FACTION_HOSTILE_NEUTRAL);
+                    //me->setFaction(FACTION_HOSTILE_NEUTRAL);
                     me->GetCreatureListWithEntryInGrid(_wallList, MOB_JADEFIRE_WALL, 250.0f);
                     me->SetHomePosition(_timelessIsleMiddle);
                 }
@@ -260,7 +260,7 @@ class boss_yu_lon_celestial : public CreatureScript
                         case EVENT_TIMER_SHAO_DO_INTRO:
                         {
                             Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, 3000);
+                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, 15000);
                             break;
                         }
                         case EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE:
@@ -305,7 +305,7 @@ class boss_yu_lon_celestial : public CreatureScript
                         case EVENT_TIMER_SHAO_DO_OUTRO:
                         {
                             if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                shao->AI()->Talk(EMPEROR_TALK_OUTRO_CHIJI);
+                                shao->AI()->Talk(EMPEROR_TALK_OUTRO_YULON);
                             break;
                         }
                         case EVENT_TIMER_DEATH:

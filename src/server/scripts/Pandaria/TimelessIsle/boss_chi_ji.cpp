@@ -171,9 +171,9 @@ class boss_chi_ji : public CreatureScript
 
                 if (point == 1)
                 {
-                    events.ScheduleEvent(EVENT_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
+                    events.ScheduleEvent(EVENT_SHAO_DO_INTRO, 15000);
                     me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->setFaction(FACTION_HOSTILE_NEUTRAL);
+                    //me->setFaction(FACTION_HOSTILE_NEUTRAL);
                     me->SetHomePosition(_timelessIsleMiddle);
                 }
             }
@@ -220,7 +220,7 @@ class boss_chi_ji : public CreatureScript
                     case EVENT_SHAO_DO_INTRO:
                     {
                         Talk(SAY_INTRO);
-                        events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 3000);
+                        events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 15000);
                         break;
                     }
                     case EVENT_SHAO_DO_INTRO_ATTACKABLE:
