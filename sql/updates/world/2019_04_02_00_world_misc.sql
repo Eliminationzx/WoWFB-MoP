@@ -11,3 +11,6 @@ UPDATE creature_template_addon SET auras='19483' WHERE entry IN (89, 58997);
 UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_terror_and_doom_guard' WHERE (`entry`='59000');
 UPDATE `creature_template` SET `ScriptName`='npc_terror_and_doom_guard' WHERE (`entry`='11859');
 
+-- delet dublicat
+DELETE FROM `gameobject` WHERE `guid` in (527670, 527940, 528077, 527758, 527845, 527954, 528060, 527761, 527866, 527932, 528072, 528043);
+
