@@ -3667,6 +3667,8 @@ bool Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         return false;
     }
     LoadScripts();
+    
+    OnSpellLaunch();
 
     if ((m_triggeredByAuraSpell && m_triggeredByAuraSpell->Id == 101056) || IsDarkSimulacrum())
         isStolen = true;
@@ -10011,6 +10013,13 @@ void Spell::PrepareTriggersExecutedOnHit()
             m_hitTriggerSpells.push_back(spellTriggerInfo);
         }
     }
+}
+
+void Spell::OnSpellLaunch()
+{
+    // Spell generic pvp opening
+    if (m_spellInfo->Id == 21651)
+        m_caster->CastSpell(nullptr, 24390, false);
 }
 
 // Global cooldowns management
