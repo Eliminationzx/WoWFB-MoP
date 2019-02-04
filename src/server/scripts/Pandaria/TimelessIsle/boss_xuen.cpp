@@ -94,8 +94,7 @@ class boss_xuen : public CreatureScript
             {
                 events.Reset();
                 _Reset();               
-
-                me->setFaction(35);
+                
                 me->SetWalk(true);
                 me->setActive(true);
             }
@@ -207,7 +206,6 @@ class boss_xuen : public CreatureScript
                         }
                         case EVENT_SHAO_DO_INTRO_ATTACKABLE:
                         {
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             me->setFaction(190);
                             me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                             break;

@@ -113,7 +113,6 @@ class boss_yu_lon_celestial : public CreatureScript
                     itr->AI()->DoAction(WALL_ACTION_RETURN);
 
                 summons.DespawnAll();
-                me->setFaction(35);
                 me->SetWalk(true);
                 me->setActive(true);
             }
@@ -145,6 +144,7 @@ class boss_yu_lon_celestial : public CreatureScript
                                     unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
 
                     dmg = 0;
+                   
                     Talk(SAY_DEATH);
                     
                     me->setFaction(35);
@@ -164,18 +164,8 @@ class boss_yu_lon_celestial : public CreatureScript
                     events.ScheduleEvent(EVENT_TIMER_DEATH, 13000);
                     death = true;
                 }
-                EnterEvadeMode();
             }
             
-            void EnterEvadeMode()
-            {
-                events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO, CELESTIAL_COURT_BOSS_INTRO_TIMER_1);
-                me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                me->setFaction(FACTION_HOSTILE_NEUTRAL);
-                me->SetHomePosition(_timelessIsleMiddle);
-
-                ScriptedAI::EnterEvadeMode();
-            }
 
             void MovementInform(uint32 type, uint32 point)
             {
@@ -275,7 +265,6 @@ class boss_yu_lon_celestial : public CreatureScript
                         }
                         case EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE:
                         {
-                            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                             me->setFaction(190);
                             me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                             break;
@@ -333,7 +322,6 @@ class boss_yu_lon_celestial : public CreatureScript
 								init.SetFacing(float(0.952623));
 								init.Launch();
 
-                                //me->DisappearAndDie();
                                 death = false;
                             }
                             break;

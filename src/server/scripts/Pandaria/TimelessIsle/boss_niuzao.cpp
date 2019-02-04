@@ -92,7 +92,6 @@ class boss_niuzao : public CreatureScript
                 me->RemoveAllAuras();
                 summons.DespawnAll();
                 _charges = 0;
-                me->setFaction(35);
                 me->SetWalk(true);
                 me->setActive(true);
             }
@@ -265,7 +264,6 @@ class boss_niuzao : public CreatureScript
                     }
                     case EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE:
                     {
-                        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
                         me->setFaction(190);
                         me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                         break;
