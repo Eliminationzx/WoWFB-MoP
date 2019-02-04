@@ -284,7 +284,7 @@ public:
         {
             me->setActive(true);
             events.Reset();
-            _yulon = false;
+            _yulon = true;
             _xuen = false;
             _chiji = false;
             _niuzao = false;
