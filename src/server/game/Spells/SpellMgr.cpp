@@ -4069,9 +4069,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ENEMY;
                     break;
                 // SPELLS
-                case 20153: // Immolation
-                    spellInfo->OverrideSpellList.push_back(143323);
-                    break;
                 case 688:   // Summon Imp
                     spellInfo->OverrideSpellList.push_back(112866); // Summon Fel Imp
                     break;
@@ -4675,6 +4672,9 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
                     spellInfo->Effects[0].TriggerSpell = 129476;
+                    break;
+                case 19483:// Immolation (infernal/abyssal)
+                    spellInfo->Effects[0].TriggerSpell = 0;
                     break;
                 case 1949:// Hellfire
                     spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
