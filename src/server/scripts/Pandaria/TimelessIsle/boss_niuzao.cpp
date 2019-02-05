@@ -110,6 +110,8 @@ public:
         {
             events.Reset();
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            me->GetMotionMaster()->Clear();
+            me->GetMotionMaster()->MoveIdle();
 
             if (EventProgress)
             {
@@ -169,6 +171,8 @@ public:
                     QuestCredit();
                     me->setFaction(35);
                     me->RemoveAllAuras();
+                    me->GetMotionMaster()->Clear();
+                    me->GetMotionMaster()->MoveIdle();
                     Talk(SAY_NIUZAO_END);
                     if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
                         if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
