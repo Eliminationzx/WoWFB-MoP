@@ -158,7 +158,9 @@ enum WarlockSpells
     WARLOCK_DEMON_AXE_TOSS                  = 89766,
     WARLOCK_BLOODY_FEAR_EFFECT              = 137143,
     WARLOCK_IMMOLATION_AURA_DAMAGE_INFERNAL = 20153,
-    WARLOCK_IMMOLATION_AURA_DAMAGE_ABYSSAL  = 143323
+    WARLOCK_IMMOLATION_AURA_DAMAGE_ABYSSAL  = 143323,
+    WARLOCK_GLYPH_EYE_OF_KILROGG            = 58081,
+    WARLOCK_GLYPH_EYE_OF_KILROGG_TRIGGERED  = 58083
 };
 
 // Demonic Slash - 114175
@@ -4206,6 +4208,127 @@ public:
     }
 };
 
+class spell_warl_eye_of_kilrogg : public SpellScriptLoader
+{
+public:
+    spell_warl_eye_of_kilrogg() : SpellScriptLoader("spell_warl_eye_of_kilrogg") { }
+
+    class spell_warl_eye_of_kilrogg_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_eye_of_kilrogg_AuraScript);
+
+        void HandleAuraApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/) 
+        {
+            if (Player* player = GetTarget()->ToPlayer()) 
+                player->UnsummonPetTemporaryIfAny();
+        }
+
+        void HandleAuraRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/) 
+        {
+            if (Player* player = GetTarget()->ToPlayer()) 
+                player->ResummonPetTemporaryUnSummonedIfAny();
+        }
+
+        void Register() override 
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warl_eye_of_kilrogg_AuraScript::HandleAuraApply, EFFECT_1, SPELL_AURA_MOD_INVISIBILITY_DETECT, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_warl_eye_of_kilrogg_AuraScript::HandleAuraRemove, EFFECT_1, SPELL_AURA_MOD_INVISIBILITY_DETECT, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override 
+    {
+        return new spell_warl_eye_of_kilrogg_AuraScript();
+    }
+};
+
+class spell_warl_eye_of_kilrogg_passive : public SpellScriptLoader
+{
+public:
+    spell_warl_eye_of_kilrogg_passive() : SpellScriptLoader("spell_warl_eye_of_kilrogg_passive") { }
+
+    class spell_warl_eye_of_kilrogg_passive_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_warl_eye_of_kilrogg_passive_AuraScript);
+
+        bool CalculateStealth(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            if (!GetCaster())
+                return false;
+
+            if (Unit* owner = GetCaster()->GetOwner())
+                if (AuraEffect* glyphEyeOfKilrogg = owner->GetAuraEffect(WARLOCK_GLYPH_EYE_OF_KILROGG, EFFECT_1))
+                    amount += glyphEyeOfKilrogg->GetAmount();
+            return true;
+        }
+
+        bool CalculateSpeed(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+        {
+            if (!GetCaster())
+                return false;
+
+            if (Unit* owner = GetCaster()->GetOwner())
+                if (AuraEffect* glyphEyeOfKilrogg = owner->GetAuraEffect(WARLOCK_GLYPH_EYE_OF_KILROGG, EFFECT_0))
+                    amount += glyphEyeOfKilrogg->GetAmount();
+            return true;
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            PreventDefaultAction();
+
+            if (!GetCaster())
+                return;
+
+            Unit* owner = GetCaster()->GetOwner();
+            if (!owner)
+                return;
+
+            Player* pOwner = owner->ToPlayer();
+            if (!pOwner)
+                return;
+
+            // Glyph of Kilrogg
+            if (owner->HasAura(WARLOCK_GLYPH_EYE_OF_KILROGG))
+            {
+                uint32 v_map = GetVirtualMapForMapAndZone(pOwner->GetMapId(), pOwner->GetZoneId());
+                MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
+
+                if (mapEntry && mapEntry->addon > 0 && mapEntry->IsContinent())
+                {
+                    WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
+                    ObjectGuid guid = GetTarget()->GetGUID();
+                    uint8 bitOrder[8] = { 4, 2, 3, 0, 5, 1, 7, 6 };
+                    data.WriteBitInOrder(guid, bitOrder);
+
+                    data.WriteByteSeq(guid[0]);
+                    data.WriteByteSeq(guid[5]);
+                    data << uint32(0);          //! movement counter
+                    data.WriteByteSeq(guid[2]);
+                    data.WriteByteSeq(guid[1]);
+                    data.WriteByteSeq(guid[6]);
+                    data.WriteByteSeq(guid[3]);
+                    data.WriteByteSeq(guid[4]);
+                    data.WriteByteSeq(guid[7]);
+                    pOwner->SendMessageToSet(&data, true);
+                }
+            }
+        }
+
+        void Register() override 
+        {
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_eye_of_kilrogg_passive_AuraScript::CalculateStealth, EFFECT_0, SPELL_AURA_MOD_STEALTH);
+            OnEffectApply += AuraEffectApplyFn(spell_warl_eye_of_kilrogg_passive_AuraScript::OnApply, EFFECT_1, SPELL_AURA_FEATHER_FALL, AURA_EFFECT_HANDLE_REAL);
+            DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_eye_of_kilrogg_passive_AuraScript::CalculateSpeed, EFFECT_2, SPELL_AURA_MOD_INCREASE_SPEED);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override 
+    {
+        return new spell_warl_eye_of_kilrogg_passive_AuraScript();
+    }
+};
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_fury_ward();
@@ -4289,4 +4412,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_soul_fire();
     new spell_warl_void_and_shadow_shield();
     new spell_warl_pet_immolation_aura();
+    new spell_warl_eye_of_kilrogg();
+    new spell_warl_eye_of_kilrogg_passive();
 }
