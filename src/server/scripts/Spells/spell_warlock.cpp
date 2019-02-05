@@ -4297,7 +4297,7 @@ public:
                 if (mapEntry && mapEntry->addon > 0 && mapEntry->IsContinent())
                 {
                     WorldPacket data(SMSG_MOVE_SET_CAN_FLY, 12);
-                    ObjectGuid guid = GetCaster()->GetGUID();
+                    ObjectGuid guid = GetTarget()->GetGUID();
                     uint8 bitOrder[8] = { 4, 2, 3, 0, 5, 1, 7, 6 };
                     data.WriteBitInOrder(guid, bitOrder);
 

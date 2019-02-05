@@ -122,9 +122,6 @@ public:
         std::string uptime          = secsToTimeString(sWorld->GetUptime());
         uint32 updateTime           = sWorld->GetUpdateTime();
 
-        handler->PSendSysMessage("WoW Circle MoP Development 5.4.8");
-        handler->PSendSysMessage("WoW Circle Core: Last Update: 15.05.2016 Updatepack: 14");
-        handler->PSendSysMessage("WoW Circle DB: Last Update: 11.05.2016 Updatepack: 113");
         handler->PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
         handler->PSendSysMessage(LANG_UPTIME, uptime.c_str());
         handler->PSendSysMessage("Server delay: %u ms", updateTime);
