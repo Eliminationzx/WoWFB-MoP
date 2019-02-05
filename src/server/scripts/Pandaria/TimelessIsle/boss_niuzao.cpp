@@ -52,22 +52,16 @@ enum eEvents
     EVENT_NIUZAO_SHAO_DO_OUTRO
 };
 
-enum eSays
-{
-    SAY_AGGRO = 0,
-    SAY_INTRO = 1,
-    SAY_DEATH = 2,
-    SAY_KILL = 3,
-    SAY_SPELL_1 = 4,
-    SAY_SPELL_2 = 5,
-    SAY_SPELL_3 = 6
-};
-
 enum eActions
 {
     ACTION_NIUZAO_CHARGE_66 = 1,
     ACTION_NIUZAO_CHARGE_33,
     ACTION_NIUZAO_CHARGE
+};
+
+const Position telePos[1] = 
+{
+    {-551.16f, -5080.01f, -6.27f, 2.28f}
 };
 
 enum eMovement
@@ -77,153 +71,154 @@ enum eMovement
 
 class boss_niuzao : public CreatureScript
 {
-    public:
-        boss_niuzao() : CreatureScript("boss_niuzao") { }
+public:
+    boss_niuzao() : CreatureScript("boss_niuzao") { }
 
-        struct boss_niuzaoAI : public BossAI
+    struct boss_niuzaoAI : public ScriptedAI
+    {
+        boss_niuzaoAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+        bool EventProgress;
+        bool bEvent_1;
+        bool bEvent_2;
+        bool ChargeEvent;
+
+        void Reset() 
         {
-            boss_niuzaoAI(Creature* creature) : BossAI(creature, BOSS_NIUZAO) { }
+            EventProgress = false;
+            me->setActive(true);
+            bEvent_1 = false;
+            bEvent_2 = false;
+            ChargeEvent = false;
+            me->setFaction(35);
+            me->SetWalk(true);
+            me->RemoveAllAuras();
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
 
-            void Reset()
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            me->SetWalk(false);
+            events.ScheduleEvent(EVENT_MASSIVE_QUAKE, 45000);
+            events.ScheduleEvent(EVENT_OXEN_FORTITUDE, 30000);
+            events.ScheduleEvent(EVENT_HEADBUTT, 30000);
+        }
+
+        void EnterEvadeMode()
+        {
+            events.Reset();
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+
+            if (EventProgress)
             {
-                events.Reset();
-                _Reset();
+                events.ScheduleEvent(2, 5500);
+                if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                    if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                        Shao->AI()->DoAction(ACTION_NIUZAO_FAIL);
+            }
+            else
+                events.ScheduleEvent(2, 5000);
 
-                me->RemoveAllAuras();
-                summons.DespawnAll();
-                _charges = 0;
-                me->SetWalk(true);
-                me->setActive(true);
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->ToPlayer())
+                Talk(SAY_NIUZAO_PLAYER_DEATH);
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_MOVE_CENTR_POSS:
+                    EventProgress = true;
+                    me->SetHomePosition(CentrPos[0]);
+                    me->GetMotionMaster()->MovePoint(1, CentrPos[0]);
+                    break;
+            }
+        }
+
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (me->HealthBelowPct(66) && !bEvent_1 && !ChargeEvent)
+            {
+                bEvent_1 = true;
+                Talk(SAY_NIUZAO_CHARGE_1);
+                events.ScheduleEvent(EVENT_MOVE_PATH_1, 0);
             }
 
-            void EnterCombat(Unit* /*target*/) override
+            if (me->HealthBelowPct(33) && !bEvent_2 && !ChargeEvent)
             {
-                me->SetWalk(false);
-                death = false;
-                Talk(SAY_AGGRO);
-                events.ScheduleEvent(urand(EVENT_NIUZAO_OXEN_FORTITUDE, EVENT_NIUZAO_MASSIVE_QUAKE), urand(10000, 20000));
+                bEvent_2 = true;
+                Talk(SAY_NIUZAO_CHARGE_2);
+                events.ScheduleEvent(EVENT_MOVE_PATH_1, 0);
             }
 
-            void DoAction(const int32 action)
+            if (damage >= me->GetHealth())
             {
-                switch (action)
+                damage = 0;
+
+                if (EventProgress)
                 {
-                    case ACTION_NIUZAO_CHARGE_66:
-                    {
-                        DoCast(SPELL_NIUZAO_CHARGE);
-                        Talk(SAY_SPELL_1);
-                        break;
-                    }
-                    case ACTION_NIUZAO_CHARGE_33:
-                    {
-                        DoCast(SPELL_NIUZAO_CHARGE);
-                        Talk(SAY_SPELL_2);
-                        break;
-                    }
-                    case ACTION_NIUZAO_CHARGE:
-                    {
-                        events.ScheduleEvent(urand(EVENT_NIUZAO_OXEN_FORTITUDE, EVENT_NIUZAO_MASSIVE_QUAKE), urand(10000, 20000));
-                        me->GetMotionMaster()->MoveCharge(_chargePos[_charges][0], _chargePos[_charges][1], _chargePos[_charges][2], 15.0f, MOVEMENT_NIUZAO_CHARGE);
-                        break;
-                    }
-                    default: break;
-                };
-            }
-
-            void DamageTaken(Unit* caster, uint32 &dmg) override
-            {
-                if (me->GetHealthPct() > 66.6f)
-                {
-                    _charge66 = false;
-                    _charge33 = false;
-                }
-
-                if (me->GetHealthPct() < 66.6f && !_charge66)
-                {
-                    _charge66 = true;
-                    events.ScheduleEvent(EVENT_NIUZAO_HEALTH_66_PERCENT, 500);
-                }
-
-                if (me->GetHealthPct() < 33.3f && !_charge33)
-                {
-                    _charge33 = true;
-                    events.ScheduleEvent(EVENT_NIUZAO_HEALTH_33_PERCENT, 500);
-                }
-
-                if (dmg >= me->GetHealth())
-                {
-                    if (death)
-                        return;
-
-                    std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-                    for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                        if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                            if (unit->IsWithinDist(me, 100.0f))
-                                if (unit->ToPlayer())
-                                    unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-
-                    dmg = 0;
-                    Talk(SAY_DEATH);
-                    
+                    EventProgress = false;
+                    ChargeEvent = false;
+                    QuestCredit();
                     me->setFaction(35);
-                   
-                    me->StopMoving();
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->Clear();
-                    me->CombatStop(true);
-                    me->SetHealth(me->GetMaxHealth());
-
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->DeleteThreatList();
-
-                    events.Reset();
-                    summons.DespawnAll();
-                    events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_OUTRO, 20000);
-                    events.ScheduleEvent(EVENT_NIUZAO_DEATH, 13000);
-                    death = true;
+                    Talk(SAY_NIUZAO_END);
+                    if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                        if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                            Shao->AI()->DoAction(ACTION_NIUZAO_END);
                 }
+                EnterEvadeMode();
             }
+        }
+        
 
-            void MovementInform(uint32 type, uint32 point)
+        void QuestCredit()
+        {
+            std::list<HostileReference*> ThreatList = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
             {
-                if (type != POINT_MOTION_TYPE)
-                    return;
+                Player *pTarget = Player::GetPlayer(*me, (*itr)->getUnitGuid());
+                if (!pTarget)
+                    continue;
 
-                switch (point)
+                pTarget->KilledMonsterCredit(me->GetEntry());
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type == POINT_MOTION_TYPE)
+            {
+                if (id == 1)
                 {
-                    case 1:
-                    {
-                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO, 15000);
-                        //me->setFaction(FACTION_HOSTILE_NEUTRAL);
-                        me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                        me->SetHomePosition(_timelessIsleMiddle);
-                        break;
-                    }
-                    case MOVEMENT_NIUZAO_CHARGE:
-                    {
-                        if (_charges >= 4)
-                        {
-                            _charges = 0;
-                            me->RemoveAura(SPELL_NIUZAO_CHARGE);
-                            events.ScheduleEvent(urand(EVENT_NIUZAO_OXEN_FORTITUDE, EVENT_NIUZAO_MASSIVE_QUAKE), urand(8500, 15000));
-                            return;
-                        }
-
-                        events.ScheduleEvent(EVENT_NIUZAO_CHARGE, 100);
-                        break;
-                    }
-                    default:
-                        break;
+                    Talk(SAY_ENTER_POS);
+                    me->SetFacingTo(1.5f);
+                    events.ScheduleEvent(1, 15000);
+                }
+                if (id == 2)
+                {
+                    DoCast(SPELL_CHARGE);
+                    events.ScheduleEvent(EVENT_MOVE_PATH_2, 3000);
                 }
             }
-
-            void KilledUnit(Unit* who)
+            if (type == WAYPOINT_MOTION_TYPE)
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    Talk(SAY_KILL);
-                        return;
+                if (id == 7)
+                {
+                    ChargeEvent = false;
+                    me->RemoveAura(SPELL_CHARGE);
+                    me->SetReactState(REACT_AGGRESSIVE);
+                }
             }
-
+        }
+        
             void UpdateHealth()
             {
                 if (!me->isInCombat())
@@ -248,116 +243,66 @@ class boss_niuzao : public CreatureScript
                 }
             }; 
 
-            void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+            EnterEvadeIfOutOfCombatArea(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING) || ChargeEvent)
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
             {
-                events.Update(diff);
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                switch (events.ExecuteEvent())
+                switch (eventId)
                 {
-                    case EVENT_NIUZAO_SHAO_DO_INTRO:
-                    {
-                        Talk(SAY_INTRO);
-                        events.ScheduleEvent(EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE, 15000);
-                        break;
-                    }
-                    case EVENT_NIUZAO_SHAO_DO_INTRO_ATTACKABLE:
-                    {
+                    case 1:
                         me->setFaction(190);
-                        me->SetMaxHealth(INITIAL_HEALTH_POINTS);
                         break;
-                    }
-                    case EVENT_NIUZAO_CHARGE:
-                    {
-                        ++_charges;
-                        DoAction(ACTION_NIUZAO_CHARGE);
+                    case EVENT_MASSIVE_QUAKE:
+                        Talk(SAY_NIUZAO_QUAKE);
+                        DoCast(SPELL_MASSIVE_QUAKE);
+                        events.ScheduleEvent(EVENT_MASSIVE_QUAKE, 48000);
                         break;
-                    }
-                    case EVENT_NIUZAO_MASSIVE_QUAKE:
-                    {
-                        if (me->HasAura(SPELL_NIUZAO_CHARGE))
-                            return;
-
-                        DoCast(SPELL_NIUZAO_MASSIVE_QUAKE);
-                        Talk(SAY_SPELL_3);
-                        events.ScheduleEvent(urand(EVENT_NIUZAO_OXEN_FORTITUDE, EVENT_NIUZAO_MASSIVE_QUAKE), urand(8500, 15000));
+                    case EVENT_OXEN_FORTITUDE:
+                        DoCast(SPELL_OXEN_FORTITUDE);
+                        events.ScheduleEvent(EVENT_OXEN_FORTITUDE, 46000);
                         break;
-                    }
-                    case EVENT_NIUZAO_HEADBUTT:
-                    {
-                        if (me->HasAura(SPELL_NIUZAO_CHARGE))
-                            return;
-
-                        DoCast(SPELL_NIUZAO_HEADBUTT);
-                        events.ScheduleEvent(urand(EVENT_NIUZAO_OXEN_FORTITUDE, EVENT_NIUZAO_MASSIVE_QUAKE), urand(8500, 15000));
-                        break;
-                    }
-                    case EVENT_NIUZAO_OXEN_FORTITUDE:
-                    {
-                        if (me->HasAura(SPELL_NIUZAO_CHARGE))
-                            return;
-
-                        DoCast(SPELL_NIUZAO_OXEN_FORTITUDE);
-                        events.ScheduleEvent(urand(EVENT_NIUZAO_OXEN_FORTITUDE, EVENT_NIUZAO_MASSIVE_QUAKE), urand(8500, 15000));
-                        break;
-                    }
-                    case EVENT_NIUZAO_HEALTH_66_PERCENT:
-                    {
-                        DoAction(ACTION_NIUZAO_CHARGE_66);
-                        break;
-                    }
-                    case EVENT_NIUZAO_HEALTH_33_PERCENT:
-                    {
-                        DoAction(ACTION_NIUZAO_CHARGE_33);
-                        break;
-                    }
-                    case EVENT_NIUZAO_SHAO_DO_OUTRO:
-                    {
-                        if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                            shao->AI()->Talk(EMPEROR_TALK_OUTRO_NIUZAO);
-                        break;
-                    }
-                    case EVENT_NIUZAO_DEATH:
-                    {
-                        if (death)
+                    case EVENT_HEADBUTT:
+                        if (Unit* target = me->getVictim())
                         {
-                            if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                shao->AI()->DoAction(ACTION_YULON);
-
-                            Movement::MoveSplineInit init(*me);
-                            Position home = me->GetHomePosition();
-                            init.MoveTo(float(-553.501099), float(-5086.039062), float(-6.277227));
-                            init.SetWalk(true);
-                            init.SetFacing(float(2.653933));
-                            init.Launch();
-
-                            death = false;
+                            DoCast(target, SPELL_HEADBUTT);
+                            DoModifyThreatPercent(target, -100);
                         }
+                        events.ScheduleEvent(EVENT_HEADBUTT, 30000);
                         break;
-                    }
-                    default:
+                    case EVENT_MOVE_PATH_1:
+                        me->AttackStop();
+                        me->SetReactState(REACT_PASSIVE);
+                        me->GetMotionMaster()->MovePoint(2, CentrPos[0]);
+                        break;
+                    case EVENT_MOVE_PATH_2:
+                        me->GetMotionMaster()->MovePath(me->GetEntry() * 100, false);
+                        ChargeEvent = true;
+                        break;
+                    case 2:
+                        DoCast(SPELL_CELESTIAL_SPAWN);
+                        me->NearTeleportTo(summonPos[3].GetPositionX(), summonPos[3].GetPositionY(), summonPos[3].GetPositionZ(), summonPos[3].GetOrientation());
+                        me->SetHomePosition(summonPos[3]);
                         break;
                 }
-
-                if (!death && !me->HasAura(SPELL_NIUZAO_CHARGE))
-                    if (!UpdateVictim())
-                        return;
-
-                DoMeleeAttackIfReady();
             }
-
-            private:
-                bool _charge66, _charge33 = false;
-                bool death = false;
-                uint8 _charges;
-                EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_niuzaoAI(creature);
+            UpdateHealth();
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_niuzaoAI (creature);
+    }
 };
 
 // Headbutt - 144610

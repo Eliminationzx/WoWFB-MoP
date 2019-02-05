@@ -260,132 +260,6 @@ public:
     }
 };
 
-enum EmperorEvent
-{
-    EVENT_EMPEROR_ARRANGE_BOSS = 1
-};
-
-// Emperor Shaohao #73303#
-class npc_emperor_shaohao : public CreatureScript
-{
-public:
-    npc_emperor_shaohao() : CreatureScript("npc_emperor_shaohao") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_emperor_shaohaoAI(creature);
-    }
-
-    struct npc_emperor_shaohaoAI : public ScriptedAI
-    {
-        npc_emperor_shaohaoAI(Creature* creature) : ScriptedAI(creature) { }
-
-        void Reset()
-        {
-            me->setActive(true);
-            events.Reset();
-            _yulon = true;
-            _xuen = false;
-            _chiji = false;
-            _niuzao = false;
-            events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 75000);
-        }
-
-        void DoAction(const int32 action)
-        {
-            switch (action)
-            {
-                case ACTION_XUEN:
-                    _xuen = true;
-                    break;
-                case ACTION_CHIJI:
-                    _chiji = true;
-                    break;
-                case ACTION_NIUZAO:
-                    _niuzao = true;
-                    break;
-                case ACTION_YULON:
-                    _yulon = true;
-                    break;
-            }
-
-            events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 25000);
-        }
-
-        void UpdateAI(const uint32 diff)
-        {
-            events.Update(diff);
-
-            switch (events.ExecuteEvent())
-            {
-                case EVENT_EMPEROR_ARRANGE_BOSS:
-                {
-                    if (_yulon)
-                    {
-                        if (Creature* yulon = me->FindNearestCreature(BOSS_YU_LON, 300.0f, true))
-                        {
-                            yulon->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_YULON);
-                        }
-                        else
-                            _xuen = true;
-
-                        _yulon = false;
-                    }
-                    if (_xuen)
-                    {
-                        if (Creature* xuen = me->FindNearestCreature(BOSS_XUEN, 300.0f, true))
-                        {
-                            xuen->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_XUEN);
-                        }
-                        else
-                            _chiji = true;
-
-                        _xuen = false;
-                    }
-                    if (_chiji)
-                    {
-                        if (Creature* chiji = me->FindNearestCreature(BOSS_CHI_JI, 300.0f, true))
-                        {
-                            chiji->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_CHIJI);
-                        }
-                        else
-                            _niuzao = true;
-
-                        _chiji = false;
-                    }
-                    if (_niuzao)
-                    {
-                        if (Creature* niuzao = me->FindNearestCreature(BOSS_NIUZAO, 300.0f, true))
-                        {
-                            niuzao->GetMotionMaster()->MovePoint(1, _timelessIsleMiddle);
-                            me->AI()->Talk(EMPEROR_TALK_INTRO_NIUZAO);
-                        }
-                        else
-                            _yulon = true;
-
-                        _niuzao = false;
-                    }
-
-                    events.ScheduleEvent(EVENT_EMPEROR_ARRANGE_BOSS, 75000);
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-
-        private:
-            EventMap events;
-            bool _yulon;
-            bool _xuen;
-            bool _chiji;
-            bool _niuzao;
-    };
-};
-
 /********* Timeless Isle Npcs *********/
 
 // Chelon #72045# - Great Turtle Furyshell #73161# - Elder Great Turtle #72765#
@@ -3070,6 +2944,133 @@ public:
     }
 };
 
+class npc_emperor_shaohao : public CreatureScript
+{
+public:
+    npc_emperor_shaohao() : CreatureScript("npc_emperor_shaohao") { }
+
+    struct npc_emperor_shaohaoAI : public ScriptedAI
+    {
+        npc_emperor_shaohaoAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
+
+        EventMap events;
+        SummonList summons;
+
+        void Reset() 
+        {
+            me->SummonCreature(NPC_CHIJI, summonPos[0]);
+            me->SummonCreature(NPC_XUEN, summonPos[1]);
+            me->SummonCreature(NPC_YULON, summonPos[2]);
+            me->SummonCreature(NPC_NIUZAO, summonPos[3]);
+            me->setActive(true);
+
+            events.ScheduleEvent(urand(EVENT_CHIJI_START, EVENT_NIUZAO_START), 60000);
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_CHIJI_END:
+                    events.ScheduleEvent(EVENT_CHIJI_END, 20000);
+                    break;
+                case ACTION_CHIJI_FAIL:
+                    events.ScheduleEvent(EVENT_CHIJI_START, 40000);
+                    break;
+                case ACTION_XUEN_END:
+                    events.ScheduleEvent(EVENT_XUEN_END, 20000);
+                    break;
+                case ACTION_XUEN_FAIL:
+                    events.ScheduleEvent(EVENT_XUEN_START, 40000);
+                    break;
+                case ACTION_YULON_END:
+                    events.ScheduleEvent(EVENT_YULON_END, 20000);
+                    break;
+                case ACTION_YULON_FAIL:
+                    events.ScheduleEvent(EVENT_YULON_START, 40000);
+                    break;
+                case ACTION_NIUZAO_END:
+                    events.ScheduleEvent(EVENT_NIUZAO_END, 20000);
+                    break; 
+                case ACTION_NIUZAO_FAIL:
+                    events.ScheduleEvent(EVENT_NIUZAO_START, 40000);
+                    break;
+            }
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
+        }
+
+        void UpdateAI(uint32 diff)
+        {
+            events.Update(diff);
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case EVENT_CHIJI_START:
+                    {
+                        Talk(SAY_CHIJI_START);
+                        EntryCheckPredicate pred1(NPC_CHIJI);
+                        summons.DoAction(ACTION_MOVE_CENTR_POSS, pred1);
+                        break;
+                    }
+                    case EVENT_CHIJI_END:
+                        Talk(SAY_CHIJI_FINISH);
+                        events.ScheduleEvent(EVENT_XUEN_START, 60000);
+                        break;
+                    case EVENT_XUEN_START:
+                    {
+                        Talk(SAY_XUEN_START);
+                        EntryCheckPredicate pred1(NPC_XUEN);
+                        summons.DoAction(ACTION_MOVE_CENTR_POSS, pred1);
+                        break;
+                    }
+                    case EVENT_XUEN_END:
+                        Talk(SAY_XUEN_FINISH);
+                        events.ScheduleEvent(EVENT_YULON_START, 60000);
+                        break;
+                    case EVENT_YULON_START:
+                    {
+                        Talk(SAY_YULON_START);
+                        EntryCheckPredicate pred1(NPC_YULON);
+                        summons.DoAction(ACTION_MOVE_CENTR_POSS, pred1);
+                        break;
+                    }
+                    case EVENT_YULON_END:
+                    {
+                        Talk(SAY_YULON_FINISH);
+                        events.ScheduleEvent(EVENT_NIUZAO_START, 60000);
+                        break;
+                    }
+                    case EVENT_NIUZAO_START:
+                    {
+                        Talk(SAY_NIUZAO_START);
+                        EntryCheckPredicate pred1(NPC_NIUZAO);
+                        summons.DoAction(ACTION_MOVE_CENTR_POSS, pred1);
+                        break;
+                    }
+                    case EVENT_NIUZAO_END:
+                    {
+                        Talk(SAY_NIUZAO_FINISH);
+                        events.ScheduleEvent(EVENT_CHIJI_START, 60000);
+                        break;
+                    }
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_emperor_shaohaoAI (creature);
+    }
+};
+
 void AddSC_timeless_isle()
 {
     // creatures
@@ -3098,7 +3099,6 @@ void AddSC_timeless_isle()
     new npc_jademist_dancer();
     new npc_nice_sprite();
     new npc_ordon_candlekeeper();
-    new npc_emperor_shaohao();
     
     // gameobject
     new go_time_lost_shrine_ti();
@@ -3108,4 +3108,6 @@ void AddSC_timeless_isle()
     new spell_timeless_isle_crane_wings();
     new spell_timeless_isle_cauterize();
     new spell_timeless_isle_burning_fury();
+    
+    new npc_emperor_shaohao();
 }
