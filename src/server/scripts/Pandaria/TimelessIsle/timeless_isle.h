@@ -286,6 +286,181 @@ enum EmprerorTalk
     EMPEROR_TALK_INTRO
 };
 
+// August Celestials Only
+const Position summonPos[4] = 
+{
+    {-553.17f, -4949.02f, -6.27f, -2.30f},
+    {-740.80f, -4955.08f, -6.27f, 5.63f},
+    {-746.32f, -5078.48f, -6.27f, 0.69f},
+    {-551.16f, -5080.01f, -6.27f, 2.28f},
+};
+
+const Position CentrPos[1] =
+{
+    {-650.14f, -5024.67f, -6.27f},
+};
+
+const Position WallPos[7] =
+{
+    {-680.63f, -5091.60f, -6.19f, 1.58f},
+    {-713.89f, -5091.50f, -6.19f, 1.57f},
+    {-580.55f, -5091.66f, -6.19f, 1.58f},
+    {-613.91f, -5091.65f, -6.19f, 1.54f},
+    {-547.26f, -5091.75f, -6.19f, 1.56f},
+    {-647.20f, -5091.63f, -6.19f, 1.57f},
+    {-747.19f, -5091.65f, -6.19f, 1.59f},
+};
+
+enum Says
+{
+    //Annoncer
+    SAY_CHIJI_START         = 2,
+    SAY_CHIJI_FINISH        = 6,
+    SAY_XUEN_START          = 1,
+    SAY_XUEN_FINISH         = 5,
+    SAY_YULON_START         = 0,
+    SAY_YULON_FINISH        = 4,
+    SAY_NIUZAO_START        = 3,
+    SAY_NIUZAO_FINISH       = 7,
+
+    //Misc
+    SAY_ENTER_POS           = 1,
+    SAY_AGGRO               = 0,
+
+    //ChiJi
+    SAY_CHIJI_BEACON        = 4,
+    SAY_CHIJI_RUSH_1        = 6,
+    SAY_CHIJI_BLAZ_SONG     = 4,
+    SAY_CHIJI_RUSH_2        = 5,
+    SAY_CHIJI_END           = 2,
+
+    //Xuen
+    SAY_XUEN_BARRAGE        = 5,
+    SAY_XUEN_LIGHTNING      = 6,
+    SAY_XUEN_PLAYER_DEATH   = 3,
+    SAY_XUEN_AGGILITY       = 4,
+    SAY_XUEN_END            = 2,
+
+    //Yulon
+    SAY_YULON_PLAYER_DEATH   = 3,
+    SAY_YULON_WALL_1         = 4,
+    SAY_YULON_WALL_2         = 6,
+    SAY_YULON_END            = 2,
+
+    //Niuzao
+    SAY_NIUZAO_CHARGE_1      = 4,
+    SAY_NIUZAO_PLAYER_DEATH  = 3,
+    SAY_NIUZAO_QUAKE         = 6,
+    SAY_NIUZAO_CHARGE_2      = 5,
+    SAY_NIUZAO_END           = 2,
+};
+
+enum Npc
+{
+    NPC_SHAOHAO         = 73303,
+    NPC_CHIJI           = 71952,
+    NPC_XUEN            = 71953,
+    NPC_YULON           = 71955,
+    NPC_NIUZAO          = 71954,
+    //Summons
+    NPC_FIRESTORM       = 71971,
+    NPC_BEACON_OF_HOPE  = 71978,
+    NPC_CHILD_OF_CHIJI  = 71990,
+    NPC_JADEFIRE_BLAZE  = 72016,
+    NPC_JADEFIRE_WALL   = 72020,
+};
+
+enum Spells
+{
+    SPELL_CELESTIAL_SPAWN       = 149307,
+    //ChiJi
+    SPELL_FIRESTORM             = 144461,
+    SPELL_FIRESTORM_AURA        = 144463,
+    SPELL_INSPIRING_SONG        = 144468,
+    SPELL_BEACON_OF_HOPE        = 144473,
+    SPELL_BEACON_OF_HOPE_AURA   = 144474,
+    SPELL_BLAZING_SONG          = 144471,
+    SPELL_BLAZING_NOVA          = 144493,
+    SPELL_CRANE_RUSH            = 144470,
+    //Xuen
+    SPELL_CHI_BARRAGE           = 144642,
+    SPELL_CRACKLING_LIGHTNING   = 144635,
+    SPELL_LEAP                  = 144640,
+    SPELL_SPECTRAL_SWIPE        = 144638,
+    SPELL_AGILITY               = 144631,
+    //Yulon
+    SPELL_JADEFLAME_BUFFET      = 144630,
+    SPELL_JADEFIRE_BREATH       = 144530,
+    SPELL_JADEFIRE_BLAZE        = 144537,
+    SPELL_JADEFIRE_WALL         = 144533,
+    //Niuzao
+    SPELL_MASSIVE_QUAKE         = 144611,
+    SPELL_OXEN_FORTITUDE        = 144606,
+    SPELL_HEADBUTT              = 144610,
+    SPELL_CHARGE                = 144608,
+
+    //Ordos
+    SPELL_BANISHMENT            = 148705,
+    SPELL_CELESTIAL_WINDS       = 149322,
+    SPELL_ANCIENT_FLAME         = 144695,
+    SPELL_MAGMA_CRUSH           = 144688,
+    SPELL_BURNING_SOUL          = 144689,
+    SPELL_ETERNAL_AGONY         = 144696,
+
+    //Other
+    SPELL_GHOSTLY_VOID          = 147495,
+    SPELL_DESATURATE            = 129290,
+    SPELL_SPIRIT_STRANGLE       = 144059,
+};
+
+enum Events
+{
+    //Annoncer
+    EVENT_CHIJI_START       = 1,
+    EVENT_XUEN_START        = 2,
+    EVENT_YULON_START       = 3,
+    EVENT_NIUZAO_START      = 4,
+    EVENT_CHIJI_END         = 5,
+    EVENT_XUEN_END          = 6,
+    EVENT_YULON_END         = 7,
+    EVENT_NIUZAO_END        = 8,
+    //ChiJi
+    EVENT_FIRESTORM         = 3,
+    EVENT_INSPIRING_SONG    = 4,
+    EVENT_BEACON            = 5,
+    EVENT_BLAZING_SONG      = 6,
+    //Xuen
+    EVENT_CHI_BARRAGE       = 3,
+    EVENT_LIGHTNING         = 4,
+    EVENT_LEAP              = 5,
+    EVENT_SPECTRAL_SWIPE    = 6,
+    EVENT_AGILITY           = 7,
+    //Yulon
+    EVENT_JADEFLAME_BUFFET  = 3,
+    EVENT_JADEFIRE_BREATH   = 4,
+    EVENT_JADEFIRE_BOLT     = 5,
+    EVENT_FIRE_WALL         = 6,
+    //Niuzao
+    EVENT_MASSIVE_QUAKE     = 3,
+    EVENT_OXEN_FORTITUDE    = 4,
+    EVENT_HEADBUTT          = 5,
+    EVENT_MOVE_PATH_1       = 6,
+    EVENT_MOVE_PATH_2       = 7,
+};
+
+enum Actions
+{
+    ACTION_MOVE_CENTR_POSS  = 1,
+    ACTION_CHIJI_END        = 2,
+    ACTION_CHIJI_FAIL       = 3,
+    ACTION_XUEN_END         = 4,
+    ACTION_XUEN_FAIL        = 5,
+    ACTION_YULON_END        = 6,
+    ACTION_YULON_FAIL       = 7,
+    ACTION_NIUZAO_END       = 8,
+    ACTION_NIUZAO_FAIL      = 9,
+};
+
 static Position _timelessIsleMiddle = { -650.04f, -5016.84f, -6.27f, 1.573f };
 
 #define MIDDLE_FACING_ANGLE 1.573f

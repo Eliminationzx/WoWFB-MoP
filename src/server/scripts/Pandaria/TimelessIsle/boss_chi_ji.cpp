@@ -18,24 +18,15 @@
 #define INITIAL_HEALTH_POINTS 87250000
 #define INCREMENTAL 2800000
 
-enum Spells
+enum nSpells
 {
-    SPELL_FIRESTORM					= 144461,
-    SPELL_INSPIRING_SONG			= 144468,
-    SPELL_BEACON_OF_HOPE			= 144473,
-    SPELL_BLAZING_SONG				= 144471,
-    SPELL_CRANE_RUSH				= 144470,
     SPELL_FIRESTORM_VISUAL			= 144463,
-    SPELL_BLAZING_NOVA_AURA         = 144493,
-    SPELL_BLAZING_NOVA				= 144494,
-    SPELL_BEACON_OF_HOPE_AURA       = 144475
+    SPELL_BLAZING_NOVA_AURA         = 144493
 };
 
-enum Events
+enum nEvents
 {
-    EVENT_FIRESTORM					= 1,
-    EVENT_INSPIRING_SONG,
-    EVENT_BEACON_OF_HOPE,	
+    EVENT_BEACON_OF_HOPE = 1,	
     EVENT_HEALTH_66_PERCENT,
     EVENT_HEALTH_33_PERCENT,
     EVENT_SHAO_DO_OUTRO,
@@ -45,268 +36,216 @@ enum Events
     EVENT_HEALTH_POOL_TIMER
 };
 
-enum Says
-{
-    SAY_AGGRO                       = 0,
-    SAY_INTRO                       = 1,
-    SAY_DEATH                       = 2,
-    SAY_KILL                        = 3,
-    SAY_SPELL                       = 4,
-    SAY_SPELL_2                     = 5,
-    SAY_SPELL_3                     = 6
-};
-
-enum Actions
+enum mActions
 {
     ACTION_CHILDREN_OF_CHIJI_33 = 1,
     ACTION_CHILDREN_OF_CHIJI_66 = 2
 };
 
-class boss_chi_ji : public CreatureScript
+class boss_chiji : public CreatureScript
 {
-    public:
-        boss_chi_ji() : CreatureScript("boss_chi_ji") { }
+public:
+    boss_chiji() : CreatureScript("boss_chiji") { }
 
-        struct boss_chi_jiAI : public BossAI
+    struct boss_chijiAI : public ScriptedAI
+    {
+        boss_chijiAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
+
+        EventMap events;
+        SummonList summons;
+        uint32 orient;
+
+        bool EventProgress;
+        bool bEvent_1;
+        bool bEvent_2;
+
+        void Reset() 
         {
-            boss_chi_jiAI(Creature* creature) : BossAI(creature, DATA_CHI_JI) {	}
-
-            void Reset()
-            {
-                events.Reset();
-                _Reset();
-                
-                summons.DespawnAll();
-                me->SetWalk(true);
-                me->setActive(true);
-            }
-
-            void EnterCombat(Unit* /*target*/) override
-            {
-                me->SetWalk(false);
-                death = false;
-                Talk(SAY_AGGRO);
-                events.ScheduleEvent(urand(EVENT_FIRESTORM, EVENT_INSPIRING_SONG), urand(10000, 15000));
-                events.ScheduleEvent(EVENT_BEACON_OF_HOPE, 50000);
-            }
-
-            void DoAction(const int32 action)
-            {
-                switch (action)
-                {
-                    case ACTION_CHILDREN_OF_CHIJI_66:
-                    {
-                        DoCast(SPELL_CRANE_RUSH);
-                        Talk(SAY_SPELL_3);
-                        break;
-                    }
-                    case ACTION_CHILDREN_OF_CHIJI_33:
-                    {
-                        DoCast(SPELL_CRANE_RUSH);
-                        Talk(SAY_SPELL_2);
-                        break;
-                    }
-                    default: break;
-                };
-            }
-
-            void DamageTaken(Unit* caster, uint32 &dmg) override
-            {
-                if (me->GetHealthPct() > 66.6f)
-                {
-                    _children66 = false;
-                    _children33 = false;
-                }
-
-                if (me->GetHealthPct() < 66.6f && !_children66)
-                {
-                    _children66 = true;
-                    events.ScheduleEvent(EVENT_HEALTH_66_PERCENT, 500);
-                }
-
-                if (me->GetHealthPct() < 33.3f && !_children33)
-                {
-                    _children33 = true;
-                    events.ScheduleEvent(EVENT_HEALTH_33_PERCENT, 500);
-                }
-
-                if (dmg >= me->GetHealth())
-                {
-                    if (death)
-                        return;
-
-                    std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-                    for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                        if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                            if (unit->IsWithinDist(me, 100.0f))
-                                if (unit->ToPlayer())
-                                    unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-
-                    dmg = 0;
-                    Talk(SAY_DEATH);
-                    
-                    me->setFaction(35);
-                   
-                    me->StopMoving();
-                    me->RemoveAllAuras();
-                    me->GetMotionMaster()->Clear();
-                    me->CombatStop(true);
-                    me->SetHealth(me->GetMaxHealth());
-
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->DeleteThreatList();
-
-                    events.Reset();
-                    summons.DespawnAll();
-                    events.ScheduleEvent(EVENT_SHAO_DO_OUTRO, 20000);
-                    events.ScheduleEvent(EVENT_DEATH, 13000);
-                    death = true;
-                }
-            }
-
-            void MovementInform(uint32 type, uint32 point)
-            {
-                if (type != POINT_MOTION_TYPE)
-                    return;
-
-                if (point == 1)
-                {
-                    events.ScheduleEvent(EVENT_SHAO_DO_INTRO, 15000);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    //me->setFaction(FACTION_HOSTILE_NEUTRAL);
-                    me->SetHomePosition(_timelessIsleMiddle);
-                }
-            }
-
-            void KilledUnit(Unit* who)
-            {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    Talk(SAY_KILL);
-                        return;
-            }
-
-            void UpdateHealth()
-            {
-                if (!me->isInCombat())
-                    return;
-
-                std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-                if (threatlist.empty())
-                    return;
-
-                uint8 count = 0;
-                for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                    if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                        if (unit->IsWithinDist(me, 100.0f))
-                            count++;
-
-                uint32 hp = me->GetMaxHealth() - me->GetHealth();
-                uint32 newhp = std::min<uint32>((INCREMENTAL * count), MAX_HEALTH_POINTS);
-                if (newhp != me->GetMaxHealth() && newhp > INITIAL_HEALTH_POINTS)
-                {
-                    me->SetMaxHealth(std::min<uint32>((me->GetMaxHealth() * count), MAX_HEALTH_POINTS));
-                    me->SetHealth(newhp - hp);
-                }
-            }; 
-
-            void UpdateAI(const uint32 diff)
-            {
-                events.Update(diff);
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                switch (events.ExecuteEvent())
-                {
-                    case EVENT_SHAO_DO_INTRO:
-                    {
-                        Talk(SAY_INTRO);
-                        events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 15000);
-                        break;
-                    }
-                    case EVENT_SHAO_DO_INTRO_ATTACKABLE:
-                    {
-                        me->setFaction(190);
-                        me->SetMaxHealth(INITIAL_HEALTH_POINTS);
-                        break;
-                    }
-                    case EVENT_INSPIRING_SONG:
-                    {
-                        DoCast(me, SPELL_INSPIRING_SONG);
-                        events.ScheduleEvent(urand(EVENT_FIRESTORM, EVENT_INSPIRING_SONG), urand(8000, 12000));
-                        break;
-                    }
-                    case EVENT_FIRESTORM:
-                    {
-                        DoCast(SPELL_FIRESTORM);
-                        events.ScheduleEvent(urand(EVENT_FIRESTORM, EVENT_INSPIRING_SONG), urand(8000, 12000));
-                        break;
-                    }
-                    case EVENT_BEACON_OF_HOPE:
-                    {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 15.0f, true))
-                        {
-                            DoCast(target, SPELL_BEACON_OF_HOPE, true);
-
-                            DoCast(SPELL_BLAZING_SONG);
-                            Talk(SAY_SPELL);
-                        }
-                        events.ScheduleEvent(EVENT_BEACON_OF_HOPE, 50000);
-                        break;
-                    }
-                    case EVENT_HEALTH_66_PERCENT:
-                    {
-                        DoAction(ACTION_CHILDREN_OF_CHIJI_66);
-                        break;
-                    }
-                    case EVENT_HEALTH_33_PERCENT:
-                    {
-                        DoAction(ACTION_CHILDREN_OF_CHIJI_33);
-                        break;
-                    }
-                    case EVENT_SHAO_DO_OUTRO:
-                    {
-                        if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                            shao->AI()->Talk(EMPEROR_TALK_OUTRO_CHIJI);
-                        break;
-                    }
-                    case EVENT_DEATH:
-                    {
-                        if (death)
-                        {
-                            if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                shao->AI()->DoAction(ACTION_NIUZAO);
-
-                            Movement::MoveSplineInit init(*me);
-                            Position home = me->GetHomePosition();
-                            init.MoveTo(float(-553.893250), float(-4945.380371), float(-6.277442));
-                            init.SetWalk(true);
-                            init.SetFacing(float(3.803745));
-                            init.Launch();
-                            death = false;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-
-                if (!death)
-                    if (!UpdateVictim())
-                        return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            private:
-                bool _children66, _children33 = false;
-                bool death = false;
-                EventMap events;
-        };
-
-        CreatureAI* GetAI(Creature* creature) const
-        {
-            return new boss_chi_jiAI(creature);
+            bEvent_1 = false;
+            bEvent_2 = false;
+            EventProgress = false;
+            me->setActive(true);
+            me->SetWalk(true);
+            me->setFaction(35);
+            me->RemoveAllAuras();
+            summons.DespawnAll();
         }
+
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            events.ScheduleEvent(EVENT_FIRESTORM, 10000);
+            events.ScheduleEvent(EVENT_INSPIRING_SONG, 20000);
+            events.ScheduleEvent(EVENT_BEACON, 40000);
+            events.ScheduleEvent(EVENT_BLAZING_SONG, 44000);
+        }
+
+        void EnterEvadeMode()
+        {
+            events.Reset();
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+
+            if (EventProgress)
+            {
+                events.ScheduleEvent(2, 5500);
+                if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                    if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                        Shao->AI()->DoAction(ACTION_CHIJI_FAIL);
+            }
+            else
+                events.ScheduleEvent(2, 5000);
+
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
+            {
+                case ACTION_MOVE_CENTR_POSS:
+                    EventProgress = true;
+                    me->SetHomePosition(CentrPos[0]);
+                    me->GetMotionMaster()->MovePoint(1, CentrPos[0]);
+                    break;
+            }
+        }
+
+        void DamageTaken(Unit* who, uint32& damage)
+        {
+            if (me->HealthBelowPct(66) && !bEvent_1)
+            {
+                bEvent_1 = true;
+                Talk(SAY_CHIJI_RUSH_1);
+                DoCast(SPELL_CRANE_RUSH);
+            }
+
+            if (me->HealthBelowPct(33) && !bEvent_2)
+            {
+                bEvent_2 = true;
+                Talk(SAY_CHIJI_RUSH_2);
+                DoCast(SPELL_CRANE_RUSH);
+            }
+
+            if (damage >= me->GetHealth())
+            {
+                damage = 0;
+
+                if (EventProgress)
+                {
+                    EventProgress = false;
+                    QuestCredit();
+                    me->setFaction(35);
+                    me->RemoveAllAuras();
+                    summons.DespawnAll();
+                    Talk(SAY_CHIJI_END);
+                    if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                        if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                            Shao->AI()->DoAction(ACTION_CHIJI_END);
+                }
+                EnterEvadeMode();
+            }
+        }
+
+        void QuestCredit()
+        {
+            std::list<HostileReference*> ThreatList = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
+            {
+                Player *pTarget = Player::GetPlayer(*me, (*itr)->getUnitGuid());
+                if (!pTarget)
+                    continue;
+
+                pTarget->KilledMonsterCredit(me->GetEntry());
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 1)
+            {
+                Talk(SAY_ENTER_POS);
+                me->SetFacingTo(1.5f);
+                events.ScheduleEvent(1, 15000);
+            }
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
+
+            if (summon->GetEntry() == NPC_FIRESTORM)
+                summon->AI()->DoCast(SPELL_FIRESTORM_AURA);
+
+            if (summon->GetEntry() == NPC_BEACON_OF_HOPE)
+                summon->AI()->DoCast(SPELL_BEACON_OF_HOPE_AURA);
+
+            if (summon->GetEntry() == NPC_CHILD_OF_CHIJI)
+            {
+                summon->AI()->DoCast(SPELL_BLAZING_NOVA);
+                orient = summon->GetOrientation();
+                summon->SetOrientation(urand(0, 6));
+                float x, y, z;
+                summon->GetClosePoint(x, y, z, me->GetObjectSize(), 70.0f);
+                summon->GetMotionMaster()->MovePoint(1, x, y, z);
+                summon->DespawnOrUnsummon(10000);
+            }
+        } 
+
+        void UpdateAI(uint32 diff)
+        {
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            EnterEvadeIfOutOfCombatArea(diff);
+            events.Update(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_CRANE_RUSH))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case 1:
+                        me->setFaction(190);
+                        break;
+                    case EVENT_FIRESTORM:
+                        DoCast(SPELL_FIRESTORM);
+                        events.ScheduleEvent(EVENT_FIRESTORM, 20000);
+                        break;
+                    case EVENT_INSPIRING_SONG:
+                        DoCast(SPELL_INSPIRING_SONG);
+                        events.ScheduleEvent(EVENT_INSPIRING_SONG, 28000);
+                        break;
+                    case EVENT_BEACON:
+                        Talk(SAY_CHIJI_BEACON);
+                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 40.0f, true))
+                            DoCast(pTarget, SPELL_BEACON_OF_HOPE);
+                        events.ScheduleEvent(EVENT_BEACON, 76000);
+                        break;
+                    case EVENT_BLAZING_SONG:
+                        Talk(SAY_CHIJI_BLAZ_SONG);
+                        DoCast(SPELL_BLAZING_SONG);
+                        events.ScheduleEvent(EVENT_BLAZING_SONG, 76000);
+                        break;
+                    case 2:
+                        DoCast(SPELL_CELESTIAL_SPAWN);
+                        me->NearTeleportTo(summonPos[0].GetPositionX(), summonPos[0].GetPositionY(), summonPos[0].GetPositionZ(), summonPos[0].GetOrientation());
+                        me->SetHomePosition(summonPos[0]);
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_chijiAI (creature);
+    }
 };
 
 enum ChildEvents
@@ -466,5 +405,5 @@ void AddSC_boss_chi_ji()
 {
     new spell_chi_ji_beacon_of_hope();
     new mob_child_of_chi_ji();
-    new boss_chi_ji();
+    new boss_chiji();
 }

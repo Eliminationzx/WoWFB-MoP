@@ -22,7 +22,6 @@
 
 enum eSpells
 {
-    SPELL_JADEFIRE_BREATH      = 144530,
     SPELL_JADEFIRE_BUFFET      = 144630,
     SPELL_JADEFIRE_WALL_VISUAL = 144533,
     SPELL_JADEFIRE_WALL_DMG    = 144539,
@@ -46,18 +45,6 @@ enum eCreatures
 {
     MOB_JADEFIRE_WALL   = 72020,
     MOB_JADEFIRE_BLAZE  = 72016
-};
-
-enum eSays
-{
-    SAY_AGGRO = 0,
-    SAY_INTRO = 1,
-    SAY_DEATH = 2,
-    SAY_KILL = 3,
-    SAY_WALL = 4,
-    SAY_WALL_2 = 5,
-    SAY_WALL_3 = 6,
-    SAY_WALL_ANN = 7
 };
 
 enum eActions
@@ -95,99 +82,138 @@ public:
     }
 };
 
-class boss_yu_lon_celestial : public CreatureScript
+class boss_yulon : public CreatureScript
 {
-    public:
-        boss_yu_lon_celestial() : CreatureScript("boss_yu_lon_celestial") { }
+public:
+    boss_yulon() : CreatureScript("boss_yulon") { }
 
-        struct boss_yu_lon_celestialAI : public BossAI
+    struct boss_yulonAI : public ScriptedAI
+    {
+        boss_yulonAI(Creature* creature) : ScriptedAI(creature), summons(me) {}
+
+        EventMap events;
+        SummonList summons;
+        bool EventProgress;
+        bool wallrand;
+
+        void Reset() 
         {
-            boss_yu_lon_celestialAI(Creature* creature) : BossAI(creature, BOSS_YU_LON) { }
+            EventProgress = false;
+            me->setActive(true);
+            me->setFaction(35);
+            me->SetWalk(true);
+            me->RemoveAllAuras();
+        }
 
-            void Reset()
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            events.ScheduleEvent(EVENT_JADEFLAME_BUFFET, 20000);
+            events.ScheduleEvent(EVENT_JADEFIRE_BREATH, 4000);
+            events.ScheduleEvent(EVENT_JADEFIRE_BOLT, 21000);
+            events.ScheduleEvent(EVENT_FIRE_WALL, 46000);
+        }
+
+        void EnterEvadeMode()
+        {
+            events.Reset();
+            summons.DespawnAll();
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+
+            if (EventProgress)
             {
-                events.Reset();
-                _Reset();
-
-                for (auto itr : _wallList)
-                    itr->AI()->DoAction(WALL_ACTION_RETURN);
-
-                summons.DespawnAll();
-                me->SetWalk(true);
-                me->setActive(true);
+                events.ScheduleEvent(2, 5500);
+                if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                    if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                        Shao->AI()->DoAction(ACTION_YULON_FAIL);
             }
+            else
+                events.ScheduleEvent(2, 5000);
 
-            void EnterCombat(Unit* /*target*/) override
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->ToPlayer())
+                Talk(SAY_YULON_PLAYER_DEATH);
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
             {
-                death = false;
-                me->SetWalk(false);
-                Talk(SAY_AGGRO);
-                events.ScheduleEvent(EVENT_TIMER_HEALTH_POOL, 10000);
-                events.ScheduleEvent(EVENT_TIMER_JADE_BREATH, 6000);
-                events.ScheduleEvent(EVENT_TIMER_JADEFIRE_WALL, 40000);
-                events.ScheduleEvent(EVENT_TIMER_JADEFIRE_BOLT, 15000);
-                events.ScheduleEvent(EVENT_TIMER_JADEFIRE_BUFFET, 30000);
+                case ACTION_MOVE_CENTR_POSS:
+                    EventProgress = true;
+                    me->SetHomePosition(CentrPos[0]);
+                    me->GetMotionMaster()->MovePoint(1, CentrPos[0]);
+                    break;
             }
+        }
 
-            void DamageTaken(Unit* caster, uint32 &dmg) override
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (damage >= me->GetHealth())
             {
-                if (dmg >= me->GetHealth())
+                damage = 0;
+
+                if (EventProgress)
                 {
-                    if (death)
-                        return;
-
-                    std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-                    for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                        if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                            if (unit->IsWithinDist(me, 100.0f))
-                                if (unit->ToPlayer())
-                                    unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-
-                    dmg = 0;
-                   
-                    Talk(SAY_DEATH);
-                    
+                    EventProgress = false;
+                    QuestCredit();
                     me->setFaction(35);
-                   
-                    me->StopMoving();
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->Clear();
-                    me->CombatStop(true);
-                    me->SetHealth(me->GetMaxHealth());
-
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->DeleteThreatList();
-
-                    events.Reset();
-                    summons.DespawnAll();
-                    events.ScheduleEvent(EVENT_TIMER_SHAO_DO_OUTRO, 20000);
-                    events.ScheduleEvent(EVENT_TIMER_DEATH, 13000);
-                    death = true;
+                    Talk(SAY_YULON_END);
+                    if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                        if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                            Shao->AI()->DoAction(ACTION_YULON_END);
                 }
+                EnterEvadeMode();
             }
-            
+        }
 
-            void MovementInform(uint32 type, uint32 point)
+        void QuestCredit()
+        {
+            std::list<HostileReference*> ThreatList = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
             {
-                if (type != POINT_MOTION_TYPE)
-                    return;
+                Player *pTarget = Player::GetPlayer(*me, (*itr)->getUnitGuid());
+                if (!pTarget)
+                    continue;
 
-                if (point == 1)
-                {
-                    events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO, 15000);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    //me->setFaction(FACTION_HOSTILE_NEUTRAL);
-                    me->GetCreatureListWithEntryInGrid(_wallList, MOB_JADEFIRE_WALL, 250.0f);
-                    me->SetHomePosition(_timelessIsleMiddle);
-                }
+                pTarget->KilledMonsterCredit(me->GetEntry());
             }
+        }
 
-            void KilledUnit(Unit* who)
+        void JustSummoned(Creature* summon)
+        {
+            summons.Summon(summon);
+
+            if (summon->GetEntry() == NPC_JADEFIRE_BLAZE)
+                summon->AI()->DoCast(SPELL_JADEFIRE_BLAZE);
+
+            if (summon->GetEntry() == NPC_JADEFIRE_WALL)
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    Talk(SAY_KILL);
-                        return;
+                summon->AI()->DoCast(SPELL_JADEFIRE_WALL);
+                float x, y, z;
+                summon->GetClosePoint(x, y, z, me->GetObjectSize(), 150.0f);
+                summon->GetMotionMaster()->MovePoint(1, x, y, z);
+                summon->DespawnOrUnsummon(15000);
             }
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 1)
+            {
+                Talk(SAY_ENTER_POS);
+                me->SetFacingTo(1.5f);
+                events.ScheduleEvent(1, 15000);
+            }
+        }
 
             void UpdateHealth()
             {
@@ -211,152 +237,68 @@ class boss_yu_lon_celestial : public CreatureScript
                     me->SetMaxHealth(std::min<uint32>((me->GetMaxHealth() * count), MAX_HEALTH_POINTS));
                     me->SetHealth(newhp - hp);
                 }
-            }; 
-
-            void DoAction(const int32 id)
-            {
-                switch (id)
-                {
-                    case ACTION_JADEFIRE_WALL:
-                    {
-                        uint8 _random = urand(0, WALLS_MAX-1);
-                        uint8 _count = 0;
-                        for (auto wall : _wallList)
-                        {
-                            wall->SetFacingTo(MIDDLE_FACING_ANGLE);
-                            if (_count != _random)
-                                wall->AddAura(SPELL_JADEFIRE_WALL_VISUAL, wall);
-
-                            wall->AI()->DoAction(WALL_ACTION_GO);
-                            _count++;
-                        }
-
-                        Talk(urand(SAY_WALL, SAY_WALL_3));
-                        break;
-                    }
-                    case ACTION_JADEFIRE_BLAZE:
-                    {
-                        std::list<Unit*> _targets;
-                        me->GetAttackableUnitListInRange(_targets, 50.0f);
-                        _targets.remove_if(PlayerCheck());
-
-                        if (!_targets.empty())
-                            if (auto target = JadeCore::Containers::SelectRandomContainerElement(_targets))
-                                if (target->GetTypeId() == TYPEID_PLAYER)
-                                    me->CastSpell(target, SPELL_JADEFIRE_BLAZE_BOLT, true);
-                        break;
-                    }
-                    default: break;
-                }
             };
 
-            void UpdateAI(const uint32 diff)
-            {
-                events.Update(diff);
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_TIMER_SHAO_DO_INTRO:
-                        {
-                            Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE, 15000);
-                            break;
-                        }
-                        case EVENT_TIMER_SHAO_DO_INTRO_ATTACKABLE:
-                        {
-                            me->setFaction(190);
-                            me->SetMaxHealth(INITIAL_HEALTH_POINTS);
-                            break;
-                        }
-                        case EVENT_TIMER_JADEFIRE_BUFFET:
-                        {
-                            DoCastToAllHostilePlayers(SPELL_JADEFIRE_BUFFET);
-                            events.ScheduleEvent(EVENT_TIMER_JADEFIRE_BUFFET, 30000);
-                            break;
-                        }
-                        case EVENT_TIMER_JADEFIRE_BOLT:
-                        {
-                            if (me->HasUnitState(UNIT_STATE_CASTING))
-                            {
-                                events.ScheduleEvent(EVENT_TIMER_JADEFIRE_BOLT, 1500);
-                                return;
-                            }
-
-                            DoAction(ACTION_JADEFIRE_BLAZE);
-                            events.ScheduleEvent(EVENT_TIMER_JADEFIRE_BOLT, 15000);
-                            break;
-                        }
-                        case EVENT_TIMER_JADEFIRE_WALL:
-                        {
-                            DoAction(ACTION_JADEFIRE_WALL);
-                            events.ScheduleEvent(EVENT_TIMER_JADEFIRE_WALL, 60000);
-                            break;
-                        }
-                        case EVENT_TIMER_JADE_BREATH:
-                        {
-                            if (me->HasUnitState(UNIT_STATE_CASTING))
-                                return;
-
-                            DoCast(SPELL_JADEFIRE_BREATH);
-                            events.ScheduleEvent(EVENT_TIMER_JADE_BREATH, 10000);
-                            break;
-                        }
-                        case EVENT_TIMER_SHAO_DO_OUTRO:
-                        {
-                            if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                shao->AI()->Talk(EMPEROR_TALK_OUTRO_YULON);
-                            break;
-                        }
-                        case EVENT_TIMER_DEATH:
-                        {
-                            if (death)
-                            {
-                                if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                    shao->AI()->DoAction(ACTION_XUEN);
-
-								Movement::MoveSplineInit init(*me);
-								Position home = me->GetHomePosition();
-								init.MoveTo(float(-746.665405), float(-5083.675781), float(-6.227572));
-								init.SetWalk(true);
-								init.SetFacing(float(0.952623));
-								init.Launch();
-
-                                death = false;
-                            }
-                            break;
-                        }
-                        case EVENT_TIMER_HEALTH_POOL:
-                        {
-                            UpdateHealth();
-                            events.ScheduleEvent(EVENT_TIMER_HEALTH_POOL, 10000);
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
-
-                if (!death)
-                {
-                    if (!UpdateVictim())
-                        return;
-                }
-
-                DoMeleeAttackIfReady();
-            }
-
-            private:
-                bool death = false;
-                EventMap events;
-                std::list<Creature*> _wallList;
-        };
-
-
-        CreatureAI* GetAI(Creature* creature) const
+        void UpdateAI(uint32 diff)
         {
-            return new boss_yu_lon_celestialAI(creature);
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+            EnterEvadeIfOutOfCombatArea(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case 1:
+                        me->setFaction(190);
+                        break;
+                    case EVENT_JADEFLAME_BUFFET:
+                        DoCast(SPELL_JADEFLAME_BUFFET);
+                        events.ScheduleEvent(EVENT_JADEFLAME_BUFFET, 20000);
+                        break;
+                    case EVENT_JADEFIRE_BREATH:
+                        if (Unit* target = me->getVictim())
+                            DoCast(target, SPELL_JADEFIRE_BREATH);
+                        events.ScheduleEvent(EVENT_JADEFIRE_BREATH, 18000);
+                        break;
+                    case EVENT_JADEFIRE_BOLT:
+                        DoCast(SPELL_JADEFIRE_BOLT);
+                        events.ScheduleEvent(EVENT_JADEFIRE_BOLT, 18000);
+                        break;
+                    case EVENT_FIRE_WALL:
+                    {
+                        Talk(urand(SAY_YULON_WALL_1, SAY_YULON_WALL_2));
+                        bool wall = true;
+                        for(uint8 i = 0; i < 7; i++)
+                        {
+                            if (wall && i != 7 && roll_chance_i(15))
+                                wall = false;
+                            else
+                                me->SummonCreature(72020, WallPos[i]);
+                        }
+                        events.ScheduleEvent(EVENT_FIRE_WALL, 60000);
+                        break;
+                    }
+                    case 2:
+                        DoCast(SPELL_CELESTIAL_SPAWN);
+                        me->NearTeleportTo(summonPos[2].GetPositionX(), summonPos[2].GetPositionY(), summonPos[2].GetPositionZ(), summonPos[2].GetOrientation());
+                        me->SetHomePosition(summonPos[2]);
+                        break;
+                }
+            }          
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_yulonAI (creature);
+    }
 };
 
 // Jadefire Wall
@@ -476,5 +418,5 @@ class mob_jadefire_wall : public CreatureScript
 void AddSC_boss_yu_lon()
 {
     new mob_jadefire_wall();
-    new boss_yu_lon_celestial();
+    new boss_yulon();
 }

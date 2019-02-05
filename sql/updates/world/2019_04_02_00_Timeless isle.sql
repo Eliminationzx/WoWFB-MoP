@@ -26,3 +26,20 @@ INSERT INTO `locales_creature_text` (`entry`, `textGroup`, `id`, `text_loc1`, `t
 INSERT INTO `locales_creature_text` (`entry`, `textGroup`, `id`, `text_loc1`, `text_loc2`, `text_loc3`, `text_loc4`, `text_loc5`, `text_loc6`, `text_loc7`, `text_loc8`, `text_loc9`, `text_loc10`) VALUES ('71955', '4', '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Слушайте внутренний голос и стремитесь к истине!', NULL, NULL);
 INSERT INTO `locales_creature_text` (`entry`, `textGroup`, `id`, `text_loc1`, `text_loc2`, `text_loc3`, `text_loc4`, `text_loc5`, `text_loc6`, `text_loc7`, `text_loc8`, `text_loc9`, `text_loc10`) VALUES ('71955', '5', '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Думайте о последствиях своих действий!', NULL, NULL);
 
+delete from creature where id in (71952,71953,71955,71954);
+update creature_template set ScriptName = 'npc_emperor_shaohao' where entry = 73303;
+update creature_template set speed_walk = 2, dmg_multiplier = 8, ScriptName = 'boss_chiji' where entry = 71952;
+update creature_template set speed_walk = 2, dmg_multiplier = 8, ScriptName = 'boss_xuen' where entry = 71953;
+update creature_template set speed_walk = 2, dmg_multiplier = 8, ScriptName = 'boss_yulon' where entry = 71955;
+update creature_template set speed_walk = 2, speed_run = 3, dmg_multiplier = 8, ScriptName = 'boss_niuzao' where entry = 71954;
+update creature_template set flags_extra = 130 where entry in (71971, 71978, 72016, 72020);
+
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_flag`, `action`, `action_chance`, `inverse_formation_angle`, `wpguid`) VALUES 
+(7195400, 1, -573.247, -5024.76, -6.27667, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 2, -574.627, -5074.96, -6.27667, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 3, -674.698, -5074.79, -6.27722, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 4, -741.14, -5074.97, -6.27722, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 5, -741.446, -5017.58, -6.27723, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 6, -741.128, -4958.48, -6.27723, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 7, -652.9, -4958.67, -6.27723, 0, 1, 0, 0, 100, 0, 0),
+(7195400, 8, -572.782, -4960.81, -6.27723, 0, 1, 0, 0, 100, 0, 0);

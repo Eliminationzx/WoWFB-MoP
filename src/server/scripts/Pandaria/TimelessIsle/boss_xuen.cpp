@@ -30,139 +30,119 @@ public:
     }
 };
 
-enum Spells
-{
-	SPELL_AGILITY                   = 144631,
-    SPELL_CHI_BARRAGE_TRIGGER       = 144643,
-    SPELL_CHI_BARRAGE               = 144642,
-    SPELL_CRACKLING_LIGHTNING       = 144635,
-    SPELL_LEAP                      = 144640,
-    SPELL_SPECTRAL_SWIPE_TRIGGER    = 144652,
-    SPELL_SPECTRAL_SWIPE            = 144638
-};
-
-enum Events
-{
-    EVENT_SPECTRAL_SWIPES           = 1,
-    EVENT_CHI_BARRAGE_AOE,
-    EVENT_CRACKLING_LIGHTNING,
-    EVENT_AGILITY_SELF_BUFF,
-    EVENT_LEAP,
-    EVENT_DEFEATED,
-    EVENT_DEATH ,
-    EVENT_SHAO_DO_INTRO,
-    EVENT_SHAO_DO_INTRO_ATTACKABLE,
-    EVENT_SHAO_DO_OUTRO
-};
-
-enum Timers
-{
-    TIMER_SPECTRAL_SWIPES           = 5000,
-    TIMER_CHI_BARRAGE_AOE           = 20000,
-    TIMER_CRACKLING_LIGHTNING       = 30000,
-    TIMER_AGILITY_SELF_BUFF         = 40000,
-    TIMER_LEAP                      = 30000,
-    TIMER_DEFEATED                  = 1000
-};
-
-enum Actions
-{
-	ACTION_DEFEATED					= 0
-};
-
-enum Says
-{
-    SAY_AGGRO = 0,
-    SAY_INTRO = 1,
-    SAY_DEATH = 2,
-    SAY_KILL = 3,
-    SAY_AGILITY = 4,
-    SAY_CHI = 5,
-    SAY_CRACKLING = 6
-};
-
 class boss_xuen : public CreatureScript
 {
-    public:
-        boss_xuen() : CreatureScript("boss_xuen") { }
+public:
+    boss_xuen() : CreatureScript("boss_xuen") { }
 
-        struct boss_xuenAI : public BossAI
+    struct boss_xuenAI : public ScriptedAI
+    {
+        boss_xuenAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+        bool EventProgress;
+
+        void Reset() 
         {
-            boss_xuenAI(Creature* creature) : BossAI(creature, BOSS_XUEN) { }
+            EventProgress = false;
+            me->setActive(true);
+            me->setFaction(35);
+            me->SetWalk(true);
+            me->RemoveAllAuras();
+        }
 
-            void Reset()
+        void EnterCombat(Unit* who)
+        {
+            Talk(SAY_AGGRO);
+            events.ScheduleEvent(EVENT_CHI_BARRAGE, 18000);
+            events.ScheduleEvent(EVENT_LIGHTNING, 36000);
+            events.ScheduleEvent(EVENT_LEAP, 12000);
+            events.ScheduleEvent(EVENT_SPECTRAL_SWIPE, 8000);
+            events.ScheduleEvent(EVENT_AGILITY, 28000);
+        }
+
+        void EnterEvadeMode()
+        {
+            events.Reset();
+            me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+
+            if (EventProgress)
             {
-                events.Reset();
-                _Reset();               
-                
-                me->SetWalk(true);
-                me->setActive(true);
+                events.ScheduleEvent(2, 5500);
+                if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                    if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                        Shao->AI()->DoAction(ACTION_XUEN_FAIL);
             }
+            else
+                events.ScheduleEvent(2, 5000);
 
-            void EnterCombat(Unit* /*target*/) override
+            ScriptedAI::EnterEvadeMode();
+        }
+
+        void KilledUnit(Unit* victim)
+        {
+            if (victim->ToPlayer())
+                Talk(SAY_XUEN_PLAYER_DEATH);
+        }
+
+        void DoAction(const int32 action)
+        {
+            switch (action)
             {
-                me->SetWalk(false);
-                death = false;
-                Talk(SAY_AGGRO);
-                events.ScheduleEvent(urand(EVENT_CHI_BARRAGE_AOE, EVENT_AGILITY_SELF_BUFF), urand(15000, 25000));
-                events.ScheduleEvent(EVENT_SPECTRAL_SWIPES, urand(5000, 15000));
+                case ACTION_MOVE_CENTR_POSS:
+                    EventProgress = true;
+                    me->SetHomePosition(CentrPos[0]);
+                    me->GetMotionMaster()->MovePoint(1, CentrPos[0]);
+                    break;
             }
+        }
 
-            void DamageTaken(Unit* caster, uint32 &dmg) override
+        void DamageTaken(Unit* /*who*/, uint32& damage)
+        {
+            if (damage >= me->GetHealth())
             {
-                if (dmg >= me->GetHealth())
+                damage = 0;
+
+                if (EventProgress)
                 {
-                    if (death)
-                        return;
-
-                    std::list<HostileReference*>& threatlist = me->getThreatManager().getThreatList();
-                    for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                        if (Unit* unit = Unit::GetUnit(*me, (*itr)->getUnitGuid()))
-                            if (unit->IsWithinDist(me, 100.0f))
-                                if (unit->ToPlayer())
-                                    unit->ToPlayer()->KilledMonsterCredit(me->GetEntry(), me->GetGUID());
-
-                    dmg = 0;
-                    Talk(SAY_DEATH);
-                    
+                    EventProgress = false;
+                    QuestCredit();
                     me->setFaction(35);
-                   
-                    me->StopMoving();
                     me->RemoveAllAuras();
-                    me->GetMotionMaster()->Clear();
-                    me->CombatStop(true);
-                    me->SetHealth(me->GetMaxHealth());
-
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    me->DeleteThreatList();
-
-                    events.Reset();
-                    events.ScheduleEvent(EVENT_SHAO_DO_OUTRO, 20000);
-                    events.ScheduleEvent(EVENT_DEATH, 13000);
-                    death = true;
+                    Talk(SAY_XUEN_END);
+                    if (me->ToTempSummon() && me->ToTempSummon()->GetSummoner())
+                        if (Creature* Shao = me->ToTempSummon()->GetSummoner()->ToCreature())
+                            Shao->AI()->DoAction(ACTION_XUEN_END);
                 }
+                EnterEvadeMode();
             }
+        }
 
-            void MovementInform(uint32 type, uint32 point)
+        void QuestCredit()
+        {
+            std::list<HostileReference*> ThreatList = me->getThreatManager().getThreatList();
+            for (std::list<HostileReference*>::const_iterator itr = ThreatList.begin(); itr != ThreatList.end(); ++itr)
             {
-                if (type != POINT_MOTION_TYPE)
-                    return;
+                Player *pTarget = Player::GetPlayer(*me, (*itr)->getUnitGuid());
+                if (!pTarget)
+                    continue;
 
-                if (point == 1)
-                {
-                    events.ScheduleEvent(EVENT_SHAO_DO_INTRO, 15000);
-                    me->SetFacingTo(MIDDLE_FACING_ANGLE);
-                    //me->setFaction(FACTION_HOSTILE_NEUTRAL);
-                    me->SetHomePosition(_timelessIsleMiddle);
-                }
+                pTarget->KilledMonsterCredit(me->GetEntry());
             }
+        }
 
-            void KilledUnit(Unit* who)
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE)
+                return;
+
+            if (id == 1)
             {
-                if (who->GetTypeId() == TYPEID_PLAYER)
-                    Talk(SAY_KILL);
-                        return;
+                Talk(SAY_ENTER_POS);
+                me->SetFacingTo(1.5f);
+                events.ScheduleEvent(1, 15000);
             }
+        }
 
             void UpdateHealth()
             {
@@ -186,115 +166,66 @@ class boss_xuen : public CreatureScript
                     me->SetMaxHealth(std::min<uint32>((me->GetMaxHealth() * count), MAX_HEALTH_POINTS));
                     me->SetHealth(newhp - hp);
                 }
-            }; 
+            };
 
-            void UpdateAI(const uint32 diff)
-            {
-                events.Update(diff);
-                if (me->HasUnitState(UNIT_STATE_CASTING))
-                    return;
-
-                while (uint32 eventId = events.ExecuteEvent())
-                {
-                    switch (eventId)
-                    {
-                        case EVENT_SHAO_DO_INTRO:
-                        {
-                            Talk(SAY_INTRO);
-                            events.ScheduleEvent(EVENT_SHAO_DO_INTRO_ATTACKABLE, 15000);
-                            break;
-                        }
-                        case EVENT_SHAO_DO_INTRO_ATTACKABLE:
-                        {
-                            me->setFaction(190);
-                            me->SetMaxHealth(INITIAL_HEALTH_POINTS);
-                            break;
-                        }
-                        case EVENT_SPECTRAL_SWIPES:
-                        {
-                            DoCast(SPELL_SPECTRAL_SWIPE);
-                            events.ScheduleEvent(EVENT_SPECTRAL_SWIPES, urand(10000, 15000)); 
-                            break;
-                        }
-                        case EVENT_AGILITY_SELF_BUFF:
-                        {
-                            DoCast(me, SPELL_AGILITY);
-                            Talk(SAY_AGILITY);
-                            events.ScheduleEvent(urand(EVENT_CHI_BARRAGE_AOE, EVENT_AGILITY_SELF_BUFF), urand(15000, 25000));
-                            break;
-                        }
-                        case EVENT_LEAP:
-                        {
-                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f))
-                                DoCast(target, SPELL_LEAP);
-                            break;
-                        }
-                        case EVENT_CRACKLING_LIGHTNING:
-                        {
-                            if (Unit* random_target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                            {
-                                Talk(SAY_CRACKLING);
-                                DoCast(random_target, SPELL_CRACKLING_LIGHTNING, false);
-                            }
-
-                            events.ScheduleEvent(urand(EVENT_CHI_BARRAGE_AOE, EVENT_AGILITY_SELF_BUFF), urand(15000, 25000));
-                            events.ScheduleEvent(EVENT_LEAP, 30000);
-                            break;
-                        }
-                        case EVENT_CHI_BARRAGE_AOE:
-                        {
-                            Talk(SAY_CHI);
-                            DoCast(SPELL_CHI_BARRAGE);
-                            events.ScheduleEvent(urand(EVENT_CHI_BARRAGE_AOE, EVENT_AGILITY_SELF_BUFF), urand(15000, 25000));
-                            break;
-                        }
-                        case EVENT_SHAO_DO_OUTRO:
-                        {
-                            if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                shao->AI()->Talk(EMPEROR_TALK_OUTRO_XUEN);
-                            break;
-                        }
-                        case EVENT_DEATH:
-                        {
-                            if (death)
-                            {
-                                if (Creature* shao = me->FindNearestCreature(NPC_EMPEROR_SHAOHAO_TI, 300.0f, true))
-                                    shao->AI()->DoAction(ACTION_CHIJI);
-
-								Movement::MoveSplineInit init(*me);
-								Position home = me->GetHomePosition();
-								init.MoveTo(float(-747.933594), float(-4947.194824), float(-6.276601));
-								init.SetWalk(true);
-                                init.SetFacing(float(5.700478));
-								init.Launch();
-
-                                //me->DisappearAndDie();
-                                death = false;
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
-
-                if (!death)
-                    if (!UpdateVictim())
-                        return;
-
-                DoMeleeAttackIfReady();
-            }
-
-            private:
-                bool death = false;
-                EventMap events;
-        };
-
-
-        CreatureAI* GetAI(Creature* creature) const
+        void UpdateAI(uint32 diff)
         {
-            return new boss_xuenAI(creature);
+            if (!UpdateVictim() && me->isInCombat())
+                return;
+
+            events.Update(diff);
+            EnterEvadeIfOutOfCombatArea(diff);
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+
+            while (uint32 eventId = events.ExecuteEvent())
+            {
+                switch (eventId)
+                {
+                    case 1:
+                        me->setFaction(190);
+                        break;
+                    case EVENT_CHI_BARRAGE:
+                        Talk(SAY_XUEN_BARRAGE);
+                        DoCast(SPELL_CHI_BARRAGE);
+                        events.ScheduleEvent(EVENT_CHI_BARRAGE, 34000);
+                        break;
+                    case EVENT_LIGHTNING:
+                        Talk(SAY_XUEN_LIGHTNING);
+                        DoCast(SPELL_CRACKLING_LIGHTNING);
+                        events.ScheduleEvent(EVENT_LIGHTNING, 46000);
+                        break;
+                    case EVENT_LEAP:
+                        if (Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 70.0f, true))
+                            DoCast(pTarget, SPELL_LEAP);
+                        events.ScheduleEvent(EVENT_LEAP, 48000);
+                        break;
+                    case EVENT_SPECTRAL_SWIPE:
+                        if (Unit* target = me->getVictim())
+                            DoCast(target, SPELL_SPECTRAL_SWIPE);
+                        events.ScheduleEvent(EVENT_SPECTRAL_SWIPE, 14000);
+                        break;
+                    case EVENT_AGILITY:
+                        Talk(SAY_XUEN_AGGILITY);
+                        DoCast(SPELL_AGILITY);
+                        events.ScheduleEvent(EVENT_AGILITY, 60000);
+                        break;
+                    case 2:
+                        DoCast(SPELL_CELESTIAL_SPAWN);
+                        me->NearTeleportTo(summonPos[1].GetPositionX(), summonPos[1].GetPositionY(), summonPos[1].GetPositionZ(), summonPos[1].GetOrientation());
+                        me->SetHomePosition(summonPos[1]);
+                        break;
+                }
+            }
+            DoMeleeAttackIfReady();
         }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_xuenAI (creature);
+    }
 };
 
 // Chi Barrage - 144642
