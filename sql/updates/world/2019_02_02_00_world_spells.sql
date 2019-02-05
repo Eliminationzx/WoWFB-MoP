@@ -46,3 +46,12 @@ INSERT INTO spell_script_names VALUE
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_time_lost_wisdom';
 INSERT INTO spell_script_names VALUE 
 (24390, 'spell_time_lost_wisdom');
+
+-- Eye of Kilrogg
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_warl_eye_of_kilrogg';
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_warl_eye_of_kilrogg_passive';
+INSERT INTO spell_script_names VALUE 
+(126, 'spell_warl_eye_of_kilrogg'),
+(2585, 'spell_warl_eye_of_kilrogg_passive');
+
+UPDATE creature_template_addon SET auras='2585' WHERE entry =4277;
