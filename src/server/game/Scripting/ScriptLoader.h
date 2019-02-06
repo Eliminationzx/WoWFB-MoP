@@ -30,6 +30,7 @@ void AddOutlandScripts();
 void AddNorthrendScripts();
 void AddPandarieScripts();
 void AddBattlegroundScripts();
+void AddEventScripts();
 void AddOutdoorPvPScripts();
 void AddCustomScripts();
 void AddScenarioScripts();

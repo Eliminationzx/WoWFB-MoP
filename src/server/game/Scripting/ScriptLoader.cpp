@@ -631,6 +631,9 @@ void AddSC_shattrath_city();
 void AddSC_terokkar_forest();
 void AddSC_zangarmarsh();
 
+// Events
+void AddSC_event_childrens_week();
+
 // Cataclysm
 void AddSC_deepholm();
 
@@ -964,6 +967,7 @@ void AddScripts()
     AddKalimdorScripts();
     AddOutlandScripts();
     AddNorthrendScripts();
+    AddEventScripts();
     AddPandarieScripts();
     AddBattlegroundScripts();
     AddOutdoorPvPScripts();
@@ -1718,6 +1722,13 @@ void AddNorthrendScripts()
     AddSC_zuldrak();
     AddSC_crystalsong_forest();
     AddSC_isle_of_conquest();
+#endif
+}
+
+void AddEventScripts()
+{
+#ifdef SCRIPTS
+    AddSC_event_childrens_week();
 #endif
 }
 

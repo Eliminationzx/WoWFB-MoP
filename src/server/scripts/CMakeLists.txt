@@ -52,6 +52,7 @@ if(SCRIPTS)
   include(Pandaria/CMakeLists.txt)
   include(Scenarios/CMakeLists.txt)
   include(Toys/CMakeLists.txt)
+  include(Events/CMakeLists.txt)
 endif()
 
 MACRO( auto_group ProjectDirectory ProjectSources )
