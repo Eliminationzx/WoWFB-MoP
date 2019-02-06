@@ -349,6 +349,7 @@ class Spell
         void EffectQuestComplete(SpellEffIndex effIndex);
         void EffectCreateItem(SpellEffIndex effIndex);
         void EffectCreateItem2(SpellEffIndex effIndex);
+        void EffectEternityEmbrace(SpellEffIndex effIndex);
         void EffectCreateRandomItem(SpellEffIndex effIndex);
         void EffectPersistentAA(SpellEffIndex effIndex);
         void EffectEnergize(SpellEffIndex effIndex);

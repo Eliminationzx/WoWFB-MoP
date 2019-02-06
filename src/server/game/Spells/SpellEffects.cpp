@@ -277,7 +277,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectRemoveAura,                               //203 SPELL_EFFECT_REMOVE_AURA_2
     &Spell::EffectBattlePetUpgrade,                         //204 SPELL_EFFECT_204
     &Spell::EffectNULL,                                     //205 SPELL_EFFECT_205
-    &Spell::EffectNULL,                                     //206 SPELL_EFFECT_206
+    &Spell::EffectEternityEmbrace,                          //206 SPELL_EFFECT_ETERNITY_EMBRACE
     &Spell::EffectNULL,                                     //207 SPELL_EFFECT_207
     &Spell::EffectNULL,                                     //208 SPELL_EFFECT_208
     &Spell::EffectNULL,                                     //209 SPELL_EFFECT_209
@@ -2981,6 +2981,27 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
             player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);    // create some random items
     }
     // TODO: ExecuteLogEffectCreateItem(i, m_spellInfo->Effects[i].ItemType);
+}
+
+void Spell::EffectEternityEmbrace(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
+        return;
+
+    Item* item = m_targets.GetItemTarget();
+    if (!item)
+        return;
+
+    Player* player = m_caster->ToPlayer();
+    if (item->GetEntry() && player)
+    {
+        if (m_spellInfo->IsLootCrafting())
+        {
+            uint32 count = 1;
+            player->DestroyItemCount(item->GetEntry(), count, true);
+            player->AutoStoreLoot(item->GetTemplate()->Spells[0].SpellId, LootTemplates_Spell, 535);
+        }
+    }
 }
 
 void Spell::EffectCreateRandomItem(SpellEffIndex /*effIndex*/)

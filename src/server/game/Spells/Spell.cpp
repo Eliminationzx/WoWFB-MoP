@@ -8782,6 +8782,19 @@ SpellCastResult Spell::CheckItems()
                 }
                 break;
             }
+            case SPELL_EFFECT_ETERNITY_EMBRACE:
+            {
+                if (ItemTemplate const* itemProto = m_targets.GetItemTarget()->GetTemplate())
+                {
+                    if (p_caster->CanUseItem(itemProto) != EQUIP_ERR_OK)
+                        return SPELL_FAILED_BAD_TARGETS;
+                    if (!(itemProto->Flags & ITEM_FLAG_EXTRA_USES_RESOURCES) || itemProto->ItemLevel != 496 || itemProto->ItemId == 104347) //Timeless Curio cannot be target
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else
+                    return SPELL_FAILED_BAD_TARGETS;
+                break;
+            }
             case SPELL_EFFECT_ENCHANT_ITEM:
                 if (m_spellInfo->Effects[i].ItemType && m_targets.GetItemTarget()
                     && (m_targets.GetItemTarget()->IsVellum()))
