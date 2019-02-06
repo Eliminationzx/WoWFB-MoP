@@ -2091,3 +2091,25 @@ public:
 		return new npc_cw_human_orphanAI(creature);
 	}
 };
+
+void AddSC_event_childrens_week()
+{
+    new npc_elder_kekek();
+    new npc_high_oracle_soo_roo();
+    new npc_winterfin_playmate();
+    new npc_snowfall_glade_playmate();
+    new npc_the_etymidian();
+    new npc_the_biggest_tree();
+    new at_bring_your_orphan_to();
+    new npc_cw_area_trigger();
+    new npc_alexstraza_the_lifebinder();
+    new npc_cw_redhound_twoseater_trigger();
+    new npc_cw_redhound_twoseater_vehicle();
+    new npc_cw_rental_chopper_trigger();
+    new npc_cw_rental_chopper_vehicle();
+    new npc_cw_salandria();
+    new npc_cw_oracle_orphan();
+    new npc_cw_wolvar_orphan();
+    new npc_cw_orcish_orphan();
+    new npc_cw_human_orphan();
+}
