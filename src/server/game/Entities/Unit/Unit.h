@@ -2049,6 +2049,7 @@ class Unit : public WorldObject
 
         // Event handler
         EventProcessor m_Events;
+        void CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool triggered = false);
 
         // stat system
         bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);

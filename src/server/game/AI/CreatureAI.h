@@ -79,6 +79,8 @@ class CreatureAI : public UnitAI
 
     public:
         void Talk(uint8 id, uint64 WhisperGuid = 0, uint32 range = 0);
+        void TalkToZone(uint8 id, uint64 WhisperGuid = 0);
+		void TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint64 const& whisperGuid = 0);
         explicit CreatureAI(Creature* creature) : UnitAI(creature), me(creature), m_MoveInLineOfSight_locked(false), m_canSeeEvenInPassiveMode(false) {}
 
         virtual ~CreatureAI() {}

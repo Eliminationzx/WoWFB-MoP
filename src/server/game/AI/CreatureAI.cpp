@@ -201,3 +201,38 @@ void CreatureAI::EnterEvadeMode()
     if (!me->getVictim())
         AttackStart(attacker);
 }*/
+
+void CreatureAI::TalkToZone(uint8 id, uint64 WhisperGuid)
+{
+	sCreatureTextMgr->SendChat(me, id, WhisperGuid, CHAT_MSG_ADDON, LANG_ADDON, TEXT_RANGE_ZONE);
+}
+
+void CreatureAI::TalkWithDelay(uint32 const& delay, uint32 const& groupId, uint64 const& whisperGuid)
+{
+	class TalkDelayEvent : public BasicEvent
+	{
+	public:
+		TalkDelayEvent(Creature* _me, uint32 const _groupId, uint64 const _whisperGuid) : me(_me), groupId(_groupId), whisperGuid(_whisperGuid) { }
+
+		bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+		{
+			if (whisperGuid != 0 && me && me->IsInWorld())
+			{
+				if (Unit* target = ObjectAccessor::GetUnit(*me, whisperGuid))
+					if (target->IsInWorld() && target->IsInMap(me))
+						me->AI()->Talk(groupId, whisperGuid);
+			}
+			else
+				me->AI()->Talk(groupId);
+			return true;
+		}
+
+	private:
+		Creature* me;
+		uint32 const groupId;
+		uint64 const whisperGuid;
+	};
+
+	if (me)
+		me->m_Events.AddEvent(new TalkDelayEvent(me, groupId, whisperGuid), me->m_Events.CalculateTime(delay));
+}

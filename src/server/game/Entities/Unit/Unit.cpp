@@ -25351,3 +25351,31 @@ void Unit::GetZoneAndAreaId(uint32& p_ZoneId, uint32& p_AreaId, bool p_ForceReca
     *(const_cast<uint32*>(&m_LastZoneId)) = p_ZoneId;
     *(const_cast<uint32*>(&m_LastAreaId)) = p_AreaId;
 }
+
+void Unit::CastWithDelay(uint32 delay, Unit* victim, uint32 spellid, bool triggered)
+{
+	if (!this || !IsInWorld() || !victim || !victim->IsInWorld())
+		return;
+
+	class CastDelayEvent : public BasicEvent
+	{
+	public:
+		CastDelayEvent(Unit* _me, Unit* _victim, uint32 const& _spellId, bool const& _triggered) :
+			me(_me), victim(_victim), spellId(_spellId), triggered(_triggered) { }
+
+		bool Execute(uint64 /*execTime*/, uint32 /*diff*/)
+		{
+			if (me && me->IsInWorld() && victim && victim != NULL && victim->IsInWorld())
+				me->CastSpell(victim, spellId, triggered);
+			return true;
+		}
+
+	private:
+		Unit* me;
+		Unit* victim;
+		uint32 const spellId;
+		bool const triggered;
+	};
+
+	m_Events.AddEvent(new CastDelayEvent(this, victim, spellid, triggered), m_Events.CalculateTime(delay));
+}
