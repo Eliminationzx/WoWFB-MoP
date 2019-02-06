@@ -266,10 +266,10 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectBattlePetUnCage,                          //192 SPELL_EFFECT_UNCAGE_PET
     &Spell::EffectNULL,                                     //193 SPELL_EFFECT_193
     &Spell::EffectNULL,                                     //194 SPELL_EFFECT_194
-    &Spell::EffectNULL,                                     //195 SPELL_EFFECT_195
-    &Spell::EffectNULL,                                     //196 SPELL_EFFECT_196
-    &Spell::EffectNULL,                                     //197 SPELL_EFFECT_197
-    &Spell::EffectNULL,                                     //198 SPELL_EFFECT_198
+    &Spell::EffectPlaySceneObject,                          //195 SPELL_EFFECT_PLAY_SCENEOBJECT_3
+    &Spell::EffectPlaySceneObject,                          //196 SPELL_EFFECT_PLAY_SCENEOBJECT_4
+    &Spell::EffectPlaySceneObject,                          //197 SPELL_EFFECT_PLAY_SCENEOBJECT_5
+    &Spell::EffectPlaySceneObject,                          //198 SPELL_EFFECT_PLAY_SCENEOBJECT_6
     &Spell::EffectNULL,                                     //199 SPELL_EFFECT_199
     &Spell::EffectBattlePetHeal,                            //200 SPELL_EFFECT_HEAL_BATTLEPET_PCT
     &Spell::EffectBattlePetsUnlock,                         //201 SPELL_EFFECT_BATTLE_PET_UNLOCK
