@@ -3670,6 +3670,52 @@ class spell_item_multistrike_heal : public SpellScriptLoader
         }
 };
 
+enum BookOfTheAges
+{
+    SPELL_TIMELESS_AGILITY   = 147355,
+    SPELL_TIMELESS_INTELLECT = 147357,
+    SPELL_TIMELESS_STRENGTH  = 147359
+};
+
+class spell_item_book_of_the_ages : public SpellScriptLoader
+{
+    public:
+        spell_item_book_of_the_ages() : SpellScriptLoader("spell_item_book_of_the_ages") { }
+
+        class spell_item_book_of_the_ages_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_item_book_of_the_ages_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                if(!caster)
+                    return;
+
+                int32 agila = caster->GetStat(STAT_AGILITY);
+                int32 intelect = caster->GetStat(STAT_INTELLECT);
+                int32 streight = caster->GetStat(STAT_STRENGTH);
+
+                if (agila > intelect && agila > streight)
+                    caster->CastSpell(caster, SPELL_TIMELESS_AGILITY, true);
+                else if(intelect > agila && intelect > streight)
+                    caster->CastSpell(caster, SPELL_TIMELESS_INTELLECT, true);
+                else if(streight > intelect && streight > agila)
+                    caster->CastSpell(caster, SPELL_TIMELESS_STRENGTH, true);
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_item_book_of_the_ages_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_item_book_of_the_ages_SpellScript();
+        }
+};
+
 void AddSC_item_spell_scripts()
 {
     new spell_item_eye_of_the_black_prince();
@@ -3751,4 +3797,5 @@ void AddSC_item_spell_scripts()
     new spell_item_juggernault_focusing_crystal();
     new spell_item_multistrike();
     new spell_item_multistrike_heal();
+    new spell_item_book_of_the_ages();
 }

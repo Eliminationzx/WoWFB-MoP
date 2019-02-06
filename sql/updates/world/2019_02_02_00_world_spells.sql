@@ -55,3 +55,8 @@ INSERT INTO spell_script_names VALUE
 (2585, 'spell_warl_eye_of_kilrogg_passive');
 
 UPDATE creature_template_addon SET auras='2585' WHERE entry =4277;
+
+-- Book of The Ages
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_item_book_of_the_ages';
+INSERT INTO spell_script_names VALUE 
+(147226, 'spell_item_book_of_the_ages');
