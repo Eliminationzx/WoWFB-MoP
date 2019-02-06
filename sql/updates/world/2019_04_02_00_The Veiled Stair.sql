@@ -24,3 +24,5 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES ('64822', '2', '773.089', '-534.699', '453.627', '0', NULL);
 INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES ('64822', '3', '775.223', '-541.617', '453.708', '0', NULL);
 INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES ('64822', '4', '777.286', '-538.242', '454.061', '0', NULL);
+
+INSERT INTO `areatrigger_scripts` VALUES ('8503', 'at_massons_folly_platform');

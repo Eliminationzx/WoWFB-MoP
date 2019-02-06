@@ -30,16 +30,19 @@ namespace VeiledStairEvents
 {
     enum
     {
-        EventFirstMove   = 1,
-        EventSecondMove  = 2,
-        EventThirdTalk   = 3,
-        EventFourthTalk  = 4,
-        EventFifthTalk   = 5,
-        EventSixthTalk   = 6,
-        EventSeventhTalk = 7,
-        EventEigthTalk   = 8,
-        EventFinal       = 9,
-        EventPlayScene   = 10
+        EventFirstMove     = 1,
+        EventSecondMove    = 2,
+        EventFirstTalk     = 3,
+        EventThirdTalk     = 4,
+        EventFourthTalk    = 5,
+        EventFifthTalk     = 6,
+        EventSixthTalk     = 7,
+        EventSeventhTalk   = 8,
+        EventEigthTalk     = 9,
+        EventFinal         = 10,
+        EventSpellCast     = 11,
+        EventSpellCast2    = 12,
+        EventPlayEmoteKiss = 13
     };
 }
 

@@ -5,6 +5,17 @@
 #include "the_veiled_stair.h"
 #include "GameObjectAI.h"
 
+enum TheVeiledStairs
+{
+    // Quest - Breath of the Black Prince
+    SPELL_SUMMON_WRATHION               = 126714,
+    SPELL_SPEAKING_WITH_WRATHION        = 126724,
+    SPELL_WRATHION_SPELL_CAST           = 126723,
+    SPELL_WRATHION_SPELL_CAST2          = 130942,
+    SPELL_WRATHION_SPELL_CAST3          = 130950,
+    QUEST_ID_BREATH_OF_THE_BLACK_PRINCE = 31482
+};
+
 // 64616 - Wrathion
 class npc_wrathion : public CreatureScript
 {
@@ -96,7 +107,7 @@ class npc_wrathion_mason : public CreatureScript
 
         bool OnQuestReward(Player* p_Player, Creature* p_Creature, Quest const* p_Quest, uint32 p_Option)
         {
-            if (p_Quest->GetQuestId() == 31482)
+            if (p_Quest->GetQuestId() == QUEST_ID_BREATH_OF_THE_BLACK_PRINCE)
             {
                 if (p_Creature->isQuestGiver() && p_Creature->AI())
                 {
@@ -128,7 +139,7 @@ class npc_wrathion_mason : public CreatureScript
             {
                 if (Player* p_Player = p_Summoner->ToPlayer())
                 {
-                    if (p_Player->GetQuestStatus(31482) == QUEST_STATUS_INCOMPLETE)
+                    if (p_Player->GetQuestStatus(QUEST_ID_BREATH_OF_THE_BLACK_PRINCE) == QUEST_STATUS_INCOMPLETE)
                     {
                         SetDespawnAtFar(false);
                         SetDespawnAtEnd(false);
@@ -144,15 +155,14 @@ class npc_wrathion_mason : public CreatureScript
                 switch (p_WaypointId)
                 {
                     case 1:
-                        Talk(1);
+                        Talk(0);
                         break;
                     case 3:
                         SetEscortPaused(true);
                         me->SetFacingTo(4.719869f);
                         me->SetOrientation(4.719869f);
-                        Talk(2);
-                        m_Events.ScheduleEvent(VeiledStairEvents::EventThirdTalk, 5000);
-                        m_Events.ScheduleEvent(VeiledStairEvents::EventSecondMove, 10000);
+                        Talk(1);
+                        m_Events.ScheduleEvent(VeiledStairEvents::EventThirdTalk, 10000);
                         break;
                     case 4:
                         me->SetFacingTo(5.442434f);
@@ -172,44 +182,55 @@ class npc_wrathion_mason : public CreatureScript
                 {
                     switch (m_Events.ExecuteEvent())
                     {
-                        case VeiledStairEvents::EventFirstMove:
-                            Talk(0);
+                        case VeiledStairEvents::EventFirstMove:;
                             Start(false, false, l_Player->GetGUID());
                             break;
                         case VeiledStairEvents::EventThirdTalk:
-                            Talk(3);
-                            m_Events.ScheduleEvent(VeiledStairEvents::EventPlayScene, 4000);
-                            m_Events.ScheduleEvent(VeiledStairEvents::EventFourthTalk, 7000);
+                            Talk(2);
+                            me->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
+                            m_Events.ScheduleEvent(VeiledStairEvents::EventSecondMove, 5000);
                             break;
                         case VeiledStairEvents::EventSecondMove:
+                            Talk(3);
                             SetEscortPaused(false);
-                            break;
-                        case VeiledStairEvents::EventPlayScene:
-                            l_Player->PlayScene(245, l_Player);
+                            m_Events.ScheduleEvent(VeiledStairEvents::EventFourthTalk, 10000);
+                            m_Events.ScheduleEvent(VeiledStairEvents::EventSpellCast, 4000);
                             break;
                         case VeiledStairEvents::EventFourthTalk:
                             Talk(4);
+                            l_Player->PlayScene(245, l_Player);
                             m_Events.ScheduleEvent(VeiledStairEvents::EventFifthTalk, 6000);
                             break;
                         case VeiledStairEvents::EventFifthTalk:
                             Talk(5);
-                            m_Events.ScheduleEvent(VeiledStairEvents::EventSixthTalk, 5000);
+                            m_Events.ScheduleEvent(VeiledStairEvents::EventSixthTalk, 6000);
                             break;
                         case VeiledStairEvents::EventSixthTalk:
                             Talk(6);
+                            me->RemoveAura(SPELL_WRATHION_SPELL_CAST);
+                            me->CastSpell(me, SPELL_WRATHION_SPELL_CAST2);
                             m_Events.ScheduleEvent(VeiledStairEvents::EventSeventhTalk, 10000);
                             break;
                         case VeiledStairEvents::EventSeventhTalk:
                             Talk(7);
-                            m_Events.ScheduleEvent(VeiledStairEvents::EventEigthTalk, 8000);
-                            break;
-                        case VeiledStairEvents::EventEigthTalk:
-                            Talk(8);
+                            me->RemoveAura(SPELL_WRATHION_SPELL_CAST2);
+                            m_Events.ScheduleEvent(VeiledStairEvents::EventPlayEmoteKiss, 4000);
                             m_Events.ScheduleEvent(VeiledStairEvents::EventFinal, 10000);
                             break;
                         case VeiledStairEvents::EventFinal:
+                            Talk(8);
                             l_Player->KilledMonsterCredit(64664);
+                            me->HandleEmoteCommand(EMOTE_ONESHOT_POINT);
                             me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                            break;
+                        case VeiledStairEvents::EventSpellCast:
+                            me->CastSpell(me, SPELL_WRATHION_SPELL_CAST);
+                            break;
+                        case VeiledStairEvents::EventSpellCast2:
+                            me->CastSpell(me, SPELL_WRATHION_SPELL_CAST3);
+                            break;
+                        case VeiledStairEvents::EventPlayEmoteKiss:
+                            m_Events.ScheduleEvent(VeiledStairEvents::EventSpellCast2, 1000);
                             break;
                         default:
                             break;
@@ -270,6 +291,22 @@ class gob_wrathion_chest : public GameObjectScript
         }
 };
 
+class at_massons_folly_platform : public AreaTriggerScript
+{
+public:
+    at_massons_folly_platform() : AreaTriggerScript("at_massons_folly_platform") { }
+
+    bool OnTrigger(Player* pPlayer, const AreaTriggerEntry* /*pAt*/, bool p_Enter)
+    {		
+        if (pPlayer->GetQuestStatus(QUEST_ID_BREATH_OF_THE_BLACK_PRINCE) == QUEST_STATUS_INCOMPLETE && !pPlayer->HasAura(SPELL_SPEAKING_WITH_WRATHION))
+        {
+            pPlayer->CastSpell(pPlayer, SPELL_SUMMON_WRATHION, true);
+            pPlayer->AddAura(SPELL_SPEAKING_WITH_WRATHION, pPlayer);
+        }
+        return true;
+    }
+};
+
 void AddSC_the_veiled_stair()
 {
     new npc_wrathion();
@@ -277,4 +314,5 @@ void AddSC_the_veiled_stair()
     new npc_wrathion_mason();
     new npc_wrathion_masons_foly();
     new gob_wrathion_chest();
+    new at_massons_folly_platform();
 }
