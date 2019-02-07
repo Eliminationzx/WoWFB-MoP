@@ -61,7 +61,7 @@ void WorldSession::HandleJoinChannel(WorldPacket& recvPacket)
     {
         cMgr->team = _player->GetTeam();
         if (Channel* chn = cMgr->GetJoinChannel(channelName, channelId))
-            chn->Join(_player->GetGUID(), pass.c_str());
+            chn->Join(_player->GetGUID(), pass);
     }
 }
 
@@ -118,7 +118,7 @@ void WorldSession::HandleChannelPassword(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->Password(_player->GetGUID(), l_Pass.c_str());
+            l_Channel->Password(_player->GetGUID(), l_Pass);
     }
 }
 
@@ -143,7 +143,7 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->SetOwner(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->SetOwner(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -186,7 +186,7 @@ void WorldSession::HandleChannelModerator(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->SetModerator(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->SetModerator(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -211,7 +211,7 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->UnsetModerator(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->UnsetModerator(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -237,7 +237,7 @@ void WorldSession::HandleChannelMute(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->SetMute(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->SetMute(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -263,7 +263,7 @@ void WorldSession::HandleChannelUnmute(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->UnsetMute(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->UnsetMute(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -292,7 +292,7 @@ void WorldSession::HandleChannelInvite(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->Invite(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->Invite(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -318,7 +318,7 @@ void WorldSession::HandleChannelKick(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->Kick(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->Kick(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -347,7 +347,7 @@ void WorldSession::HandleChannelBan(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->Ban(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->Ban(_player->GetGUID(), l_PlrName);
     }
 }
 
@@ -376,7 +376,7 @@ void WorldSession::HandleChannelUnban(WorldPacket& p_RecvData)
     if (ChannelMgr* l_ChannelMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* l_Channel = l_ChannelMgr->GetChannel(l_ChannName, _player))
-            l_Channel->UnBan(_player->GetGUID(), l_PlrName.c_str());
+            l_Channel->UnBan(_player->GetGUID(), l_PlrName);
     }
 }
 
