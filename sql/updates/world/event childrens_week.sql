@@ -193,3 +193,5 @@ UPDATE `creature_template` SET `speed_walk`=0.3, `speed_run`=0.45, `InhabitType`
 DELETE FROM `creature_text` WHERE `entry`=43845;
 INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
 (43845,0,0,'No, little one, it\?s nothing like that. My spirit spent many years in the Emerald Dream while my body slept, and it started to take on attributes of our animal forms.',12,0,100,0,0,0,'Comment');
+
+UPDATE `creature_template` SET  `flags_extra`='128' WHERE (`entry`='40789');
