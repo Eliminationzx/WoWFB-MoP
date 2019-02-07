@@ -683,7 +683,6 @@ void Channel::Say(uint64 p, std::string const& what, uint32 lang)
         WorldPacket data;
         player->BuildPlayerChat(&data, CHAT_MSG_CHANNEL, what, lang, 0, m_name);
         SendToAll(&data, players[p].IsModerator() ? 0 : p);
-        sLog->outError(LOG_FILTER_CHATSYS, "TEST MSG: %s", what);
     }
 }
 
