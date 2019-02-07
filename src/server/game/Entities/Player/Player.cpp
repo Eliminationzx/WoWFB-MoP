@@ -31417,10 +31417,11 @@ void Player::SendMovementSetCollisionHeight(float height)
 
     WorldPacket data(SMSG_MOVE_SET_COLLISION_HEIGHT, 2 + 8 + 4 + 4);
 
+    data.WriteBit(!mountDisplayInfo); // mountDisplayInfo scale, inverse
     data.WriteBit(guid[7]);
     data.WriteBit(guid[6]);
     data.WriteBit(guid[1]);
-    data.WriteBits(reason, 2);
+	data.WriteBits(reason, 2);
     data.WriteBit(guid[2]);
     data.WriteBit(guid[5]);
     data.WriteBit(guid[3]);
@@ -31428,18 +31429,18 @@ void Player::SendMovementSetCollisionHeight(float height)
     data.WriteBit(guid[4]);
 
     data.WriteByteSeq(guid[5]);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[1]);    
     data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[7]);    
-    data.WriteByteSeq(guid[0]);
     data.WriteByteSeq(guid[2]);
-	if (mountDisplayInfo)
-		data << uint32(mountDisplayInfo->Displayid);
     data << float(height);
-	data << uint32(sWorld->GetGameTime());  // Packet counter
-	data.WriteByteSeq(guid[6]);
     data << float(GetObjectScale());
+    data << uint32(sWorld->GetGameTime());  // Packet counter
     data.WriteByteSeq(guid[3]);
+    if (mountDisplayInfo)
+        data << uint32(mountDisplayInfo->Displayid);
+    data.WriteByteSeq(guid[0]);
 
     SendDirectMessage(&data);
 }
