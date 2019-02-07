@@ -4524,6 +4524,13 @@ enum TradeStatus
 
 };
 
+enum eUpdateCollisionReasons
+{
+    UPDATE_COLLISION_HEIGHT_FORCE = 1,
+    UPDATE_COLLISION_HEIGHT_SCALE = 2,
+    UPDATE_COLLISION_HEIGHT_MOUNT = 3
+};
+
 enum XPColorChar
 {
     XP_RED,
