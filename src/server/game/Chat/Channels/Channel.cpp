@@ -23,8 +23,9 @@
 #include "World.h"
 #include "DatabaseEnv.h"
 #include "AccountMgr.h"
+#include "Player.h"
 
-Channel::Channel(const std::string& name, uint32 channel_id, uint32 Team)
+Channel::Channel(std::string const& name, uint32 channel_id, uint32 Team)
  : m_announce(true), m_ownership(true), m_name(name), m_password(""), m_flags(0), m_channelId(channel_id), m_ownerGUID(0), m_Team(Team), _special(false)
 {
     m_IsSaved = false;
@@ -173,7 +174,7 @@ void Channel::CleanOldChannelsInDB()
     }
 }
 
-void Channel::Join(uint64 p, const char *pass)
+void Channel::Join(uint64 p, std::string const& pass)
 {
     WorldPacket data;
     if (IsOn(p))
@@ -193,7 +194,7 @@ void Channel::Join(uint64 p, const char *pass)
         return;
     }
 
-    if (m_password.length() > 0 && strcmp(pass, m_password.c_str()))
+    if (m_password.length() > 0 && pass != m_password)
     {
         MakeWrongPassword(&data);
         SendToOne(&data, p);
@@ -298,7 +299,7 @@ void Channel::Leave(uint64 p, bool send)
     }
 }
 
-void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
+void Channel::KickOrBan(uint64 good, std::string const& badname, bool ban)
 {
     AccountTypes sec = SEC_PLAYER;
     Player* gplr = ObjectAccessor::FindPlayer(good);
@@ -319,7 +320,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
     }
     else
     {
-        Player* bad = sObjectAccessor->FindPlayerByName(badname);
+        Player* bad = sObjectAccessor->FindPlayerByName(badname.c_str());
         if (bad == NULL || !IsOn(bad->GetGUID()))
         {
             WorldPacket data;
@@ -366,7 +367,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
     }
 }
 
-void Channel::UnBan(uint64 good, const char *badname)
+void Channel::UnBan(uint64 good, std::string const& badname)
 {
     uint32 sec = 0;
     Player* gplr = ObjectAccessor::FindPlayer(good);
@@ -387,7 +388,7 @@ void Channel::UnBan(uint64 good, const char *badname)
     }
     else
     {
-        Player* bad = sObjectAccessor->FindPlayerByName(badname);
+        Player* bad = sObjectAccessor->FindPlayerByName(badname.c_str());
         if (bad == NULL || !IsBanned(bad->GetGUID()))
         {
             WorldPacket data;
@@ -407,7 +408,7 @@ void Channel::UnBan(uint64 good, const char *badname)
     }
 }
 
-void Channel::Password(uint64 p, const char *pass)
+void Channel::Password(uint64 p, std::string const& pass)
 {
     uint32 sec = 0;
     Player* player = ObjectAccessor::FindPlayer(p);
@@ -446,7 +447,7 @@ void Channel::Password(uint64 p, const char *pass)
     }
 }
 
-void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
+void Channel::SetMode(uint64 p, std::string const& p2n, bool mod, bool set)
 {
     Player* player = ObjectAccessor::FindPlayer(p);
     if (!player)
@@ -468,7 +469,7 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
     }
     else
     {
-        Player* newp = sObjectAccessor->FindPlayerByName(p2n);
+        Player* newp = sObjectAccessor->FindPlayerByName(p2n.c_str());
         if (!newp)
         {
             WorldPacket data;
@@ -514,7 +515,7 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
     }
 }
 
-void Channel::SetOwner(uint64 p, const char *newname)
+void Channel::SetOwner(uint64 p, std::string const& newname)
 {
     Player* player = ObjectAccessor::FindPlayer(p);
     if (!player)
@@ -538,7 +539,7 @@ void Channel::SetOwner(uint64 p, const char *newname)
         return;
     }
 
-    Player* newp = sObjectAccessor->FindPlayerByName(newname);
+    Player* newp = sObjectAccessor->FindPlayerByName(newname.c_str());
     if (newp == NULL || !IsOn(newp->GetGUID()))
     {
         WorldPacket data;
@@ -653,10 +654,11 @@ void Channel::Announce(uint64 p)
     }
 }
 
-void Channel::Say(uint64 p, const char *what, uint32 lang)
+void Channel::Say(uint64 p, std::string const& what, uint32 lang)
 {
-    if (!what)
+    if (what.empty())
         return;
+
     if (sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         lang = LANG_UNIVERSAL;
 
@@ -679,12 +681,13 @@ void Channel::Say(uint64 p, const char *what, uint32 lang)
     else
     {
         WorldPacket data;
-        player->BuildPlayerChat(&data, CHAT_MSG_CHANNEL, what, lang, NULL, m_name);
-        SendToAll(&data, !players[p].IsModerator() ? p : false);
+        player->BuildPlayerChat(&data, CHAT_MSG_CHANNEL, what, lang, 0, m_name);
+        SendToAll(&data, players[p].IsModerator() ? 0 : p);
+        sLog->outError(LOG_FILTER_CHATSYS, "TEST MSG: %s", what);
     }
 }
 
-void Channel::Invite(uint64 p, const char *newname)
+void Channel::Invite(uint64 p, std::string const& newname)
 {
     if (!IsOn(p))
     {
@@ -694,7 +697,7 @@ void Channel::Invite(uint64 p, const char *newname)
         return;
     }
 
-    Player* newp = sObjectAccessor->FindPlayerByName(newname);
+    Player* newp = sObjectAccessor->FindPlayerByName(newname.c_str());
     if (!newp || !newp->isGMVisible() || newp->InArena())
     {
         WorldPacket data;
@@ -978,7 +981,7 @@ void Channel::MakePlayerUnbanned(WorldPacket* data, uint64 bad, uint64 good)
 }
 
 // done 0x16
-void Channel::MakePlayerNotBanned(WorldPacket* data, const std::string &name)
+void Channel::MakePlayerNotBanned(WorldPacket* data, std::string const& name)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_BANNED_NOTICE);
     *data << name;

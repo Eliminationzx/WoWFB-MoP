@@ -24109,7 +24109,7 @@ void Player::StopCastingCharm()
     }
 }
 
-void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language, const char* addonPrefix /*= NULL*/, const std::string& channel /*= ""*/) const
+void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, std::string const& text, uint32 language, char const* addonPrefix /*= NULL*/, std::string const& channel /*= ""*/) const
 {
     uint32 messageLength = text.length();
     uint32 achievementId = 0;
