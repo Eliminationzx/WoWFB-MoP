@@ -1647,7 +1647,7 @@ void InterRealmSession::SendWhisper(uint64 sender, uint64 receiver, const std::s
     pckt.Initialize(SMSG_MESSAGECHAT, 200);
     //pReceiver->BuildPlayerChat(&pckt, CHAT_MSG_WHISPER_INFORM, _text, language);
 
-	pckt << uint8(CHAT_MSG_WHISPER_INFORM);
+    pckt << uint8(CHAT_MSG_WHISPER_INFORM);
     pckt << uint32(language);
     pckt << uint64(pReceiver->GetGUID());
     pckt << uint32(0);                                      // constant unknown time
