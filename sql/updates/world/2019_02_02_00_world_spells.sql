@@ -59,4 +59,7 @@ UPDATE creature_template_addon SET auras='2585' WHERE entry =4277;
 -- Book of The Ages
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_item_book_of_the_ages';
 INSERT INTO spell_script_names VALUE 
-(147226, 'spell_item_book_of_the_ages');
+(147228, 'spell_item_book_of_the_ages');
+
+INSERT INTO `spell_proc_event` (`entry`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `SpellFamilyMask3`, `procFlags`, `procEx`, `ppmRate`, `CustomChance`, `Cooldown`) VALUES ('147228', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15', '0');
+
