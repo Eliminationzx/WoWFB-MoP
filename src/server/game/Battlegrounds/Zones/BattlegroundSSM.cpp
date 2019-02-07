@@ -69,6 +69,9 @@ void BattlegroundSM::Reset()
         m_Depot[l_Iter] = false;
         m_DepotCloseTimer[l_Iter] = 3000;
     }
+
+	if (GetBgMap())
+		GetBgMap()->SetObjectVisibility(1000.0f);   ///< Hardcode visibility to see carts on the whole map (shoudn't be a performance issue since we have cross realm)
 }
 
 void BattlegroundSM::PostUpdateImpl(uint32 p_Diff)
