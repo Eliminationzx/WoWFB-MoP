@@ -60,3 +60,10 @@ UPDATE creature_template_addon SET auras='2585' WHERE entry =4277;
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_item_book_of_the_ages';
 INSERT INTO spell_script_names VALUE 
 (147228, 'spell_item_book_of_the_ages');
+
+-- Psychic Terror
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_pri_psychic_terror';
+INSERT INTO spell_script_names VALUE 
+(113792, 'spell_pri_psychic_terror');
+
+UPDATE creature_template SET ScriptName='' WHERE entry=59190;

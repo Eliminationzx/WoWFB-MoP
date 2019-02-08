@@ -4996,58 +4996,6 @@ class npc_void_tendrils : public CreatureScript
 };
 
 /*######
-## npc_psyfiend -- 59190
-######*/
-
-enum PsyfiendSpells
-{
-    SPELL_PSYCHIC_HORROR    = 113792,
-};
-
-class npc_psyfiend : public CreatureScript
-{
-    public:
-        npc_psyfiend() : CreatureScript("npc_psyfiend") { }
-
-        struct npc_psyfiendAI : public Scripted_NoMovementAI
-        {
-            npc_psyfiendAI(Creature* c) : Scripted_NoMovementAI(c)
-            {
-                me->SetReactState(REACT_PASSIVE);
-                psychicHorrorTimer = 2500;
-            }
-
-            void OwnerDamagedBy(Unit* attacker)
-            {
-                //
-            }
-
-
-            void UpdateAI(uint32 const diff)
-            {
-                if (psychicHorrorTimer <= diff)
-                {
-                    if (!me->HasAuraType(SPELL_AURA_MOD_SILENCE))
-                        DoCastAOE(SPELL_PSYCHIC_HORROR);
-                    
-                    psychicHorrorTimer = 2500;
-                }
-                else
-                    psychicHorrorTimer -= diff;
-            }
-
-        private:
-            uint32 psychicHorrorTimer;
-
-        };
-
-        CreatureAI* GetAI(Creature *creature) const
-        {
-            return new npc_psyfiendAI(creature);
-        }
-};
-
-/*######
 ## npc_spectral_guise -- 59607
 ######*/
 
@@ -7360,7 +7308,6 @@ void AddSC_npcs_special()
     new npc_past_self();
     new npc_transcendence_spirit();
     new npc_void_tendrils();
-    new npc_psyfiend();
     new npc_spectral_guise();
     new npc_metzen();
     new npc_moonwell_chalice();

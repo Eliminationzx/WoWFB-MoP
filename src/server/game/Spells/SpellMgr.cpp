@@ -4090,20 +4090,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 18540: // Summon Doomguard
                     spellInfo->OverrideSpellList.push_back(112927); // Summon Terrorguard
                     break;
-                case 120517:// Halo (Holy)
-                case 120644:// Halo (Shadow)
-                    spellInfo->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
-                    spellInfo->Effects[1].Effect = SPELL_EFFECT_SCRIPT_EFFECT;
-                    spellInfo->Effects[1].BasePoints = 0;
-                    spellInfo->Effects[1].TargetA = TARGET_SRC_CASTER;
-                    spellInfo->Effects[1].TargetB = TARGET_UNIT_SRC_AREA_ALLY;
-                    spellInfo->Effects[1].RadiusEntry = sSpellRadiusStore.LookupEntry(10);
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_SCHOOL_DAMAGE;
-                    spellInfo->Effects[0].BasePoints = 1;
-                    spellInfo->Effects[0].TargetA = TARGET_SRC_CASTER;
-                    spellInfo->Effects[0].TargetB = TARGET_UNIT_SRC_AREA_ENEMY;
-                    spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(10);
-                    break;
                 case 34487: // Master Marksman
                     spellInfo->ProcFlags = 0;
                     break;
@@ -4488,11 +4474,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 case 120583:// Glyph of Shadow Word: Death
                     spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2;
-                    break;
-                case 120692:// Halo (Heal, Holy)
-                case 120696:// Halo (Heal, Shadow);
-                    spellInfo->Effects[0].Effect = SPELL_EFFECT_HEAL;
-                    spellInfo->Effects[0].BasePoints = 1;
                     break;
                 case 48045: // Mind Sear
                     spellInfo->AttributesEx |= SPELL_ATTR1_CANT_TARGET_SELF;
@@ -5548,6 +5529,7 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[0].RadiusEntry = sSpellRadiusStore.LookupEntry(14);
                     break;
                 case 115308:// Elusive Brew
+                case 122300: // Psyfiend Visual
                     spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(1);
                     break;
                 case 115129:// Expel Harm - Damage to a nearby ennemy within 10 yards
