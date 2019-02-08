@@ -15,3 +15,5 @@ UPDATE `creature_template` SET `ScriptName`='npc_terror_and_doom_guard' WHERE (`
 DELETE FROM `gameobject` WHERE `guid` in (527210, 527215, 527165, 527180, 527238, 527433, 527239, 527240, 527439, 527242, 527304, 527473, 527318, 527252, 527412, 527415, 527423, 527213, 527211, 527432);
 
 UPDATE creature_template SET vehicleId = 2119 WHERE entry IN(60378, 60379, 60380); -- mini-map icon
+
+UPDATE access_requirement SET level_min = 90 WHERE mapId=1098; -- Throne of Thunder
