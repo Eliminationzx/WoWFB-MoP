@@ -1,8 +1,8 @@
 /*
-	* Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
-	* ------------------------------------------------------------
-	* Do whatever you want with this code but DO NOT remove the
-	* copyright and respect it's authors.
+    * Copyright © 2016 Emiliyan Kurtseliyanski a.k.a JunkyBulgaria
+    * ------------------------------------------------------------
+    * Do whatever you want with this code but DO NOT remove the
+    * copyright and respect it's authors.
 */
 
 #include "ScriptMgr.h"
