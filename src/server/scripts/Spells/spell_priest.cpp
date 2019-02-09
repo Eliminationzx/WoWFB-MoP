@@ -1793,76 +1793,106 @@ class spell_pri_cascade_first : public SpellScriptLoader
         }
 };
 
-// Halo
-class spell_pri_halo : public SpellScriptLoader
+// Halo (shadow) - 120696 and Halo - 120692 : Heal
+class spell_pri_halo_heal : public SpellScriptLoader
 {
     public:
-        spell_pri_halo() : SpellScriptLoader("spell_pri_halo") { }
+        spell_pri_halo_heal() : SpellScriptLoader("spell_pri_halo_heal") { }
 
-        class spell_pri_halo_SpellScript : public SpellScript
+        class spell_pri_halo_heal_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_pri_halo_SpellScript);
+            PrepareSpellScript(spell_pri_halo_heal_SpellScript);
 
-            void HandleHeal(SpellEffIndex /*effIndex*/)
+            void HandleHeal(SpellEffIndex eff)
             {
-                if (Unit* caster = GetCaster())
+                if (Unit* _player = GetCaster())
                 {
                     if (Unit* target = GetHitUnit())
                     {
-                        int32 _heal = GetHitHeal();
-                        float Distance = caster->GetDistance(target);
-                        float pct = (0.5f * pow((1.01f),(-1 * pow(((Distance - 25.0f) / 2), 4))) + 0.1f + 0.015f*Distance);
-                        _heal = int32(_heal * pct);
-                        SetHitHeal(_heal);
+                        int32 heal = GetHitHeal();
+                        heal += int32(_player->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 3.25f);
+
+                        float Distance = _player->GetDistance(target);
+                        float pct = Distance / 25.0f;
+                        heal = int32(heal * pct);
+
+                        SetHitHeal(heal);
                     }
                 }
-            }
-
-            void HandleDamage(SpellEffIndex /*effIndex*/)
-            {
-                if (Unit* caster = GetCaster())
-                {
-                    if (Unit* target = GetHitUnit())
-                    {
-                        int32 _damage = GetHitDamage();
-                        float Distance = caster->GetDistance(target);
-                        float pct = (0.5f * pow((1.01f),(-1 * pow(((Distance - 25.0f) / 2), 4))) + 0.1f + 0.015f*Distance);
-                        _damage = int32(_damage * pct);
-                        SetHitDamage(_damage);
-                    }
-                }
-            }
-
-            void FilterTargets(WorldObject*& target)
-            {
-                Unit* unit = target->ToUnit();
-                if(!unit)
-                    target = NULL;
-                if(!GetCaster()->IsFriendlyTo(unit))
-                    target = NULL;
-            }
-
-            void FilterTargets1(WorldObject*& target)
-            {
-                Unit* unit = target->ToUnit();
-                if(!unit)
-                    target = NULL;
-                if(GetCaster()->IsFriendlyTo(unit))
-                    target = NULL;
             }
 
             void Register()
             {
-                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_pri_halo_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_TARGET_ANY);
-                OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_pri_halo_SpellScript::FilterTargets1, EFFECT_1, TARGET_UNIT_TARGET_ANY);
-                OnEffectHitTarget += SpellEffectFn(spell_pri_halo_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
-                OnEffectHitTarget += SpellEffectFn(spell_pri_halo_SpellScript::HandleDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_pri_halo_heal_SpellScript::HandleHeal, EFFECT_0, SPELL_EFFECT_HEAL);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_pri_halo_SpellScript;
+            return new spell_pri_halo_heal_SpellScript;
+        }
+};
+
+// Halo (shadow) - 120517 and Halo - 120644 : Damage
+class spell_pri_halo_damage : public SpellScriptLoader
+{
+    public:
+        spell_pri_halo_damage() : SpellScriptLoader("spell_pri_halo_damage") { }
+
+        class spell_pri_halo_damage_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_halo_damage_SpellScript);
+
+            void HandleDamage(SpellEffIndex eff)
+            {
+                if (Unit* _player = GetCaster())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        int32 damage = GetHitDamage();
+                        damage += int32(_player->SpellBaseDamageBonusDone(GetSpellInfo()->GetSchoolMask()) * 1.95f);
+
+                        float Distance = _player->GetDistance(target);
+                        float pct = Distance / 25.0f;
+                        damage = int32(damage * pct);
+
+                        SetHitDamage(damage);
+                    }
+                }
+            }
+
+            void HandleScript(SpellEffIndex eff)
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    if (Unit* target = GetHitUnit())
+                    {
+                        if (GetSpellInfo()->Id == 120517)
+                        {
+                            _player->CastSpell(target, PRIEST_SPELL_HALO_HEAL_HOLY, true);
+                            // visual effect - to enable it we should fix a speed of animation
+                            //_player->CastSpell(_player, 120630, true);
+                        }
+                        else
+                        {
+                            _player->CastSpell(target, PRIEST_SPELL_HALO_HEAL_SHADOW, true);
+                            // visual effect
+                            //_player->CastSpell(_player, 120643, true);
+                        }
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_pri_halo_damage_SpellScript::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                OnEffectHitTarget += SpellEffectFn(spell_pri_halo_damage_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_halo_damage_SpellScript;
         }
 };
 
@@ -3251,7 +3281,8 @@ void AddSC_priest_spell_scripts()
     new spell_pri_cascade_second();
     new spell_pri_cascade_trigger();
     new spell_pri_cascade_first();
-    new spell_pri_halo();
+    new spell_pri_halo_heal();
+    new spell_pri_halo_damage();
     new spell_pri_inner_fire_or_will();
     new spell_pri_inner_fire();
     new spell_pri_leap_of_faith();
