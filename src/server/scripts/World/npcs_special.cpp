@@ -4928,7 +4928,7 @@ class npc_transcendence_spirit : public CreatureScript
 
 enum voidTendrilsSpells
 {
-    SPELL_VOID_TENDRILS_ROOT = 108920,
+    SPELL_VOID_TENDRILS_ROOT = 108920
 };
 
 class npc_void_tendrils : public CreatureScript
@@ -4955,8 +4955,6 @@ class npc_void_tendrils : public CreatureScript
             void SetGUID(uint64 guid, int32)
             {
                 targetGUID = guid;
-
-                me->setFaction(14);
             }
 
             void JustDied(Unit* killer)
@@ -4984,8 +4982,9 @@ class npc_void_tendrils : public CreatureScript
 
             void UpdateAI(uint32 const diff)
             {
-                if (!(ObjectAccessor::GetUnit(*me, targetGUID)))
-                    me->DespawnOrUnsummon();
+                if (Unit* m_target = ObjectAccessor::GetUnit(*me, targetGUID))
+                    if (!m_target->HasAura(SPELL_VOID_TENDRILS_ROOT))
+                        me->DespawnOrUnsummon();
             }
         };
 
@@ -7251,6 +7250,58 @@ public:
     };
 };
 
+/*######
+## npc_psyfiend -- 59190
+######*/
+
+enum PsyfiendSpells
+{
+    SPELL_PSYCHIC_HORROR    = 113792,
+};
+
+class npc_psyfiend : public CreatureScript
+{
+    public:
+        npc_psyfiend() : CreatureScript("npc_psyfiend") { }
+
+        struct npc_psyfiendAI : public Scripted_NoMovementAI
+        {
+            npc_psyfiendAI(Creature* c) : Scripted_NoMovementAI(c)
+            {
+                me->SetReactState(REACT_PASSIVE);
+                psychicHorrorTimer = 2500;
+            }
+
+            void OwnerDamagedBy(Unit* attacker)
+            {
+                //
+            }
+
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (psychicHorrorTimer <= diff)
+                {
+                    if (!me->HasAuraType(SPELL_AURA_MOD_SILENCE))
+                        DoCastAOE(SPELL_PSYCHIC_HORROR);
+                    
+                    psychicHorrorTimer = 2500;
+                }
+                else
+                    psychicHorrorTimer -= diff;
+            }
+
+        private:
+            uint32 psychicHorrorTimer;
+
+        };
+
+        CreatureAI* GetAI(Creature *creature) const
+        {
+            return new npc_psyfiendAI(creature);
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();
@@ -7325,6 +7376,7 @@ void AddSC_npcs_special()
     new npc_frozen_trail_packer();
     new npc_black_ox_statue();
     new npc_jade_serpent_statue();
+    new npc_psyfiend();
 
     new npc_childrens_week_human_orphan();
     new npc_childrens_week_orcish_orphan();

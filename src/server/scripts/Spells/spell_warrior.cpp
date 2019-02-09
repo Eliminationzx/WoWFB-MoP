@@ -1583,10 +1583,10 @@ class spell_warr_avatar : public SpellScriptLoader
             {
                 if (Player* _player = GetCaster()->ToPlayer())
                 {
-					_player->RemoveMovementImpairingAuras();
+                    _player->RemoveMovementImpairingAuras();
                 }
             }
-			
+            
             void Register()
             {
                 OnEffectApply += AuraEffectApplyFn(spell_warr_avatar_AuraScript::OnApply, EFFECT_0, SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, AURA_EFFECT_HANDLE_REAL);
@@ -1625,7 +1625,7 @@ class spell_warr_riposte : public SpellScriptLoader
 
             void Register()
             {
-		  OnHit += SpellHitFn(spell_warr_riposte_SpellScript::HandleOnHit);
+          OnHit += SpellHitFn(spell_warr_riposte_SpellScript::HandleOnHit);
             }
         };
 
