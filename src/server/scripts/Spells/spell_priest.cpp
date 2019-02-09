@@ -2534,7 +2534,7 @@ class spell_pri_mind_flay : public SpellScriptLoader
         {
             PrepareAuraScript(spell_pri_mind_flay_AuraScript);
 
-            bool CalculateAmount(AuraEffect const* /*aurEff*/, float & amount, bool & /*canBeRecalculated*/)
+            bool CalculateAmount(AuraEffect const* /*auraEffect*/, int32& amount, bool& /*canBeRecalculated*/)
             {
                 if (Unit* caster = GetCaster())
                     if (caster->HasAura(PRIEST_GLYPH_OF_MIND_FLAY))
