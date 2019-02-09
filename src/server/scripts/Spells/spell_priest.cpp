@@ -331,16 +331,6 @@ class spell_pri_void_tendrils : public SpellScriptLoader
                         if (Creature* voidTendrils = target->FindNearestCreature(PRIEST_NPC_VOID_TENDRILS, 10.0f))
                             if (voidTendrils->AI())
                                 voidTendrils->AI()->SetGUID(target->GetGUID());
-
-                        if (Aura* voidTendrils = target->GetAura(GetSpellInfo()->Id, caster->GetGUID()))
-                        {
-                            if (target->GetTypeId() == TYPEID_PLAYER)
-                                voidTendrils->SetMaxDuration(8000);
-                            else
-                                voidTendrils->SetMaxDuration(20000);
-
-                            voidTendrils->SetDuration(voidTendrils->GetMaxDuration());
-                        }
                     }
                 }
             }
@@ -3246,12 +3236,42 @@ class spell_pri_psychic_terror : public SpellScriptLoader
         }
 };
 
+// 114404 - Void Tendril's Grasp
+class spell_pri_void_tendrils_grasp : public SpellScriptLoader
+{
+public:
+    spell_pri_void_tendrils_grasp() : SpellScriptLoader("spell_pri_void_tendrils_grasp") { }
+
+    class spell_pri_void_tendrils_grasp_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_pri_void_tendrils_grasp_AuraScript);
+
+        void HandleEffectRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (Unit* caster = GetCaster())
+                if (Creature* me = caster->ToCreature())
+                    me->DespawnOrUnsummon(500);
+        }
+
+        void Register()
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_pri_void_tendrils_grasp_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_MOD_ROOT, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_pri_void_tendrils_grasp_AuraScript();
+    }
+};
+
 void AddSC_priest_spell_scripts()
 {
     new spell_pri_power_word_fortitude();
     new spell_pri_spectral_guise_charges();
     new spell_pri_psyfiend_hit_me_driver();
     new spell_pri_void_tendrils();
+    new spell_pri_void_tendrils_grasp();
     new spell_pri_phantasm_proc();
     new spell_pri_spirit_of_redemption_form();
     new spell_pri_spirit_of_redemption();

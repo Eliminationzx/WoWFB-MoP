@@ -18224,12 +18224,14 @@ void Unit::SetLevel(uint8 lvl)
 {
     SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
 
-    // group and spectator update
-    if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->GetGroup())
-        ToPlayer()->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
+    if (Player* player = ToPlayer())
+    {
+        // group update
+        if (player->GetGroup())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        sWorld->UpdateCharacterInfoLevel(ToPlayer()->GetGUIDLow(), lvl);
+        sWorld->UpdateCharacterInfoLevel(player->GetGUIDLow(), lvl);
+    }
 }
 
 void Unit::SetHealth(uint32 val)

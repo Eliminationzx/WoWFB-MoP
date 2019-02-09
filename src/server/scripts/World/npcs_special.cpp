@@ -4928,7 +4928,7 @@ class npc_transcendence_spirit : public CreatureScript
 
 enum voidTendrilsSpells
 {
-    SPELL_VOID_TENDRILS_ROOT = 108920
+    SPELL_VOID_TENDRILS_GRASP = 114404
 };
 
 class npc_void_tendrils : public CreatureScript
@@ -4957,12 +4957,6 @@ class npc_void_tendrils : public CreatureScript
                 targetGUID = guid;
             }
 
-            void JustDied(Unit* killer)
-            {
-                if (Unit* m_target = ObjectAccessor::GetUnit(*me, targetGUID))
-                    m_target->RemoveAura(SPELL_VOID_TENDRILS_ROOT);
-            }
-
             void IsSummonedBy(Unit* owner)
             {
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
@@ -4983,8 +4977,8 @@ class npc_void_tendrils : public CreatureScript
             void UpdateAI(uint32 const diff)
             {
                 if (Unit* m_target = ObjectAccessor::GetUnit(*me, targetGUID))
-                    if (!m_target->HasAura(SPELL_VOID_TENDRILS_ROOT))
-                        me->DespawnOrUnsummon();
+                    if (!m_target->HasAura(SPELL_VOID_TENDRILS_GRASP))
+                        me->CastSpell(m_target, SPELL_VOID_TENDRILS_GRASP);
             }
         };
 
