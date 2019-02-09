@@ -5095,9 +5095,6 @@ void SpellMgr::LoadSpellCustomAttr()
                     spellInfo->Effects[EFFECT_0].SpellClassMask[1] = 0x800;
                     spellInfo->Effects[EFFECT_1].SpellClassMask[1] = 0x800;
                     break;
-                case 21562: // Power Word : Fortitude
-                    spellInfo->Effects[0].TargetA = TARGET_UNIT_TARGET_ANY;
-                    break;
                 case 1126:  // Mark of the Wild
                 case 19740: // Blessing of Might
                 case 20217: // Blessing of Kings

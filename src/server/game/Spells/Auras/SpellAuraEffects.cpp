@@ -5226,35 +5226,31 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const* aurApp, uint8 
 
     // save current health state
     float healthPct = target->GetHealthPct();
-    bool alive = target->isAlive();
+    bool zeroHealth = !target->isAlive();
+
+    // players in corpse state may mean two different states:
+    /// 1. player just died but did not release (in this case health == 0)
+    /// 2. player is corpse running (ie ghost) (in this case health == 1)
+    if (target->getDeathState() == CORPSE)
+        zeroHealth = (target->GetHealth() == 0);
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        if (GetMiscValueB() & 1 << i || !GetMiscValueB()) // 0 is also used for all stats
+        if (GetMiscValue() == i || GetMiscValue() == -1) // affect the same stats
         {
-            // test fix for health
-            if (i == STAT_STAMINA)
-            {
-                float oldModifier = target->GetModifierValue(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT);
-                float staminaModifier = target->GetTotalAuraMultiplierByMiscBMask(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, 1 << i);
-                target->SetAndHandleModifierValue(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, staminaModifier);
-                target->ApplyStatPercentBuffMod(Stats(i), oldModifier, !apply);
-                target->ApplyStatPercentBuffMod(Stats(i), staminaModifier, apply);
-            }
-            else
-            {
-                target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
-                if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
-                    target->ApplyStatPercentBuffMod(Stats(i), float(GetAmount()), apply);
-            }
+            target->UpdateStats(target->GetStatByAuraGroup(UnitMods(UNIT_MOD_STAT_START + i)));
+            if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
+                target->ApplyStatPercentBuffMod(Stats(i), float(GetAmount()), apply);
         }
     }
 
     // recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_UNK4 0x00000010 flag)
     // this check is total bullshit i think
-    if (alive)
-        if (GetMiscValueB() & 1 << STAT_STAMINA && (m_spellInfo->Attributes & SPELL_ATTR0_ABILITY))
-            target->SetHealth(std::max<uint32>(uint32(healthPct * target->GetMaxHealth() * 0.01f), (alive ? 1 : 0)));
+    if (target->isAlive())
+    {
+        if ((GetMiscValue() == STAT_STAMINA || GetMiscValue() == -1) && m_spellInfo->HasAttribute(SPELL_ATTR0_ABILITY))
+            target->SetHealth(std::max<uint32>(uint32(healthPct * target->GetMaxHealth() * 0.01f), (zeroHealth ? 0 : 1)));
+    }
 }
 
 void AuraEffect::HandleAuraModResistenceOfStatPercent(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
