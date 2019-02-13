@@ -22,6 +22,7 @@
 #include "SpellAuraDefines.h"
 #include "SpellInfo.h"
 #include "Unit.h"
+#include "Containers.h"
 
 class Unit;
 class SpellInfo;
@@ -183,6 +184,14 @@ class Aura
         void RecalculateAmountOfEffects();
         void HandleAllEffects(AuraApplication * aurApp, uint8 mode, bool apply);
 
+        //Save list target for custom scripts work
+        void SetEffectTargets(std::list<uint64> targets) { m_effect_targets = targets; }
+        std::list<uint64> GetEffectTargets() { return m_effect_targets; }
+        void AddEffectTarget(uint64 targetGuid) { m_effect_targets.push_back(targetGuid); }
+        void RemoveEffectTarget(uint64 targetGuid) { m_effect_targets.remove(targetGuid); }
+        void ClearEffectTarget() { m_effect_targets.clear(); }
+        uint64 GetRndEffectTarget() { return JadeCore::Containers::SelectRandomContainerElement(m_effect_targets); }
+
         // Helpers for targets
         ApplicationMap const & GetApplicationMap() {return m_applications;}
         void GetApplicationList(std::list<AuraApplication*> & applicationList) const;
@@ -266,6 +275,7 @@ class Aura
 
         AuraEffect* m_effects[MAX_SPELL_EFFECTS];
         ApplicationMap m_applications;
+        std::list<uint64> m_effect_targets;
 
         bool m_isRemoved;
         bool m_isSingleTarget;                        // true if it's a single target spell and registered at caster - can change at spell steal for example

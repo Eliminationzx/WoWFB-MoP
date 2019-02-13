@@ -1977,6 +1977,150 @@ public:
     }
 };
 
+// Killing Spree - 51690
+class spell_rog_killing_spree : public SpellScriptLoader
+{
+    public:
+        spell_rog_killing_spree() : SpellScriptLoader("spell_rog_killing_spree") { }
+
+        class spell_rog_killing_spree_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rog_killing_spree_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                    if (Unit* target = _player->GetSelectedUnit())
+                        if (_player->IsValidAttackTarget(target))
+                            if (_player->IsWithinDist(target, 10.0f))
+                                return SPELL_CAST_OK;
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                std::list<WorldObject*> targetTemp = targets;
+                targets.clear();
+
+                if (Unit* caster = GetCaster())
+                {
+                    if(caster->HasAura(13877))
+                    {
+                        if (targetTemp.size() > 6)
+                            targetTemp.resize(6);
+                    }
+                    else
+                    {
+                        if (Player* _player = caster->ToPlayer())
+                        {
+                            if (Unit* target = _player->GetSelectedUnit())
+                            {
+                                targetTemp.clear();
+                                targetTemp.push_back(target);
+                            }
+                            else
+                                targetTemp.resize(1);
+                        }
+                    }
+                }
+
+                std::list<uint64> targetList;
+                for (std::list<WorldObject*>::iterator itr = targetTemp.begin(); itr != targetTemp.end(); ++itr)
+                    if(WorldObject* object = (*itr))
+                        targetList.push_back(object->GetGUID());
+
+                GetSpell()->SetEffectTargets(targetList);
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_rog_killing_spree_SpellScript::CheckCast);
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_rog_killing_spree_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rog_killing_spree_SpellScript();
+        }
+
+        class spell_rog_killing_spree_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_rog_killing_spree_AuraScript);
+
+            Position pos;
+
+            void HandleEffectPeriodic(AuraEffect const* aurEff)
+            {
+                if (!GetCaster())
+                    return;
+
+                //Rogue T16 4P Bonus for Killing Spree
+                if (GetCaster()->HasAura(145210))
+                    if (aurEff->GetTickNumber() >= 2)
+                        if (AuraEffect* aurEffb = GetCaster()->GetAura(145210)->GetEffect(0))
+                            aurEffb->SetAmount(aurEffb->GetAmount() + 10); //increase damage for next killing spree on 10%
+
+                if (Unit* caster = GetCaster())
+                {
+                    Unit* target = GetTarget();
+                    std::list<uint64> targets = GetAura()->GetEffectTargets();
+
+                    if (!targets.empty())
+                    {
+                        uint64 targetGuid = JadeCore::Containers::SelectRandomContainerElement(targets);
+                        if (Unit* effectTarget = ObjectAccessor::GetUnit(*caster, targetGuid))
+                            target = effectTarget;
+                    }
+                    if (target)
+                    {
+                        caster->CastSpell(target, 57840, true);
+                        caster->CastSpell(target, 57841, true);
+                    }
+                }
+            }
+
+            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (!GetCaster())
+                    return;
+
+                if (GetCaster()->HasAura(145210))
+                    if (AuraEffect* aurEffb = GetCaster()->GetAura(145210)->GetEffect(0))
+                        aurEffb->SetAmount(10); ////Reset value, for safe
+
+                GetCaster()->CastSpell(GetCaster(), 61851, true);
+                GetCaster()->GetPosition(&pos);
+            }
+
+            void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes mode)
+            {
+                if (Unit* caster = GetCaster())
+                {
+                    if (caster->HasAura(145210))
+                        if (AuraEffect* aurEffb = caster->GetAura(145210)->GetEffect(0))
+                            aurEffb->SetAmount(10); //Reset value
+
+                    if (caster->HasAura(63252))
+                        caster->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
+                }
+            }
+
+            void Register()
+            {
+                OnEffectPeriodic += AuraEffectPeriodicFn(spell_rog_killing_spree_AuraScript::HandleEffectPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+                OnEffectApply += AuraEffectApplyFn(spell_rog_killing_spree_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectRemove += AuraEffectRemoveFn(spell_rog_killing_spree_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_rog_killing_spree_AuraScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_glyph_of_expose_armor();
@@ -2016,4 +2160,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_glyph_of_detection();
     new spell_rog_shuriken_toss();
     new spell_rog_deadly_throw();
+    new spell_rog_killing_spree();
 }

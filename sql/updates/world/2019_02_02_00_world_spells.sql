@@ -70,3 +70,8 @@ INSERT INTO spell_script_names VALUE
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_pri_void_tendrils_grasp';
 INSERT INTO spell_script_names VALUE 
 (114404, 'spell_pri_void_tendrils_grasp');
+
+-- Killing Spree
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_rog_killing_spree';
+INSERT INTO spell_script_names VALUE 
+(51690, 'spell_rog_killing_spree');

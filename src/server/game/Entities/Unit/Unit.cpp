@@ -15575,10 +15575,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
             AddPct(DoneTotalMod, 30);
     }
 
-    // While Killing Spree - 51690 damage must be increased
-    if (victim && pdamage != 0 && GetTypeId() == TYPEID_PLAYER && HasAura(51690))
-        AddPct(DoneTotalMod, 50);
-
     // Apply Power PvP damage bonus
     if (pdamage > 0 && (victim->GetTypeId() == TYPEID_PLAYER || (victim->GetTypeId() == TYPEID_UNIT && victim->isPet() && victim->GetOwner() && victim->GetOwner()->ToPlayer())))
     {

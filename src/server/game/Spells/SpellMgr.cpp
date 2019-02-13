@@ -4566,9 +4566,6 @@ void SpellMgr::LoadSpellCustomAttr()
                 case 31224: // Cloak of Shadows
                     spellInfo->Effects[0].BasePoints = -1000;
                     break;
-                case 51690: // Killing Spree
-                    spellInfo->Effects[3].Effect = SPELL_EFFECT_FORCE_DESELECT;
-                    break;
                 case 137619:// Marked for Death
                     spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
                     break;
