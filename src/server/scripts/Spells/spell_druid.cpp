@@ -914,37 +914,6 @@ class spell_dru_demonic_circle_teleport : public SpellScriptLoader
         {
             PrepareSpellScript(spell_dru_demonic_circle_teleport_SpellScript);
 
-            SpellCastResult CheckTarget()
-            {
-                if (!GetCaster())
-                    return SPELL_FAILED_DONT_REPORT;
-
-                std::list<Unit*> groupList;
-
-                GetCaster()->GetPartyMembers(groupList);
-
-                // Demonic Circle: Teleport
-                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(48020);
-
-                if (!groupList.empty())
-                {
-                    for (auto itr : groupList)
-                    {
-                        if (itr->HasAura(SPELL_DRUID_SYMBIOSIS_WARLOCK, GetCaster()->GetGUID()))
-                        {
-                            if (GameObject* circle = itr->GetGameObject(WARLOCK_DEMONIC_CIRCLE_SUMMON))
-                            {
-                                if (GetCaster()->IsWithinDist(circle, spellInfo->GetMaxRange(true)))
-                                    return SPELL_CAST_OK;
-                                else
-                                    return SPELL_FAILED_OUT_OF_RANGE;
-                            }
-                        }
-                    }
-                }
-                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-            }
-
             void HandleOnHit()
             {
                 if (Player* _player = GetCaster()->ToPlayer())
@@ -955,11 +924,11 @@ class spell_dru_demonic_circle_teleport : public SpellScriptLoader
 
                     if (!groupList.empty())
                     {
-                        for (auto itr : groupList)
+                        for (std::list<Unit*>::const_iterator itr = groupList.begin(); itr != groupList.end(); ++itr)
                         {
-                            if (itr->HasAura(SPELL_DRUID_SYMBIOSIS_WARLOCK, _player->GetGUID()))
+                            if ((*itr)->HasAura(SPELL_DRUID_SYMBIOSIS_WARLOCK, _player->GetGUID()))
                             {
-                                if (GameObject* circle = itr->GetGameObject(WARLOCK_DEMONIC_CIRCLE_SUMMON))
+                                if (GameObject* circle = (*itr)->GetGameObject(WARLOCK_DEMONIC_CIRCLE_SUMMON))
                                 {
                                     _player->NearTeleportTo(circle->GetPositionX(), circle->GetPositionY(), circle->GetPositionZ(), circle->GetOrientation());
                                     _player->RemoveMovementImpairingAuras();
@@ -970,9 +939,36 @@ class spell_dru_demonic_circle_teleport : public SpellScriptLoader
                 }
             }
 
+            SpellCastResult CheckCast()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                {
+                    std::list<Unit*> groupList;
+
+                    _player->GetPartyMembers(groupList);
+
+                    if (!groupList.empty())
+                    {
+                        for (std::list<Unit*>::const_iterator itr = groupList.begin(); itr != groupList.end(); ++itr)
+                        {
+                            if ((*itr)->HasAura(SPELL_DRUID_SYMBIOSIS_WARLOCK, _player->GetGUID()))
+                            {
+                                if (GameObject* circle = (*itr)->GetGameObject(WARLOCK_DEMONIC_CIRCLE_SUMMON))
+                                {
+                                    if(circle->GetExactDist2d(_player) < 40.0f)
+                                        return SPELL_CAST_OK;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return SPELL_FAILED_BAD_TARGETS;
+            }
+
             void Register()
             {
-                OnCheckCast += SpellCheckCastFn(spell_dru_demonic_circle_teleport_SpellScript::CheckTarget);
+                OnCheckCast += SpellCheckCastFn(spell_dru_demonic_circle_teleport_SpellScript::CheckCast);
                 OnHit += SpellHitFn(spell_dru_demonic_circle_teleport_SpellScript::HandleOnHit);
             }
         };
@@ -1023,7 +1019,7 @@ class spell_dru_shattering_blow : public SpellScriptLoader
 };
 
 // Symbiosis Aura - 110478/110479/110482/110483/110484/110485/110486/110488/110490/110491
- class spell_dru_symbiosis_aura : public SpellScriptLoader
+class spell_dru_symbiosis_aura : public SpellScriptLoader
 {
     public:
         spell_dru_symbiosis_aura() : SpellScriptLoader("spell_dru_symbiosis_aura") { }
@@ -1031,61 +1027,47 @@ class spell_dru_shattering_blow : public SpellScriptLoader
         class spell_dru_symbiosis_aura_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_dru_symbiosis_aura_AuraScript);
+            uint32 m_checkTimer;
 
-            ObjectGuid m_casterGuid;
-
-            void OnUpdate(uint32 diff)
+            bool Load()
             {
+                m_checkTimer = 1000;
+                return true;
+            }
 
-                if (!GetCaster() && GetUnitOwner())
+            void OnUpdate(uint32 diff, AuraEffect* /*aurEff*/)
+            {
+                if (m_checkTimer <= diff)
+                    m_checkTimer = 1000;
+                else
                 {
-                    if (Player* target = GetUnitOwner()->ToPlayer())
-                        target->RemoveAura(GetSpellInfo()->Id);
-                    if (Player* caster = Caster())
-                        caster->RemoveAura(SPELL_DRUID_SYMBIOSIS_FOR_CASTER);
+                    m_checkTimer -= diff;
+                    return;
                 }
-                else if (GetCaster() && !GetUnitOwner())
-                {
-                    if (Player* caster = GetCaster()->ToPlayer())
-                        caster->RemoveAura(SPELL_DRUID_SYMBIOSIS_FOR_CASTER);
-                }
-                else if (GetCaster() && GetUnitOwner())
-                {
-                    Player* caster = GetCaster()->ToPlayer();
-                    Player* target = GetUnitOwner()->ToPlayer();
-                    if (!target || !caster)
-                        return;
 
-                    if (target->GetMapId() != caster->GetMapId() 
-                        || !target->IsInSameRaidWith(caster) 
-                        || !caster->HasAura(SPELL_DRUID_SYMBIOSIS_FOR_CASTER))
+                if (Unit* caster = GetCaster())
+                {
+                    if (Unit* target = GetUnitOwner())
                     {
-                        target->RemoveAura(GetSpellInfo()->Id);
-                        caster->RemoveAura(SPELL_DRUID_SYMBIOSIS_FOR_CASTER);
+                        if ((!target->IsInPartyWith(caster) && !target->IsInRaidWith(caster)) ||
+                            (target->GetMapId() != caster->GetMapId()) || target->GetExactDist2d(caster) > 100.0f || !caster->HasAura(SPELL_DRUID_SYMBIOSIS_FOR_CASTER))
+                        {
+                            GetAura()->Remove();
+                        }
                     }
                 }
             }
 
-            Player* Caster()
+            void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (m_casterGuid)
-                    return sObjectAccessor->FindPlayer(m_casterGuid);
-
-                return nullptr;
-            }
-
-            void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
-            {
-                if (GetCaster())
-                    m_casterGuid = GetCaster()->GetGUID();
-                else
-                    ObjectGuid(0LL);
+                if (Unit* caster = GetCaster())
+                    caster->RemoveAura(SPELL_DRUID_SYMBIOSIS_FOR_CASTER);
             }
 
             void Register()
             {
-                OnAuraUpdate += AuraUpdateFn(spell_dru_symbiosis_aura_AuraScript::OnUpdate);
-                AfterEffectApply += AuraEffectApplyFn(spell_dru_symbiosis_aura_AuraScript::OnApply, EFFECT_0, SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS, AURA_EFFECT_HANDLE_REAL);
+                AfterEffectRemove += AuraEffectRemoveFn(spell_dru_symbiosis_aura_AuraScript::OnRemove, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+                OnEffectUpdate += AuraEffectUpdateFn(spell_dru_symbiosis_aura_AuraScript::OnUpdate, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
             }
         };
 
