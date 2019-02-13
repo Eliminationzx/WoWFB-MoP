@@ -637,6 +637,13 @@ class Spell
 
         void SetPeriodicDamageModifier(float newModifier) { m_periodicDamageModifier = newModifier; }
         
+        void SetEffectTargets (std::list<uint64> targets) { m_effect_targets = targets; }
+        std::list<uint64> GetEffectTargets() { return m_effect_targets; }
+        void AddEffectTarget (uint64 targetGuid) { m_effect_targets.push_back(targetGuid); }
+        void RemoveEffectTarget (uint64 targetGuid) { m_effect_targets.remove(targetGuid); }
+        void ClearEffectTarget () { m_effect_targets.clear(); }
+        uint64 GetRndEffectTarget () { return JadeCore::Containers::SelectRandomContainerElement(m_effect_targets); }
+        
     protected:
         bool HasGlobalCooldown() const;
         void TriggerGlobalCooldown();
@@ -766,14 +773,7 @@ class Spell
         };
         std::list<AreaTriggerTargetInfo> m_UniqueAreaTriggerTargetInfo;
 
-        SpellDestination m_destTargets[MAX_SPELL_EFFECTS];
-        
-        void SetEffectTargets (std::list<uint64> targets) { m_effect_targets = targets; }
-        std::list<uint64> GetEffectTargets() { return m_effect_targets; }
-        void AddEffectTarget (uint64 targetGuid) { m_effect_targets.push_back(targetGuid); }
-        void RemoveEffectTarget (uint64 targetGuid) { m_effect_targets.remove(targetGuid); }
-        void ClearEffectTarget () { m_effect_targets.clear(); }
-        uint64 GetRndEffectTarget () { return JadeCore::Containers::SelectRandomContainerElement(m_effect_targets); }
+        SpellDestination m_destTargets[MAX_SPELL_EFFECTS];     
 
         void AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid = true, bool implicit = true, uint8 effectIndex = EFFECT_0);
         void AddGOTarget(GameObject* target, uint32 effectMask);
