@@ -65,3 +65,8 @@ INSERT INTO spell_script_names VALUE
 DELETE FROM spell_script_names WHERE ScriptName = 'spell_pri_psychic_terror';
 INSERT INTO spell_script_names VALUE 
 (113792, 'spell_pri_psychic_terror');
+
+-- Void tendrils grasp
+DELETE FROM spell_script_names WHERE ScriptName = 'spell_pri_void_tendrils_grasp';
+INSERT INTO spell_script_names VALUE 
+(114404, 'spell_pri_void_tendrils_grasp');

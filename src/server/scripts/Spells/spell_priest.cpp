@@ -103,6 +103,7 @@ enum PriestSpells
     PRIEST_PRAYER_OF_MENDING_RADIUS                 = 123262,
     PRIEST_BODY_AND_SOUL_AURA                       = 64129,
     PRIEST_BODY_AND_SOUL_INCREASE_SPEED             = 65081,
+    PRIEST_FROM_DARKNESS_COMES_LIGHT_AURA           = 109186,
     PRIEST_SURGE_OF_LIGHT                           = 114255,
     PRIEST_SURGE_OF_DARKNESS                        = 87160,
     PRIEST_SHADOW_WORD_INSANITY_ALLOWING_CAST       = 130733,
@@ -720,11 +721,8 @@ class spell_pri_surge_of_light : public SpellScriptLoader
                 {
                     if (Aura* surgeOfLight = _player->GetAura(PRIEST_SURGE_OF_LIGHT))
                     {
-                        int32 stacks = surgeOfLight->GetStackAmount();
-                        if (stacks <= 1)
-                                _player->RemoveAura(PRIEST_SURGE_OF_LIGHT);
-                            else
-                                surgeOfLight->SetStackAmount(stacks - 1);
+                        surgeOfLight->SetUsingCharges(true);
+                        surgeOfLight->DropCharge();
                     }
                 }
             }
@@ -738,6 +736,37 @@ class spell_pri_surge_of_light : public SpellScriptLoader
         SpellScript* GetSpellScript() const
         {
             return new spell_pri_surge_of_light_SpellScript();
+        }
+};
+
+// Called by Smite - 585, Heal - 2050, Flash Heal - 2061, Binding Heal - 32546 and Greater Heal - 2060 (Surge of Darkness)
+// From Darkness, Comes Light - 109186
+class spell_pri_from_darkness_comes_light : public SpellScriptLoader
+{
+    public:
+        spell_pri_from_darkness_comes_light() : SpellScriptLoader("spell_pri_from_darkness_comes_light") { }
+
+        class spell_pri_from_darkness_comes_light_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_pri_from_darkness_comes_light_SpellScript);
+
+            void HandleOnHit()
+            {
+                if (Player* _player = GetCaster()->ToPlayer())
+                    if (_player->HasAura(PRIEST_FROM_DARKNESS_COMES_LIGHT_AURA))
+                        if (roll_chance_i(15))
+                            _player->CastSpell(_player, PRIEST_SURGE_OF_LIGHT, true);
+            }
+
+            void Register()
+            {
+                OnHit += SpellHitFn(spell_pri_from_darkness_comes_light_SpellScript::HandleOnHit);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_pri_from_darkness_comes_light_SpellScript();
         }
 };
 
@@ -2349,7 +2378,14 @@ class spell_pri_vampiric_touch : public SpellScriptLoader
             void OnTick(AuraEffect const* aurEff)
             {
                 if (GetCaster())
+                {
                     GetCaster()->EnergizeBySpell(GetCaster(), GetSpellInfo()->Id, GetCaster()->CountPctFromMaxMana(2), POWER_MANA);
+
+                    // From Darkness, Comes Light
+                    if (GetCaster()->HasAura(PRIEST_FROM_DARKNESS_COMES_LIGHT_AURA))
+                        if (roll_chance_i(15))
+                            GetCaster()->CastSpell(GetCaster(), PRIEST_SURGE_OF_DARKNESS, true);
+                }
             }
 
             void HandleDispel(DispelInfo* dispelInfo)
@@ -3283,6 +3319,7 @@ void AddSC_priest_spell_scripts()
     new spell_pri_shadow_word_insanity_allowing();
     new spell_pri_shadowfiend();
     new spell_pri_surge_of_light();
+    new spell_pri_from_darkness_comes_light();
     new spell_pri_body_and_soul();
     new spell_pri_prayer_of_mending_divine_insight();
     new spell_pri_divine_insight_holy();
