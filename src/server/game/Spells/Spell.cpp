@@ -544,7 +544,7 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
 m_spellInfo(sSpellMgr->GetSpellForDifficultyFromSpell(info, caster)),
 m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharmerOrOwner()) ? caster->GetCharmerOrOwner() : caster)
 , m_spellValue(new SpellValue(m_spellInfo)),
-m_damage(0), m_healing(0), m_final_damage(0), m_absorbed_damage(0)
+m_damage(0), m_healing(0), m_final_damage(0), m_absorbed_damage(0), m_effect_targets(NULL)
 {
     m_customError = SPELL_CUSTOM_ERROR_NONE;
     m_skipCheck = skipCheck;
@@ -3391,6 +3391,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                     }
 
                     m_spellAura->_RegisterForTargets();
+                    
+                    std::list<uint64> list_efftarget = GetEffectTargets();
+                    if(!list_efftarget.empty())
+                        m_spellAura->SetEffectTargets(list_efftarget);
                 }
             }
         }
