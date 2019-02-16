@@ -2970,15 +2970,12 @@ void Spell::EffectCreateItem2(SpellEffIndex effIndex)
             if (!player->HasItemCount(item_id))
                 return;
 
-            // remove reagent
-            uint32 count = 1;
-            player->DestroyItemCount(item_id, count, true);
-
             // create some random items
-            player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);
+            if (player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell, m_CastItem ? m_CastItem->GetTemplate()->ItemLevel : 0))
+                player->DestroyItemCount(item_id, 1, true); // remove reagent
         }
         else if (archId == 0)
-            player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell);    // create some random items
+            player->AutoStoreLoot(m_spellInfo->Id, LootTemplates_Spell, m_CastItem ? m_CastItem->GetTemplate()->ItemLevel : 0);    // create some random items
     }
     // TODO: ExecuteLogEffectCreateItem(i, m_spellInfo->Effects[i].ItemType);
 }
@@ -2997,9 +2994,8 @@ void Spell::EffectEternityEmbrace(SpellEffIndex effIndex)
     {
         if (m_spellInfo->IsLootCrafting())
         {
-            uint32 count = 1;
-            player->DestroyItemCount(item->GetEntry(), count, true);
-            player->AutoStoreLoot(item->GetTemplate()->Spells[0].SpellId, LootTemplates_Spell, 535);
+            if (player->AutoStoreLoot(item->GetTemplate()->Spells[0].SpellId, LootTemplates_Spell, 535))
+                player->DestroyItemCount(item->GetEntry(), 1, true);
         }
     }
 }

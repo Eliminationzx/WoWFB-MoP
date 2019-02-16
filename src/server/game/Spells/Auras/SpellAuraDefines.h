@@ -408,7 +408,7 @@ enum AuraType
     SPELL_AURA_DEPOSIT_BONUS_MONEY_IN_GUILD_BANK_ON_LOOT    = 348,  // NYI
     SPELL_AURA_MOD_CURRENCY_GAIN                            = 349,
     SPELL_AURA_MOD_GATHERING_ITEMS_GAINED_PERCENT           = 350,  // NYI
-    PELL_AURA_MOD_CURRENCY_LOOT                             = 351,
+    SPELL_AURA_MOD_CURRENCY_LOOT                            = 351,
     SPELL_AURA_ALLOW_WORGEN_TRANSFORM                       = 352,
     SPELL_AURA_MOD_CAMOUFLAGE                               = 353,  // Used by Camouflage
     SPELL_AURA_MOD_HEALING_DONE_FROM_PCT_HEALTH             = 354,  // Restoration Shaman mastery - mod healing based on target's health (less = more healing)

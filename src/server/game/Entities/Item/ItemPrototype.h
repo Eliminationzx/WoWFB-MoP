@@ -1016,6 +1016,11 @@ struct ItemTemplate
 
         return true;
     }
+
+    bool IsUsableBySpecialization(uint32 specId) const
+    {
+        return std::find(specs.begin(), specs.end(), specId) != specs.end();
+    }
 };
 
 //////////////////////////////////////////////////////////////

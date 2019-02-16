@@ -17,8 +17,8 @@ class mob_shadow_of_doubt : public CreatureScript
 {
     public:
         mob_shadow_of_doubt() : CreatureScript("mob_shadow_of_doubt") 
-		{ 
-		}
+        { 
+        }
 
         CreatureAI* GetAI(Creature* creature) const
         {
@@ -3082,21 +3082,21 @@ class gob_yulon_challenge_gong : public GameObjectScript
 class playerScript_enter_jade_serpent_temple : public PlayerScript
 {
     public:
-		playerScript_enter_jade_serpent_temple() : PlayerScript("playerScript_enter_jade_serpent_temple") { }
+        playerScript_enter_jade_serpent_temple() : PlayerScript("playerScript_enter_jade_serpent_temple") { }
 
-		/// Save Phasemask and GUID of player entering the area, remove it when leaving
-		std::map<uint64, uint32> m_PlayerGUIDs;
+        /// Save Phasemask and GUID of player entering the area, remove it when leaving
+        std::map<uint64, uint32> m_PlayerGUIDs;
 
         void OnUpdateZone(Player* p_Player, uint32 p_NewZoneId, uint32 p_OldZoneId, uint32 p_NewAreaId, uint32 p_OldAreaId) override
         {
             /// Make all trashes + boss disappear in case of temple of Jade Serpent entrance
             if (p_NewZoneId == 5956)
-			{
-				m_PlayerGUIDs.insert(std::make_pair(p_Player->GetGUID(), p_Player->GetPhaseMask()));
+            {
+                m_PlayerGUIDs.insert(std::make_pair(p_Player->GetGUID(), p_Player->GetPhaseMask()));
                 std::vector<uint32> l_Gobs = { 211280, 213544, 213545, 213547, 213548, 213549, 213550, 213903 };
 
-				if (p_Player->GetQuestStatus(32805) == QUEST_STATUS_INCOMPLETE)
-					p_Player->SetPhaseMask(2, true);
+                if (p_Player->GetQuestStatus(32805) == QUEST_STATUS_INCOMPLETE)
+                    p_Player->SetPhaseMask(2, true);
 
                 /// Open all doors of the instance
                 {
@@ -3109,20 +3109,20 @@ class playerScript_enter_jade_serpent_temple : public PlayerScript
                         l_Door->SetGoState(GO_STATE_READY);
                 }
             }
-			else if (p_OldZoneId == 5956)
-			{
-				for (auto l_Itr = m_PlayerGUIDs.begin(); l_Itr != m_PlayerGUIDs.end(); l_Itr++)
-				{
-					if (l_Itr->first == p_Player->GetGUID())
-					{
-						p_Player->SetPhaseMask(l_Itr->second, true);
-						l_Itr = m_PlayerGUIDs.erase(l_Itr);
+            else if (p_OldZoneId == 5956)
+            {
+                for (auto l_Itr = m_PlayerGUIDs.begin(); l_Itr != m_PlayerGUIDs.end(); l_Itr++)
+                {
+                    if (l_Itr->first == p_Player->GetGUID())
+                    {
+                        p_Player->SetPhaseMask(l_Itr->second, true);
+                        l_Itr = m_PlayerGUIDs.erase(l_Itr);
 
-						if (l_Itr == m_PlayerGUIDs.end())
-							break;
-					}
-				}
-			}
+                        if (l_Itr == m_PlayerGUIDs.end())
+                            break;
+                    }
+                }
+            }
         }
 };
 

@@ -133,6 +133,22 @@ struct LootStoreItem
                                                             // Checks correctness of values
 };
 
+struct CurrencyLoot
+{
+    uint32 Entry;
+    uint8 Type;
+    uint32 CurrencyId;
+    uint32 CurrencyAmount;
+    uint32 currencyMaxAmount;
+    uint8 lootmode;
+    float chance;
+
+    CurrencyLoot(uint32 _entry, uint8 _type, uint32 _CurrencyId, uint32 _CurrencyAmount, uint32 _CurrencyMaxAmount, uint8 _lootmode, float _chance) : Entry(_entry), Type(_type), CurrencyId(_CurrencyId),
+        CurrencyAmount(_CurrencyAmount), currencyMaxAmount(_CurrencyMaxAmount), lootmode(_lootmode), chance(_chance)
+    {
+    }
+};
+
 typedef std::set<uint32> AllowedLooterSet;
 
 struct Loot;
@@ -340,8 +356,10 @@ struct Loot
     uint8 unlootedCount;
     uint64 roundRobinPlayer;                                // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     LootType loot_type;                                     // required for achievement system
+    uint8 objType;
+    uint32 itemLevel;
 
-    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), alreadyAskedForRoll(false), maxLinkedSlot(0), additionalLinkedGold(0) {}
+    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), loot_type(LOOT_CORPSE), objType(0), itemLevel(0), alreadyAskedForRoll(false), maxLinkedSlot(0), additionalLinkedGold(0), m_lootOwner(NULL) {}
     ~Loot() { clear(); }
 
     // if loot becomes invalid this reference is used to inform the listener
@@ -423,6 +441,7 @@ struct Loot
     uint32 GetMaxSlotInLootFor(Player* player) const;
     bool hasItemFor(Player* player) const;
     bool hasOverThresholdItem() const;
+    Player const* GetLootOwner() const { return m_lootOwner; }
 
     // there are players that killed the mob (instance only)
     InstanceLooters AllowedPlayers;
@@ -443,6 +462,8 @@ struct Loot
 
         // All rolls are registered here. They need to know, when the loot is not valid anymore
         LootValidatorRefManager i_LootValidatorRefManager;
+
+        Player* m_lootOwner;
 };
 
 struct LootView

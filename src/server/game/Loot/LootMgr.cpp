@@ -481,6 +481,8 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     if (!lootOwner)
         return false;
 
+    m_lootOwner = lootOwner;
+
     LootTemplate const* tab = store.GetLootFor(lootId);
 
     // if the creature was killed by players in a dungeon
@@ -502,6 +504,9 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
 
     if (!tab)
     {
+        if (objType == 2)
+            FillNotNormalLootFor(lootOwner, true);
+
         if (!noEmptyError)
             sLog->outError(LOG_FILTER_SQL, "Table '%s' loot id #%u used but it doesn't have records.", store.GetName(), lootId);
         return false;
@@ -579,7 +584,7 @@ void Loot::FillNotNormalLootFor(Player* player, bool presentAtLooting)
         if (i < items.size())
             item = &items[i];
         else
-            item = &quest_items[i-itemsSize];
+            item = &quest_items[i - itemsSize];
 
         if (!item->is_looted && item->freeforall && item->AllowedForPlayer(player))
             if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item->itemid))
@@ -1409,6 +1414,7 @@ void LootTemplate::LootGroup::Process(Loot& loot, uint16 lootMode) const
     // build up list of possible drops
     LootStoreItemList EqualPossibleDrops = EqualChanced;
     LootStoreItemList ExplicitPossibleDrops = ExplicitlyChanced;
+    uint32 specId = loot.GetLootOwner()->GetLootSpecId();
 
     uint8 uiAttemptCount = 0;
     const uint8 uiMaxAttempts = ExplicitlyChanced.size() + EqualChanced.size();
@@ -1470,6 +1476,22 @@ void LootTemplate::LootGroup::Process(Loot& loot, uint16 lootMode) const
                         else if (_proto->InventoryType != 0 && _item_counter == 1) // Equippable item are limited to 1 drop
                             duplicate = true;
                     }
+
+                if (_proto->HasSpec() && loot.objType == 4)
+                {
+                    bool specFind = false;
+                    if (_proto->IsUsableBySpecialization(specId))
+                        specFind = true;
+
+                    if (loot.itemLevel && loot.itemLevel != _proto->ItemLevel)
+                        specFind = false;
+
+                    if (!loot.GetLootOwner()->CanGetItemForLoot(_proto))
+                        specFind = false;
+
+                    if (!specFind)
+                        duplicate = true;
+                }
             }
             if (duplicate) // if item->itemid is a duplicate, remove it
                 switch (itemSource)
@@ -1590,6 +1612,9 @@ void LootTemplate::Process(Loot& loot, bool rate, uint16 lootMode, uint8 groupId
         return;
     }
 
+    Player const* lootOwner = loot.GetLootOwner();
+    uint32 specId = lootOwner->GetLootSpecId();
+
     // Rolling non-grouped items
     for (LootStoreItemList::const_iterator i = Entries.begin(); i != Entries.end(); ++i)
     {
@@ -1616,6 +1641,21 @@ void LootTemplate::Process(Loot& loot, bool rate, uint16 lootMode, uint8 groupId
                 }
                 if (_item != loot.items.end())
                     continue;
+
+                if (_proto->HasSpec() && loot.objType == 4)
+                {
+                    if (!lootOwner->CanGetItemForLoot(_proto))
+                        continue;
+                    bool specFind = false;
+                    if (_proto->IsUsableBySpecialization(specId))
+                        specFind = true;
+
+                    if (loot.itemLevel && loot.itemLevel != _proto->ItemLevel)
+                        specFind = false;
+
+                    if (!specFind)
+                        continue;
+                }
             }
         }
 

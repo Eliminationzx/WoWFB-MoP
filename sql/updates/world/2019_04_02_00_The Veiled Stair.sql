@@ -26,3 +26,6 @@ INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `
 INSERT INTO `script_waypoint` (`entry`, `pointid`, `location_x`, `location_y`, `location_z`, `waittime`, `point_comment`) VALUES ('64822', '4', '777.286', '-538.242', '454.061', '0', NULL);
 
 INSERT INTO `areatrigger_scripts` VALUES ('8503', 'at_massons_folly_platform');
+
+INSERT INTO `spell_target_position` VALUES ('126714', '0', '870', '738.58', '-500.95', '440.13', '0');
+INSERT INTO `spell_target_position` VALUES ('140019', '0', '870', '738.58', '-500.95', '440.13', '0');
