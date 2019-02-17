@@ -1019,7 +1019,9 @@ struct ItemTemplate
 
     bool IsUsableBySpecialization(uint32 specId) const
     {
-        return std::find(specs.begin(), specs.end(), specId) != specs.end();
+        if (ChrSpecializationsEntry const* chrSpecialization = sChrSpecializationsStore.LookupEntry(specId))
+            return std::find(specs.begin(), specs.end(), chrSpecialization->entry) != specs.end();
+        return false;
     }
 };
 

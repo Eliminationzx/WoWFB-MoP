@@ -1641,7 +1641,6 @@ void LootTemplate::Process(Loot& loot, bool rate, uint16 lootMode, uint8 groupId
                 }
                 if (_item != loot.items.end())
                     continue;
-
                 if (_proto->HasSpec() && loot.objType == 4)
                 {
                     if (!lootOwner->CanGetItemForLoot(_proto))
