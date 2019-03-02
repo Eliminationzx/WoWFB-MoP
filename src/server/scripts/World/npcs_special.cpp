@@ -2519,7 +2519,16 @@ class npc_training_dummy : public CreatureScript
                     me->SetControlled(true, UNIT_STATE_STUNNED);//disable rotate
 
                 if (entry != NPC_ADVANCED_TARGET_DUMMY && entry != NPC_TARGET_DUMMY)
-                    return;
+                {
+                    if (resetTimer <= diff)
+                    {
+                        EnterEvadeMode();
+                        resetTimer = 5000;
+                    }
+                    else
+                        resetTimer -= diff;
+                     return;
+                }
                 else
                 {
                     if (despawnTimer <= diff)
