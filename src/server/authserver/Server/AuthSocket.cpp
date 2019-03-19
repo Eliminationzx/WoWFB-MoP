@@ -412,6 +412,12 @@ bool AuthSocket::_HandleLogonChallenge()
             else
                 sLog->outDebug(LOG_FILTER_AUTHSERVER, "[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
 
+            if (fields[8].GetUInt8() == 0)                  // if account is not active
+            {
+                pkt << uint8(WOW_FAIL_SUSPENDED);
+                locked = true;
+            }
+            
             if (!locked)
             {
                 //set expired bans to inactive
