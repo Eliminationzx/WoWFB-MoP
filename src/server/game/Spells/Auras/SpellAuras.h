@@ -161,7 +161,7 @@ class Aura
 
         bool IsArea() const;
         bool HasMoreThanOneEffectForType(AuraType auraType) const;
-        bool IsPersistanceArea() const;
+        bool IsPersistentArea() const;
         bool IsPassive() const;
         bool IsDeathPersistent() const;
         bool IsRemovedOnShapeLost(Unit* target) const { return (GetCasterGUID() == target->GetGUID() && m_spellInfo->Stances && !(m_spellInfo->AttributesEx2 & SPELL_ATTR2_NOT_NEED_SHAPESHIFT) && !(m_spellInfo->Attributes & SPELL_ATTR0_NOT_SHAPESHIFT)); }
